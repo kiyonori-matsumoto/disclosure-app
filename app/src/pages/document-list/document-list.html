@@ -1,0 +1,24 @@
+<!--
+  Generated template for the DocumentListPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>適宜開示一覧</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <ion-list>
+    <button ion-item [navPush]="documentViewPage" [navParams]="item" class="text" *ngFor="let item of items | async" >
+      <h2>{{item.company}}<small>({{item.code}})</small>
+        <ion-note>{{item.time | twitterTime }}</ion-note></h2>
+      <p>{{item.title}}</p>
+    </button>
+  </ion-list>
+</ion-content>
