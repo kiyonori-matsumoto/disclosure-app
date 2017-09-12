@@ -17,6 +17,8 @@ import { DocumentViewPageModule } from "../pages/document-view/document-view.mod
 import { DocumentViewPage } from "../pages/document-view/document-view";
 import { SettingPageModule } from "../pages/setting/setting.module";
 import { SettingPage } from "../pages/setting/setting";
+import { SignInProvider } from '../providers/sign-in/sign-in';
+import { AuthProvider } from '../providers/auth/auth';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -54,7 +56,9 @@ export const firebaseConfig = {
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    DisclosureProvider
+    DisclosureProvider,
+    SignInProvider,
+    AuthProvider
   ]
 })
 export class AppModule {}

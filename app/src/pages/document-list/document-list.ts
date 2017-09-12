@@ -24,7 +24,7 @@ export class DocumentListPage {
   items: Observable<any[]>;
   documentViewPage = DocumentViewPage;
   constructor(public navCtrl: NavController, public navParams: NavParams, dp: DisclosureProvider) {
-    this.items = dp.all();
+    this.items = dp.all().map(e => e.reverse());
   }
   
 

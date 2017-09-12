@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
-import { DomSanitizer } from "@angular/platform-browser";
-
+import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
+import { FirebaseApp } from 'angularfire2';
+import 'firebase/storage';
+import { Observable } from "rxjs";
 /**
  * Generated class for the DocumentViewPage page.
  *
@@ -14,7 +16,9 @@ import { DomSanitizer } from "@angular/platform-browser";
   selector: 'page-document-view',
   templateUrl: 'document-view.html',
 })
-export class DocumentViewPage {
+export class DocumentViewPage implements OnInit {
+  ngOnInit(): void {
+  }
 
   document;
   documentUrl;
@@ -22,10 +26,13 @@ export class DocumentViewPage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    sanitizer: DomSanitizer,
+    public sanitizer: DomSanitizer,
+    private app: FirebaseApp
   ) {
-    this.document = navParams.data;
-    this.documentUrl = sanitizer.bypassSecurityTrustResourceUrl(`https://docs.google.com/viewer?url=https://www.release.tdnet.info/inbs/${this.document.document}.pdf&embedded=true`)
+    this.document = this.navParams.data;
+    // this.documentUrl = sanitizer.bypassSecurityTrustResourceUrl(`https://docs.google.com/viewer?url=https://www.release.tdnet.info/inbs/${this.document.document}.pdf&embedded=true`)
+    this.documentUrl = Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${this.document.document}.pdf`).getDownloadURL())
+    // .map(d => this.sanitizer.bypassSecurityTrustResourceUrl(`https://docs.google.com/viewer?url=${encodeURIComponent(d)}&embedded=true`))
 
   }
 

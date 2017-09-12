@@ -14,5 +14,5 @@
 
 
 <ion-content>
-  <iframe [src]="documentUrl" style="width:100%; height: 100%; margin:0; border-width:0;" #documentViewer></iframe> 
+  <pdf-viewer [src]="(documentUrl | async) || ''" [original-size]="false" [show-all]="true" style="display: block;"></pdf-viewer>
 </ion-content>

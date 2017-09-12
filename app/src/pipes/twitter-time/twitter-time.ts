@@ -14,9 +14,10 @@ export class TwitterTimePipe implements PipeTransform {
    * Takes a value and makes it lowercase.
    */
   transform(value: string, ...args) {
-    const t1 = moment(value);
-    const now = moment();
-    const diff = moment.duration(now.diff(t1));
-    return diff.humanize(true);
+    const t1 = moment(value).locale('ja');
+    // const now = moment();
+    // const diff = moment.duration(now.diff(t1));
+    // return diff.humanize(true);
+    return t1.subtract(9, 'hours').fromNow()
   }
 }
