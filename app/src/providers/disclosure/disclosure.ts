@@ -15,8 +15,12 @@ export class DisclosureProvider {
   constructor(private afDB: AngularFireDatabase) {
   }
 
-  public all() {
-    return this.afDB.list('/disclosures', {query: {orderByChild: 'time', limitToLast: 20}}) as Observable<any>;
+  public all(n: number = 20) {
+    return this.afDB.list('/disclosures', {query: {orderByChild: 'time', limitToLast: n}}) as Observable<any>;
+  }
+
+  public next(pointer, n: number = 20) {
+    return this.afDB.list('/disclosure', {query: { limitToLast: 20, orderByChild: 'time', endAt: pointer }}) as Observable<any>;
   }
 
 }

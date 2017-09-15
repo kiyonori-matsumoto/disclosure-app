@@ -18,6 +18,10 @@ describe('checkNewDisclosure', () => {
     // Here we stub admin.initializeApp to be a dummy function that doesn't do anything.
     admin =  require('firebase-admin');
     adminInitStub = sinon.stub(admin, 'initializeApp');
+    adminStrageStub = sinon.stub(admin, 'storage');
+    bucketStub = sinon.stub();
+    
+    adminStrageStub.returns({bucket: bucketStub});
     // Next we stub functions.config(). Normally config values are loaded from Cloud Runtime Config;
     // here we'll just provide some fake values for firebase.databaseURL and firebase.storageBucket
     // so that an error is not thrown during admin.initializeApp's parameter check

@@ -22,6 +22,7 @@ export class DocumentViewPage implements OnInit {
 
   document;
   documentUrl;
+  pages: number[] = [];
 
   constructor(
     public navCtrl: NavController,
@@ -32,12 +33,19 @@ export class DocumentViewPage implements OnInit {
     this.document = this.navParams.data;
     // this.documentUrl = sanitizer.bypassSecurityTrustResourceUrl(`https://docs.google.com/viewer?url=https://www.release.tdnet.info/inbs/${this.document.document}.pdf&embedded=true`)
     this.documentUrl = Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${this.document.document}.pdf`).getDownloadURL())
+    // .map(this.sanitizer.bypassSecurityTrustResourceUrl)
     // .map(d => this.sanitizer.bypassSecurityTrustResourceUrl(`https://docs.google.com/viewer?url=${encodeURIComponent(d)}&embedded=true`))
+    // .startWith(this.sanitizer.bypassSecurityTrustResourceUrl(''))
 
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad DocumentViewPage');
+  }
+
+  onPdfLoadComplete(pdf: PDFDocumentProxy) {
+    this.pages = Array.from(Array(pdf.numPages).keys());
+    console.log(this.pages);
   }
 
 }

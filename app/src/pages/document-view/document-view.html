@@ -13,6 +13,13 @@
 </ion-header>
 
 
-<ion-content>
-  <pdf-viewer [src]="(documentUrl | async) || ''" [original-size]="false" [show-all]="true" style="display: block;"></pdf-viewer>
+<ion-content style="background-color:gray;">
+  <!-- <ion-slides pager>
+    <ion-slide *ngFor="let page of pages; let i = index;" > -->
+  <!-- <object [data]="(documentUrl | async) || ''" type="application/pdf" width="100%" height="100%">test</object> -->
+      <ion-spinner *ngIf="!pages.length" style="position:absolute;left:50%;top:50%;"></ion-spinner>
+      <pdf-viewer [src]="(documentUrl | async) || ''" [original-size]="false" [show-all]="true" style="display: block;" (after-load-complete)="onPdfLoadComplete($event)"></pdf-viewer>
+    <!-- </ion-slide>
+  </ion-slides> -->
+  <!-- <pdf-viewer src="https://www.release.tdnet.info/inbs/140120170912472032.pdf" [original-size]="false" [show-all]="true" style="display: block;"></pdf-viewer> -->
 </ion-content>

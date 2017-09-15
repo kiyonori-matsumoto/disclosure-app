@@ -18,6 +18,6 @@ export class TwitterTimePipe implements PipeTransform {
     // const now = moment();
     // const diff = moment.duration(now.diff(t1));
     // return diff.humanize(true);
-    return t1.subtract(9, 'hours').fromNow()
+    return t1.fromNow()
   }
 }

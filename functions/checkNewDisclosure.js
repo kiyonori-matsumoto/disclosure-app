@@ -10,7 +10,7 @@ const https = require('https');
 const myBucket = admin.storage().bucket(functions.config().firebase.storageBucket);
 
 const checkNewDisclosure = (event) => {
-  const time = moment(event.timestamp);
+  const time = moment(event.timestamp).utcOffset(9);
   console.log(`viewing: ${time.format('YYYYMMDD')}`);
   return Promise.all([
     rp.get(`https://www.release.tdnet.info/inbs/I_list_001_${time.format('YYYYMMDD')}.html`),

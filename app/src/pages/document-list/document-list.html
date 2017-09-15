@@ -14,11 +14,20 @@
 
 
 <ion-content padding>
-  <ion-list>
-    <button ion-item [navPush]="documentViewPage" [navParams]="item" class="text" *ngFor="let item of items | async" >
-      <h2>{{item.company}}<small>({{item.code}})</small>
-        <ion-note>{{item.time | twitterTime }}</ion-note></h2>
-      <p>{{item.title}}</p>
-    </button>
-  </ion-list>
+  <!-- <ion-refresher>
+    <ion-refresher-content> -->
+      <!-- <ion-list [virtualScroll]="(items | async) || []"> -->
+      <ion-list>
+        <button ion-item [navPush]="documentViewPage" [navParams]="item" class="text" *ngFor="let item of items | async" >
+        <!-- <button ion-item [navPush]="documentViewPage" [navParams]="item" class="text" *virtualItem="let item" > -->
+          <h2>{{item.company}}<small>({{item.code}})</small>
+            <ion-note>{{item.time | twitterTime }}</ion-note></h2>
+          <p>{{item.title}}</p>
+        </button>
+      </ion-list>
+      <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+        <ion-infinite-scroll-content></ion-infinite-scroll-content>
+      </ion-infinite-scroll>
+    <!-- </ion-refresher-content>
+  </ion-refresher> -->
 </ion-content>
