@@ -6,6 +6,7 @@ import 'rxjs/add/operator/map'
 import { DisclosureProvider } from "../../providers/disclosure/disclosure";
 import { Observable, Subject, AsyncSubject, BehaviorSubject } from "rxjs";
 import { DocumentViewPage } from "../document-view/document-view";
+import * as firebase from 'firebase';
 
 /**
  * Generated class for the DocumentListPage page.
@@ -22,27 +23,45 @@ import { DocumentViewPage } from "../document-view/document-view";
 export class DocumentListPage implements OnInit {
 
   ngOnInit(): void {
-    this.num.next(20);
+    // this.num.next(20);
   }
 
-  items: Observable<any>;
+  private readonly REF_BASE = 'disclosures';
+
+  queryBase: firebase.database.Query;
+
   documentViewPage = DocumentViewPage;
-  num: BehaviorSubject<number>;
-  n: number;
   pointer: any = '';
 
-  items$: Observable<any>;
+  items : any[] = []
+
+  updateItems = (e: firebase.database.DataSnapshot) => {
+    const val = e.val();
+    console.log(val, this.pointer);
+    this.items.push(... Object.keys(val).map(key => val[key]).sort((a, b) => b.time - a.time));
+    this.pointer = this.items[this.items.length - 1].time
+  }
 
   constructor(public navCtrl: NavController, public navParams: NavParams, afDB: AngularFireDatabase) {
-    this.num = new BehaviorSubject<number>(1);
-    
-    this.items$ = afDB.list('/disclosures', { query: { limitToLast: this.num.scan((a, e) => a + e, 0), orderByChild: 'time' }});
-    this.items = this.items$.map(e => e.reverse())
+    this.queryBase = afDB.database.ref(this.REF_BASE).orderByKey().limitToLast(20);
+    this.queryBase.once('value').then(this.updateItems);
   }
   
   doInfinite(infiniteScroll) {
-    this.num.next(20);
-    this.items$.subscribe(e => infiniteScroll.complete());
+    console.log('doInfinite');
+    this.queryBase.endAt(this.pointer).once('value').then(e => {
+      this.updateItems(e);
+      infiniteScroll.complete();
+    });
+  }
+
+  doRefresh(refresh) {
+    console.log('doRefresh');
+    this.queryBase.once('value').then(e => {
+      this.items = [];
+      this.updateItems(e);
+      refresh.complete();
+    });
   }
 
   ionViewDidLoad() {

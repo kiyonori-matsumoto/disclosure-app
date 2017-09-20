@@ -4,6 +4,7 @@ import { FirebaseListObservable, AngularFireDatabase } from "angularfire2/databa
 import { DocumentListPageModule } from "../document-list/document-list.module";
 import { DocumentListPage } from "../document-list/document-list";
 import { SettingPage } from "../setting/setting";
+import { DocumentStreamPage } from '../document-stream/document-stream';
 
 @Component({
   selector: 'page-home',
@@ -12,7 +13,7 @@ import { SettingPage } from "../setting/setting";
 export class HomePage {
   items: FirebaseListObservable<any[]>;
   tab = {
-    document: DocumentListPage,
+    document: DocumentStreamPage,
     setting: SettingPage,
   }
 

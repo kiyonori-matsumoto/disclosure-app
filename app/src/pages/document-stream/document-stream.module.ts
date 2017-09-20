@@ -1,17 +1,17 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { DocumentListPage } from './document-list';
-import { TwitterTimePipe } from "../../pipes/twitter-time/twitter-time";
+import { DocumentStreamPage } from './document-stream';
+import { TwitterTimePipe } from '../../pipes/twitter-time/twitter-time';
 import { TwitterTimeModule } from '../../pipes/twitter-time/twitter-time.module';
 
 @NgModule({
   declarations: [
-    DocumentListPage,
+    DocumentStreamPage,
     // TwitterTimePipe,
   ],
   imports: [
-    IonicPageModule.forChild(DocumentListPage),
+    IonicPageModule.forChild(DocumentStreamPage),
     TwitterTimeModule,
   ],
 })
-export class DocumentListPageModule {}
+export class DocumentStreamPageModule {}

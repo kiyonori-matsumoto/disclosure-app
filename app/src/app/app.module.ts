@@ -19,6 +19,10 @@ import { SettingPageModule } from "../pages/setting/setting.module";
 import { SettingPage } from "../pages/setting/setting";
 import { SignInProvider } from '../providers/sign-in/sign-in';
 import { AuthProvider } from '../providers/auth/auth';
+import { FCM } from "@ionic-native/fcm";
+import { DocumentStreamPage } from '../pages/document-stream/document-stream';
+import { DocumentStreamPageModule } from '../pages/document-stream/document-stream.module';
+import { TwitterTimePipe } from '../pipes/twitter-time/twitter-time';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -41,6 +45,7 @@ export const firebaseConfig = {
     AngularFireDatabaseModule,
     AngularFireAuthModule,
     DocumentListPageModule,
+    DocumentStreamPageModule,
     DocumentViewPageModule,
     SettingPageModule,
   ],
@@ -49,6 +54,7 @@ export const firebaseConfig = {
     MyApp,
     HomePage,
     DocumentListPage,
+    DocumentStreamPage,
     DocumentViewPage,
     SettingPage,
   ],
@@ -58,7 +64,8 @@ export const firebaseConfig = {
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     DisclosureProvider,
     SignInProvider,
-    AuthProvider
+    AuthProvider,
+    FCM,
   ]
 })
 export class AppModule {}

@@ -1,6 +1,6 @@
 {
   "name": "disclosure",
-  "app_id": "",
+  "app_id": "2a5278e5",
   "type": "ionic-angular",
   "integrations": {
     "cordova": {}

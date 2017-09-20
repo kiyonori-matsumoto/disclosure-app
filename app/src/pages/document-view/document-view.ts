@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
 import { FirebaseApp } from 'angularfire2';
 import 'firebase/storage';
@@ -23,16 +23,28 @@ export class DocumentViewPage implements OnInit {
   document;
   documentUrl;
   pages: number[] = [];
+  error: any;
 
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
     public sanitizer: DomSanitizer,
-    private app: FirebaseApp
+    private app: FirebaseApp,
+    private alertCtrl: AlertController,
   ) {
     this.document = this.navParams.data;
+    this.documentUrl = Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${this.document.document}.pdf`).getDownloadURL()).catch(err => {
+      let alert = this.alertCtrl.create({
+        title: 'Error',
+        subTitle: err.message,
+        buttons: ['Dismiss'],
+      });
+      alert.onDidDismiss(() => navCtrl.pop());
+      alert.present();
+      throw err;
+    });
+    
     // this.documentUrl = sanitizer.bypassSecurityTrustResourceUrl(`https://docs.google.com/viewer?url=https://www.release.tdnet.info/inbs/${this.document.document}.pdf&embedded=true`)
-    this.documentUrl = Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${this.document.document}.pdf`).getDownloadURL())
     // .map(this.sanitizer.bypassSecurityTrustResourceUrl)
     // .map(d => this.sanitizer.bypassSecurityTrustResourceUrl(`https://docs.google.com/viewer?url=${encodeURIComponent(d)}&embedded=true`))
     // .startWith(this.sanitizer.bypassSecurityTrustResourceUrl(''))
