@@ -1,12 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Platform, AlertController, LoadingController } from 'ionic-angular';
 import { AngularFireDatabase, FirebaseListObservable } from "angularfire2/database";
 import 'rxjs/add/operator/take'
 import 'rxjs/add/operator/map'
+import 'rxjs/add/operator/mergeMap'
 import { DisclosureProvider } from "../../providers/disclosure/disclosure";
 import { Observable, Subject, AsyncSubject, BehaviorSubject } from "rxjs";
 import { DocumentViewPage } from "../document-view/document-view";
 import * as firebase from 'firebase';
+import { FileOpener } from '@ionic-native/file-opener';
+import { FirebaseApp } from 'angularfire2';
+import { FileTransfer, FileTransferObject } from '@ionic-native/file-transfer';
+import { File } from '@ionic-native/file';
 
 /**
  * Generated class for the DocumentListPage page.
@@ -20,14 +25,10 @@ import * as firebase from 'firebase';
   selector: 'page-document-list',
   templateUrl: 'document-list.html',
 })
-export class DocumentListPage implements OnInit {
-
-  ngOnInit(): void {
-    // this.num.next(20);
-  }
-
+export class DocumentListPage {
   private readonly REF_BASE = 'disclosures';
 
+  fileTransfer: FileTransferObject;
   queryBase: firebase.database.Query;
 
   documentViewPage = DocumentViewPage;
@@ -42,9 +43,22 @@ export class DocumentListPage implements OnInit {
     this.pointer = this.items[this.items.length - 1].time
   }
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, afDB: AngularFireDatabase) {
-    this.queryBase = afDB.database.ref(this.REF_BASE).orderByKey().limitToLast(20);
+  constructor(
+    public navCtrl: NavController,
+    public navParams: NavParams,
+    private dp: DisclosureProvider,
+    private platform: Platform,
+    private fileOpener: FileOpener,
+    private app: FirebaseApp,
+    private alertCtrl: AlertController,
+    private transfer: FileTransfer,
+    private file: File,
+    private afDB: AngularFireDatabase,
+    private loadingCtrl: LoadingController,
+  ) {
+    this.queryBase = afDB.database.ref(this.REF_BASE).orderByChild('code').equalTo(navParams.get('code')).limitToLast(20);
     this.queryBase.once('value').then(this.updateItems);
+    this.fileTransfer = this.transfer.create();
   }
   
   doInfinite(infiniteScroll) {
@@ -66,6 +80,32 @@ export class DocumentListPage implements OnInit {
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad DocumentListPage');
+  }
+
+  viewDocument(item) {
+    if(this.platform.is('cordova')) {
+      const loading = this.loadingCtrl.create({content: 'ファイルをダウンロード中'})
+      loading.present();
+      Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${item.document}.pdf`).getDownloadURL())
+      .catch(err => {
+        let alert = this.alertCtrl.create({
+          title: 'Error',
+          subTitle: err.message,
+          buttons: ['Dismiss'],
+        });
+        loading.dismiss()
+        alert.present();
+        throw err;
+      })
+      .mergeMap(url => this.fileTransfer.download(url, this.file.dataDirectory + item.document + '.pdf'))
+      .subscribe(entry => {
+        console.log(entry.toURL());
+        loading.dismiss()
+        this.fileOpener.open(entry.toURL(), 'application/pdf');
+      })
+    } else {
+      this.navCtrl.push(DocumentViewPage, item);
+    }
   }
 
 }

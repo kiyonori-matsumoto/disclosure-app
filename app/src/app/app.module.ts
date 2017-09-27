@@ -23,6 +23,16 @@ import { FCM } from "@ionic-native/fcm";
 import { DocumentStreamPage } from '../pages/document-stream/document-stream';
 import { DocumentStreamPageModule } from '../pages/document-stream/document-stream.module';
 import { TwitterTimePipe } from '../pipes/twitter-time/twitter-time';
+import { ListTopicsPageModule } from '../pages/list-topics/list-topics.module';
+import { ListTopicsPage } from '../pages/list-topics/list-topics';
+import { HttpModule } from '@angular/http';
+import { SearchStocksPageModule } from '../pages/search-stocks/search-stocks.module';
+import { SearchStocksPage } from '../pages/search-stocks/search-stocks';
+import { DocumentViewer } from '@ionic-native/document-viewer';
+import { FileTransfer } from '@ionic-native/file-transfer';
+import { File } from '@ionic-native/file';
+import { FileOpener } from '@ionic-native/file-opener';
+import { FcmProvider } from '../providers/fcm/fcm';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -47,7 +57,9 @@ export const firebaseConfig = {
     DocumentListPageModule,
     DocumentStreamPageModule,
     DocumentViewPageModule,
+    ListTopicsPageModule,
     SettingPageModule,
+    SearchStocksPageModule,
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -56,7 +68,9 @@ export const firebaseConfig = {
     DocumentListPage,
     DocumentStreamPage,
     DocumentViewPage,
+    ListTopicsPage,
     SettingPage,
+    SearchStocksPage,
   ],
   providers: [
     StatusBar,
@@ -66,6 +80,11 @@ export const firebaseConfig = {
     SignInProvider,
     AuthProvider,
     FCM,
+    // DocumentViewer,
+    FileOpener,
+    FileTransfer,
+    File,
+    FcmProvider,
   ]
 })
 export class AppModule {}

@@ -34,7 +34,7 @@ describe('checkNewDisclosure', () => {
         // You can stub any other config values needed by your functions here, for example:
         // foo: 'bar'
       });
-    f = require('../checkNewDisclosure');
+    f = require('../src/checkNewDisclosure');
     admin.initializeApp(functions.config().firebase);
     // admin.database().ref('/disclosures').orderByKey().limitToLast(1).once('value'),
     refStub = sinon.stub();

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { ListTopicsPage } from '../list-topics/list-topics';
 
 /**
  * Generated class for the SettingPage page.
@@ -14,6 +15,8 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
   templateUrl: 'setting.html',
 })
 export class SettingPage {
+
+  listTopicsPage = ListTopicsPage;
 
   constructor(public navCtrl: NavController, public navParams: NavParams) {
   }

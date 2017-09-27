@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController, Platform } from 'ionic-angular';
 import { DomSanitizer, SafeResourceUrl } from "@angular/platform-browser";
 import { FirebaseApp } from 'angularfire2';
 import 'firebase/storage';
@@ -24,6 +24,8 @@ export class DocumentViewPage implements OnInit {
   documentUrl;
   pages: number[] = [];
   error: any;
+  zoom = 1.0;
+  isCordova: boolean;
 
   constructor(
     public navCtrl: NavController,
@@ -31,7 +33,10 @@ export class DocumentViewPage implements OnInit {
     public sanitizer: DomSanitizer,
     private app: FirebaseApp,
     private alertCtrl: AlertController,
+    private platform: Platform,
   ) {
+    this.isCordova = platform.is('cordova');
+    
     this.document = this.navParams.data;
     this.documentUrl = Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${this.document.document}.pdf`).getDownloadURL()).catch(err => {
       let alert = this.alertCtrl.create({
@@ -60,4 +65,8 @@ export class DocumentViewPage implements OnInit {
     console.log(this.pages);
   }
 
+  onPdfDblClick() {
+    console.log("dclick");
+    this.zoom = (this.zoom === 1.0) ? 0.5 : 1.0;
+  }
 }

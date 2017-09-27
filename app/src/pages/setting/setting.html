@@ -7,12 +7,18 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>setting</ion-title>
+    <ion-title>設定</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
 <ion-content padding>
-
+  <ion-list>
+    <ion-list-header>設定</ion-list-header>
+    <button ion-item [navPush]="listTopicsPage">
+      <ion-icon name="notifications" item-start></ion-icon>
+      通知設定
+    </button>
+  </ion-list>
 </ion-content>
