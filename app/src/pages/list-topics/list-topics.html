@@ -23,7 +23,7 @@
     </button>
   </ion-item>
   <ion-list>
-    <ion-item-sliding #item *ngFor="let elem of listCode" >
+    <ion-item-sliding #item *ngFor="let elem of listCodeAsync | async" >
       <ion-item>
         {{elem.title}}
       </ion-item>
@@ -35,4 +35,7 @@
       </ion-item-options>
     </ion-item-sliding>
   </ion-list>
+  <div *ngIf="loading | async" style="display:flex;justify-content:center;">
+    <ion-spinner></ion-spinner>
+  </div> 
 </ion-content>

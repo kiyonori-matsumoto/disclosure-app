@@ -33,6 +33,7 @@ export class DocumentStreamPage {
   documentViewPage = DocumentViewPage;
   searchStocksPage = SearchStocksPage;
   fileTransfer: FileTransferObject;
+  loading: Observable<boolean>;
 
   constructor(
     public navCtrl: NavController,
@@ -47,24 +48,39 @@ export class DocumentStreamPage {
     private loadingCtrl: LoadingController,
   ) {
     this.date = moment().format("YYYY-MM-DD");
-    this.items = dp.by_date(this.date).map(e => e.reverse()); //dp.all(50).map(e => e.reverse());
-    this.fileTransfer = this.transfer.create();
+    this.updateItems();
   }
 
   ionViewDidLoad() {
+    if(this.platform.is('cordova')) {
+      this.platform.ready().then(() => {
+        this.fileTransfer = this.transfer.create();
+      })
+    }
     console.log('ionViewDidLoad DocumentStreamPage');
   }
 
   onChangeDate() {
     console.log(this.date);
-    this.items = this.dp.by_date(this.date).map(e => e.reverse()); //dp.all(50).map
+    this.updateItems();
+  }
+
+  private updateItems() {
+    this.items = this.dp.by_date(this.date).map(e => e.reverse()).share();
+    this.loading  = this.items.map(() => false).startWith(true);
   }
 
   viewDocument(item) {
     if(this.platform.is('cordova')) {
-      const loading = this.loadingCtrl.create({content: 'ファイルをダウンロード中'})
+      const loading = this.loadingCtrl.create({
+        content: 'ファイルをダウンロード中',
+        enableBackdropDismiss: true,
+        dismissOnPageChange: true,
+      })
       loading.present();
       Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${item.document}.pdf`).getDownloadURL())
+      .do(e => console.log(e))
+      .mergeMap(url => this.fileTransfer.download(url, this.file.dataDirectory + item.document + '.pdf'))
       .catch(err => {
         let alert = this.alertCtrl.create({
           title: 'Error',
@@ -75,7 +91,6 @@ export class DocumentStreamPage {
         alert.present();
         throw err;
       })
-      .mergeMap(url => this.fileTransfer.download(url, this.file.dataDirectory + item.document + '.pdf'))
       .subscribe(entry => {
         console.log(entry.toURL());
         loading.dismiss()

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Platform } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { Platform, NavController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
@@ -8,12 +8,15 @@ import { AuthProvider } from "../providers/auth/auth";
 import { FCM } from '@ionic-native/fcm';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
+import { FcmProvider } from '../providers/fcm/fcm';
 
 @Component({
   templateUrl: 'app.html'
 })
 export class MyApp {
   rootPage:any = HomePage;
+
+  @ViewChild('myNav') nav: NavController
 
   constructor(
     platform: Platform,
@@ -23,14 +26,18 @@ export class MyApp {
     fcm: FCM,
     private afDb: AngularFireDatabase,
     private afAuth: AngularFireAuth,
+    fcmProvider: FcmProvider,
   ) {
-    platform.ready().then(() => {
+    Promise.all([
+      platform.ready(),
+      afAuth.auth.signInAnonymously(),
+    ]).then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
       if(platform.is('cordova')) {
-        fcm.onTokenRefresh().subscribe((token) => {
+        const uploadToken = (token) => {
           console.log(token)
           this.afAuth.authState.subscribe(d => {
             const uid = d.uid;
@@ -38,7 +45,9 @@ export class MyApp {
               afDb.object(`/user/tokens/${uid}/`).set(token).then(console.log);
             }
           })
-        });
+        };
+        fcm.onTokenRefresh().subscribe(uploadToken);
+        fcm.getToken().then(uploadToken);
       }
     });
   }

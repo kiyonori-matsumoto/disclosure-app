@@ -29,5 +29,8 @@
       <p>{{item.title}}</p>
     </button>
   </ion-list>
+  <div *ngIf="loading | async" style="display:flex;justify-content:center;">
+    <ion-spinner></ion-spinner>
+  </div> 
 </ion-content>
     

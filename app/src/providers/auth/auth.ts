@@ -13,7 +13,7 @@ import { AngularFireAuth } from "angularfire2/auth";
 export class AuthProvider {
 
   constructor(afAuth: AngularFireAuth) {
-    afAuth.auth.signInAnonymously().then(e => console.log(e));
+    // afAuth.auth.signInAnonymously().then(e => console.log(e));
   }
 
 }

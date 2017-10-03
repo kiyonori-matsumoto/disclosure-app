@@ -84,9 +84,15 @@ export class DocumentListPage {
 
   viewDocument(item) {
     if(this.platform.is('cordova')) {
-      const loading = this.loadingCtrl.create({content: 'ファイルをダウンロード中'})
+      const loading = this.loadingCtrl.create({
+        content: 'ファイルをダウンロード中',
+        enableBackdropDismiss: true,
+        dismissOnPageChange: true,
+      })
       loading.present();
       Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${item.document}.pdf`).getDownloadURL())
+      .do(e => console.log(e))
+      .mergeMap(url => this.fileTransfer.download(url, this.file.dataDirectory + item.document + '.pdf'))
       .catch(err => {
         let alert = this.alertCtrl.create({
           title: 'Error',
@@ -97,7 +103,6 @@ export class DocumentListPage {
         alert.present();
         throw err;
       })
-      .mergeMap(url => this.fileTransfer.download(url, this.file.dataDirectory + item.document + '.pdf'))
       .subscribe(entry => {
         console.log(entry.toURL());
         loading.dismiss()
