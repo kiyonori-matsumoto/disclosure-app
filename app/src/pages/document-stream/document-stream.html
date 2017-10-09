@@ -13,21 +13,35 @@
     </ion-buttons>
     <ion-title>適宜開示一覧</ion-title>
   </ion-navbar>
+  <ion-toolbar>
+    <ion-item>
+      <ion-label fixed>公開日</ion-label>
+      <ion-datetime displayFormat="YYYY/MM/DD" [(ngModel)]="date" (ionChange)="onChangeDate()"></ion-datetime>
+      <ion-badge item-end>{{(items | async)?.length?.toString(10)?.concat('件')}}</ion-badge>
+    </ion-item>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="onFunnelClick($event)" class="button-with-tag">
+        <ion-icon end name="funnel">
+          <ion-badge *ngIf="changeTag$ | async | tagCount"  class="tag-on-button" color="danger">{{changeTag$ | async | tagCount}}</ion-badge>
+        </ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
 </ion-header>
     
     
-<ion-content padding>
-  <ion-item>
-    <ion-label>公開日</ion-label>
-    <ion-datetime displayFormat="YYYY/MM/DD" [(ngModel)]="date" (ionChange)="onChangeDate()"></ion-datetime>
-  </ion-item>
+<ion-content>
   <ion-list>
-    <!-- <button ion-item [navPush]="documentViewPage" [navParams]="item" class="text" *ngFor="let item of items | async" > -->
-    <button ion-item (click)="viewDocument(item)" class="text" *ngFor="let item of items | async" >
-      <h2>{{item.company}}<small>({{item.code}})</small>
-        <ion-note>{{item.time | twitterTime }}</ion-note></h2>
-      <p>{{item.title}}</p>
-    </button>
+    <ion-item *ngFor="let item of items | async" >
+      <div style="display: flex; justify-content:flex-end;">
+        <button (click)="addTag(tag)" *ngFor="let tag of object.keys(item.tags)" ion-button small color="secondary" clear>{{tag}}</button>
+      </div>
+      <button style="text-align: left; background-color: white; width: 100%; overflow-x:hidden" (click)="viewDocument(item)" class="text">
+        <h2>{{item.company}}<small>({{item.code}})</small>
+          <ion-note>{{item.time | twitterTime }}</ion-note></h2>
+        <p style="white-space: normal">{{item.title}}</p>
+      </button>
+    </ion-item>
   </ion-list>
   <div *ngIf="loading | async" style="display:flex;justify-content:center;">
     <ion-spinner></ion-spinner>

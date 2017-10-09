@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform, AlertController, LoadingController } from 'ionic-angular';
-import { AngularFireDatabase, FirebaseListObservable } from "angularfire2/database";
+import { AngularFireDatabase } from "angularfire2/database";
 import 'rxjs/add/operator/take'
 import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/mergeMap'
@@ -26,7 +26,8 @@ import { File } from '@ionic-native/file';
   templateUrl: 'document-list.html',
 })
 export class DocumentListPage {
-  private readonly REF_BASE = 'disclosures';
+  // private readonly REF_BASE = 'disclosures';
+  private readonly ITEMS_PER_PAGE = 10;
 
   fileTransfer: FileTransferObject;
   queryBase: firebase.database.Query;
@@ -36,11 +37,10 @@ export class DocumentListPage {
 
   items : any[] = []
 
-  updateItems = (e: firebase.database.DataSnapshot) => {
-    const val = e.val();
-    console.log(val, this.pointer);
+  updateItems = e => {
+    const val = e.docs.map(d => d.data() );
     this.items.push(... Object.keys(val).map(key => val[key]).sort((a, b) => b.time - a.time));
-    this.pointer = this.items[this.items.length - 1].time
+    this.pointer = e.docs[e.docs.length-1];
   }
 
   constructor(
@@ -56,24 +56,30 @@ export class DocumentListPage {
     private afDB: AngularFireDatabase,
     private loadingCtrl: LoadingController,
   ) {
-    this.queryBase = afDB.database.ref(this.REF_BASE).orderByChild('code').equalTo(navParams.get('code')).limitToLast(20);
-    this.queryBase.once('value').then(this.updateItems);
+    this.dp.get(navParams.get('code')).then(this.updateItems);
+    // this.queryBase = afDB.database.ref(this.REF_BASE).orderByChild('code').equalTo(navParams.get('code')).limitToLast(20);
+    // this.queryBase.once('value').then(this.updateItems);
     this.fileTransfer = this.transfer.create();
   }
   
   doInfinite(infiniteScroll) {
     console.log('doInfinite');
-    this.queryBase.endAt(this.pointer).once('value').then(e => {
-      this.updateItems(e);
+    this.dp.get(this.navParams.get('code'), this.ITEMS_PER_PAGE, this.pointer).then((snapshot) => {
+      this.updateItems(snapshot);
+      if(snapshot.size < this.ITEMS_PER_PAGE) { infiniteScroll.enable(false); }
       infiniteScroll.complete();
     });
+    // this.queryBase.endAt(this.pointer).once('value').then(e => {
+    //   this.updateItems(e);
+    //   infiniteScroll.complete();
+    // });
   }
 
   doRefresh(refresh) {
     console.log('doRefresh');
-    this.queryBase.once('value').then(e => {
+    this.dp.get(this.navParams.get('code'), this.ITEMS_PER_PAGE, true).then((snapshot) => {
       this.items = [];
-      this.updateItems(e);
+      this.updateItems(snapshot);
       refresh.complete();
     });
   }

@@ -1,7 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, Platform } from 'ionic-angular';
-import { FirebaseListObservable, AngularFireDatabase } from "angularfire2/database";
-// import { DocumentListPageModule } from "../document-list/document-list.module";
 import { DocumentListPage } from "../document-list/document-list";
 import { SettingPage } from "../setting/setting";
 import { DocumentStreamPage } from '../document-stream/document-stream';
@@ -13,7 +11,6 @@ import { FCM } from '@ionic-native/fcm';
   templateUrl: 'home.html'
 })
 export class HomePage {
-  items: FirebaseListObservable<any[]>;
   tab = {
     document: DocumentStreamPage,
     topics: ListTopicsPage,
@@ -22,7 +19,7 @@ export class HomePage {
 
   @ViewChild('myNav') nav: NavController;
 
-  constructor(afDB: AngularFireDatabase, fcm:FCM, platform: Platform ) {
+  constructor(fcm:FCM, platform: Platform ) {
     // if(platform.is('cordova')) {
     //   fcm.onNotification().subscribe(data => {
     //     const code = data.tag.split('_')[1];

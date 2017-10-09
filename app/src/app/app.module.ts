@@ -10,6 +10,7 @@ import { HomePage } from '../pages/home/home';
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
+import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { DocumentListPage } from "../pages/document-list/document-list";
 import { DocumentListPageModule } from "../pages/document-list/document-list.module";
 import { DisclosureProvider } from '../providers/disclosure/disclosure';
@@ -33,6 +34,8 @@ import { FileTransfer } from '@ionic-native/file-transfer';
 import { File } from '@ionic-native/file';
 import { FileOpener } from '@ionic-native/file-opener';
 import { FcmProvider } from '../providers/fcm/fcm';
+import { PopoverFunnelPageModule } from '../pages/popover-funnel/popover-funnel.module';
+import { PopoverFunnelPage } from '../pages/popover-funnel/popover-funnel';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -54,9 +57,11 @@ export const firebaseConfig = {
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireDatabaseModule,
     AngularFireAuthModule,
+    AngularFirestoreModule,
     DocumentListPageModule,
     DocumentStreamPageModule,
     DocumentViewPageModule,
+    PopoverFunnelPageModule,
     ListTopicsPageModule,
     SettingPageModule,
     SearchStocksPageModule,
@@ -71,6 +76,7 @@ export const firebaseConfig = {
     ListTopicsPage,
     SettingPage,
     SearchStocksPage,
+    PopoverFunnelPage,
   ],
   providers: [
     StatusBar,

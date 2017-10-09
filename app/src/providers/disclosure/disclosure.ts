@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import 'rxjs/add/operator/map';
-import { AngularFireDatabase, FirebaseListObservable } from "angularfire2/database";
 import { Observable } from "rxjs";
 import * as moment from 'moment';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 /*
   Generated class for the DisclosureProvider provider.
@@ -13,20 +13,34 @@ import * as moment from 'moment';
 @Injectable()
 export class DisclosureProvider {
 
-  constructor(private afDB: AngularFireDatabase) {
-  }
+  private lastVisible: any;
+
+  constructor(private afs: AngularFirestore) {}
 
   public all(n: number = 20) {
-    return this.afDB.list('/disclosures', {query: {orderByChild: 'time', limitToLast: n}});
+    return this.afs.collection('disclosures', ref => ref.orderBy('time', 'desc').limit(n)).valueChanges();
   }
 
   public by_date(date: string) {
-    return this.afDB.list('/disclosures', {query: {orderByChild: 'time', startAt: moment(date).utcOffset(9).valueOf(), endAt: moment(date).utcOffset(9).add(1, 'days').valueOf() } })
-    .map(e => e.sort((a, b) => a.time - b.time));
+    const start = moment(date).utcOffset(9).valueOf();
+    const end =   moment(date).utcOffset(9).add(1, 'days').valueOf()
+    return this.afs.collection('disclosures', ref => ref.orderBy('time', 'desc').where('time', '>=', start).where('time', '<', end)).valueChanges()
   }
 
-  public next(pointer, n: number = 20) {
-    return this.afDB.list('/disclosure', {query: { limitToLast: 20, orderByChild: 'time', endAt: pointer }, })
-  }
+  public get(code: string = '', n: number = 20, pointer: any = null) {
+    // console.log("lv", this.lastVisible);
+    console.log(pointer && pointer.data())
+    let query = this.afs.firestore.collection('disclosures').orderBy('time', 'desc')
+    
+    if(code) { query = query.where('code', '==', code); }
 
+    if (pointer) { query = query.startAfter(pointer); }
+
+    query = query.limit(n);
+
+    return query.get().then((docSnapshot) => {
+      this.lastVisible = docSnapshot.docs[docSnapshot.docs.length-1];
+      return docSnapshot;
+    })
+  }
 }

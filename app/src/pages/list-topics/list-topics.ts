@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform } from 'ionic-angular';
 import { Http } from '@angular/http';
 import { FCM } from '@ionic-native/fcm';
-import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable, Subject } from 'rxjs';
 
@@ -19,8 +18,6 @@ import { Observable, Subject } from 'rxjs';
   templateUrl: 'list-topics.html',
 })
 export class ListTopicsPage {
-
-  db: FirebaseObjectObservable<any>;
   items: Observable<any[]>
   listCode: any[] = [];
   listCodeAsync: Observable<any[]>;
@@ -40,7 +37,7 @@ export class ListTopicsPage {
     throw "no such key";
   }
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private http: Http, private fcm: FCM, private afDb: AngularFireDatabase, private afAuth: AngularFireAuth, private platform: Platform) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, private http: Http, private fcm: FCM, private afAuth: AngularFireAuth, private platform: Platform) {
     this.addSubject = new Subject<string>();
     this.deleteSubject = new Subject<string>();
     this.initSubject = new Subject<string>();
