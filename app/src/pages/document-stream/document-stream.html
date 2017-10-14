@@ -11,7 +11,7 @@
         <ion-icon name="search"></ion-icon>
       </button>
     </ion-buttons>
-    <ion-title>適宜開示一覧</ion-title>
+    <ion-title>適時開示一覧</ion-title>
   </ion-navbar>
   <ion-toolbar>
     <ion-item>
@@ -34,7 +34,7 @@
   <ion-list>
     <ion-item *ngFor="let item of items | async" >
       <div style="display: flex; justify-content:flex-end;">
-        <button (click)="addTag(tag)" *ngFor="let tag of object.keys(item.tags)" ion-button small color="secondary" clear>{{tag}}</button>
+        <button (click)="addTag(tag)" *ngFor="let tag of item.tags | keys" ion-button small color="secondary" clear>{{tag}}</button>
       </div>
       <button style="text-align: left; background-color: white; width: 100%; overflow-x:hidden" (click)="viewDocument(item)" class="text">
         <h2>{{item.company}}<small>({{item.code}})</small>

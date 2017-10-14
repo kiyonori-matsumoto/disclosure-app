@@ -36,6 +36,7 @@ import { FileOpener } from '@ionic-native/file-opener';
 import { FcmProvider } from '../providers/fcm/fcm';
 import { PopoverFunnelPageModule } from '../pages/popover-funnel/popover-funnel.module';
 import { PopoverFunnelPage } from '../pages/popover-funnel/popover-funnel';
+import { SettingsProvider } from '../providers/settings/settings';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -91,6 +92,7 @@ export const firebaseConfig = {
     FileTransfer,
     File,
     FcmProvider,
+    SettingsProvider,
   ]
 })
 export class AppModule {}

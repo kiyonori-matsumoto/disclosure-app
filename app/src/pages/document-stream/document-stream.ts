@@ -89,7 +89,7 @@ export class DocumentStreamPage {
       console.log(tags);
       const tagList = Object.keys(tags).filter(e => tags[e]);
       if(tagList.length === 0) return docs;
-      return <any>docs.filter((doc: any) => tagList.some(tag => doc.tags[tag]))
+      return <any>docs.filter((doc: any) => tagList.some(tag => doc.tags && doc.tags[tag]))
     });
     // ).do(console.log).map(([docs, tags]) => docs);
     this.loading  = share.map(() => false).startWith(true);

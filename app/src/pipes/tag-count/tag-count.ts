@@ -13,7 +13,7 @@ export class TagCountPipe implements PipeTransform {
    * Takes a value and makes it lowercase.
    */
   transform(value: any, ...args) {
-    return Object.keys(value).filter(e => value[e]).length;
+    return Object.keys(value || {}).filter(e => value[e]).length;
     // console.log('tagCount', value);
     // return Object.keys(value).length;
   }
