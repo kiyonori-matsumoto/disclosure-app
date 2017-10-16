@@ -9,6 +9,7 @@ const checkNewDisclosure = require('./src/checkNewDisclosure');
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
 exports.checkNewDisclosure = functions.pubsub.topic('minutely5-tick').onPublish(checkNewDisclosure);
+exports.createCompanyDict = functions.pubsub.topic('weekly-tick').onPublish(require('./src/createCompanyDict'));
 
 // exports.sendTopic = functions.database.ref('/disclosures/{key}').onCreate(require('./src/sendTopic'));
 exports.sendTopicFs = functions.firestore.document('disclosures/{key}').onCreate(require('./src/sendTopic'));

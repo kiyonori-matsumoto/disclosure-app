@@ -1,6 +1,6 @@
 <ion-list>
   <ion-item *ngFor="let tag of tags" >
     <ion-label>{{tag}}</ion-label>
-    <ion-checkbox [(ngModel)]="tagCtrl[tag]" [name]="tag" (ionChange)="onChange($event)"></ion-checkbox>
+    <ion-checkbox [(ngModel)]="tagCtrl[tag]" [name]="tag" (ionChange)="onChange($event)" [disabled]="disabled[tag]"></ion-checkbox>
   </ion-item>
 </ion-list>

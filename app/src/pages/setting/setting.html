@@ -20,10 +20,10 @@
       <ion-icon name="notifications" item-start></ion-icon>
       通知設定
     </button>
-    <!-- <ion-list-header>表示設定</ion-list-header> -->
-    <!-- <ion-item>
+    <ion-list-header>表示設定</ion-list-header>
+    <ion-item>
       <ion-label>日々の開示情報を表示しない</ion-label>
-      <ion-checkbox [(ngModel)]="sdf"></ion-checkbox>
-    </ion-item> -->
+      <ion-checkbox [(ngModel)]="settings.hideDailyDisclosure" (ionChange)="onSettingChange()"></ion-checkbox>
+    </ion-item>
   </ion-list>
 </ion-content>

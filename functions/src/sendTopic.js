@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 const sendTopic = (event) => {
   const data = event.data.data();
   console.log(data.title, data.code);
-  admin.messaging().sendToTopic(`code_${data.code}`, {
+  return admin.messaging().sendToTopic(`code_${data.code}`, {
     notification: {
       body: `(${data.code}) ${data.title}`,
       tag: `code_${data.code}`,

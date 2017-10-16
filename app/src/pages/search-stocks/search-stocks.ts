@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import * as _ from 'lodash';
 import { DocumentListPage } from '../document-list/document-list';
+import { CompanyProvider } from '../../providers/company/company';
+import { Observable, Subject } from 'rxjs';
 
 /**
  * Generated class for the SearchStocksPage page.
@@ -21,10 +23,21 @@ export class SearchStocksPage {
 
   input = "";
   companies: string[];
-  items: string[] = [];
+  itemsAsync: Observable<any>;
+  input$ = new Subject<any>();
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
-    this.companies = _.range(1000, 10000).map(e => e.toString());
+  constructor(public navCtrl: NavController, public navParams: NavParams, private cp: CompanyProvider) {
+    this.itemsAsync = Observable.combineLatest(
+      this.cp.all(),
+      this.input$.asObservable(),
+    ).map(([companies, filter]) => {
+      if (filter.length < 2) return [];
+      return companies.filter(c => c.id.includes(filter))
+        .map(e => { return {
+          id: e.id,
+          data: e.data(),
+        }; })
+    })
   }
 
   ionViewDidLoad() {
@@ -32,9 +45,10 @@ export class SearchStocksPage {
   }
 
   changeInput() {
-    console.log("changeInput", this.companies[0]);
-    this.items = (this.input.length < 2) ? [] : 
-      this.companies.filter(e => e.includes(this.input))
+    this.input$.next(`${this.input}`);
+    // console.log("changeInput", this.companies[0]);
+    // this.items = (this.input.length < 2) ? [] : 
+    //   this.companies.filter(e => e.includes(this.input))
   }
 
 }

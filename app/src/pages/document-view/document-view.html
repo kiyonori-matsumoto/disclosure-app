@@ -14,12 +14,8 @@
 
 
 <ion-content style="background-color:gray;">
-  <!-- <ion-slides pager>
-    <ion-slide *ngFor="let page of pages; let i = index;" > -->
-  <!-- <object [data]="(documentUrl | async) || ''" type="application/pdf" width="100%" height="100%">test</object> -->
-    <ion-spinner *ngIf="!pages.length" style="position:absolute;left:50%;top:50%;"></ion-spinner>
-    <my-pdf-viewer [src]="(documentUrl | async) || ''" [original-size]="false" [show-all]="true" [zoom]="zoom" style="display: block;" (dblclick)="onPdfDblClick()" (after-load-complete)="onPdfLoadComplete($event)"></my-pdf-viewer>
-    <!-- </ion-slide>
-  </ion-slides> -->
-  <!-- <pdf-viewer src="https://www.release.tdnet.info/inbs/140120170912472032.pdf" [original-size]="false" [show-all]="true" style="display: block;"></pdf-viewer> -->
+  <object [data]="(documentUrl | async)" type="application/pdf" width="100%" height="100%">
+    <p>Sorry, the PDF couldn't be displayed :(</p>
+    <a href="filename.pdf" target="_blank">Click Here</a>
+  </object>
 </ion-content>

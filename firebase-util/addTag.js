@@ -1,9 +1,4 @@
-const admin = require('firebase-admin');
-const serviceAccount = require('../disclosure-app-firebase-adminsdk-kh901-5d7f4fdb64.json')
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseUrl: "https://disclosure-app.firebaseio.com",
-});
+const admin = require('./config/admin');
 
 const TAGS = ['株主優待', '決算', '配当', '業績予想', '日々の開示事項']
 

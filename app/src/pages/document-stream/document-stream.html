@@ -30,9 +30,10 @@
 </ion-header>
     
     
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let item of items | async" >
+<ion-content fullscreen (ionScroll)="onScroll($event)">
+  <ion-list [virtualScroll]="itemsAsync" [virtualTrackBy]="virtualTrack" approxItemHeight="92px">
+    <!-- <ion-item *ngFor="let item of items | async" > -->
+    <ion-item *virtualItem="let item">
       <div style="display: flex; justify-content:flex-end;">
         <button (click)="addTag(tag)" *ngFor="let tag of item.tags | keys" ion-button small color="secondary" clear>{{tag}}</button>
       </div>

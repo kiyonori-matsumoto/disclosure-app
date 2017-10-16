@@ -20,8 +20,8 @@
   <ion-searchbar [(ngModel)]="input" type="number" (ionInput)="changeInput()">
   </ion-searchbar>
   <ion-list>
-    <button ion-item *ngFor="let item of items" [navPush]="documentListPage" [navParams]="{code: item}">
-      {{item}}
+    <button ion-item *ngFor="let item of itemsAsync | async" [navPush]="documentListPage" [navParams]="{code: item.id}">
+      {{item.id}} {{item.data.name}}
     </button>
   </ion-list>
 </ion-content>

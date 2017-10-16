@@ -80,7 +80,6 @@
     <allow-navigation href="http://192.168.2.101:8100" />
     <allow-navigation href="http://192.168.2.101:8101" />
     <allow-navigation href="http://192.168.2.102:8101" />
-    <engine name="android" spec="^6.3.0" />
     <plugin name="cordova-plugin-console" spec="^1.1.0" />
     <plugin name="cordova-plugin-device" spec="^1.1.6" />
     <plugin name="cordova-plugin-document-viewer" spec="^0.9.5" />
@@ -93,4 +92,5 @@
     <plugin name="cordova-plugin-whitelist" spec="^1.3.2" />
     <plugin name="de.appplant.cordova.plugin.local-notification" spec="^0.8.5" />
     <plugin name="ionic-plugin-keyboard" spec="^2.2.1" />
+    <engine name="android" spec="~6.2.3" />
 </widget>

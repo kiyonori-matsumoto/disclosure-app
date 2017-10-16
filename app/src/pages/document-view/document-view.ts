@@ -38,7 +38,10 @@ export class DocumentViewPage implements OnInit {
     this.isCordova = platform.is('cordova');
     
     this.document = this.navParams.data;
-    this.documentUrl = Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${this.document.document}.pdf`).getDownloadURL()).catch(err => {
+    this.documentUrl = Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${this.document.document}.pdf`).getDownloadURL())
+    .startWith('')
+    .map(this.sanitizer.bypassSecurityTrustResourceUrl)
+    .catch(err => {
       let alert = this.alertCtrl.create({
         title: 'Error',
         subTitle: err.message,

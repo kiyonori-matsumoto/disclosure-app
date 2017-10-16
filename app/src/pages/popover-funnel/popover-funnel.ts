@@ -19,12 +19,14 @@ export class PopoverFunnelPage implements OnInit {
   tags: string[];
   tagCtrl: any;
   change$: Subject<any>;
+  disabled: any;
 
   ngOnInit(): void {
     if (this.navParams.data) {
       this.tags = this.navParams.data.tags;
       this.tagCtrl = this.navParams.data.tagCtrl;
       this.change$ = this.navParams.data.change$;
+      this.disabled = this.navParams.data.disabled;
     }
   }
 

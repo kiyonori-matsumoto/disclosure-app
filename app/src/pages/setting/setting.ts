@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { ListTopicsPage } from '../list-topics/list-topics';
-import { SettingsProvider } from '../../providers/settings/settings';
+import { SettingsProvider, Setting } from '../../providers/settings/settings';
 
 /**
  * Generated class for the SettingPage page.
@@ -18,14 +18,19 @@ import { SettingsProvider } from '../../providers/settings/settings';
 export class SettingPage {
 
   listTopicsPage = ListTopicsPage;
-  settings: any = {};
+  settings: Setting = <Setting>{};
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private sp: SettingsProvider) {
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad SettingPage');
-    // this.sp.get().subscribe(s => this.settings = s);
+    this.sp.get().subscribe(s => this.settings = s);
+  }
+
+  onSettingChange() {
+    this.sp.update(this.settings)
+    .subscribe(console.log);
   }
 
 }
