@@ -9,6 +9,7 @@ import { SearchStocksPage } from '../search-stocks/search-stocks';
 import { FileOpener } from '@ionic-native/file-opener';
 import { FileTransfer, FileTransferObject } from '@ionic-native/file-transfer';
 import { File } from '@ionic-native/file';
+import { Firebase } from '@ionic-native/firebase';
 import { FirebaseApp } from 'angularfire2';
 
 import 'rxjs/add/operator/mergeMap'
@@ -63,12 +64,13 @@ export class DocumentStreamPage {
     private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController,
     private sp: SettingsProvider,
+    private firebase: Firebase,
   ) {
     this.date = moment().format("YYYY-MM-DD");
-    this.updateItems();
   }
 
   ionViewDidLoad() {
+    this.updateItems();
     if(this.platform.is('cordova')) {
       this.platform.ready().then(() => {
         this.fileTransfer = this.transfer.create();
@@ -126,7 +128,13 @@ export class DocumentStreamPage {
 
       this.itemsAsync = f2;
       return this.itemsAsync;
-    });
+    })
+    .catch((err) => {
+      this.alertCtrl.create({message: err.message, title: "Error"}).present();
+      this.firebase.logError(JSON.stringify(err)).then(console.log);
+      // this.platform.exitApp();
+      return [];
+    })
     this.loading  = share.map(() => false).startWith(true);
   }
 
@@ -136,7 +144,7 @@ export class DocumentStreamPage {
   }
 
   onFunnelClick(ev: UIEvent) {
-    this.sp.setting$.subscribe(s => {
+    this.sp.setting$.take(1).subscribe(s => {
       let popover = this.popoverCtrl.create(PopoverFunnelPage, {
         tags: ['株主優待', '決算', '配当', '業績予想', '日々の開示事項'],
         tagCtrl: this.filterConditions,

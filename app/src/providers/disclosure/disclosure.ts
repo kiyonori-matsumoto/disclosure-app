@@ -4,6 +4,7 @@ import { Observable } from "rxjs";
 import * as moment from 'moment';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { Disclosure } from '../../model/Disclosure';
+import { AngularFireAuth } from 'angularfire2/auth';
 
 /*
   Generated class for the DisclosureProvider provider.
@@ -16,17 +17,23 @@ export class DisclosureProvider {
 
   private lastVisible: any;
 
-  constructor(private afs: AngularFirestore) {}
+  constructor(
+    private afAuth: AngularFireAuth,
+    private afs: AngularFirestore,
+  ) {}
 
   public all(n: number = 20) {
-    return this.afs.collection('disclosures', ref => ref.orderBy('time', 'desc').limit(n)).valueChanges()
+    return this.afAuth.authState.filter(user => !!user)
+    .mergeMap(() => this.afs.collection('disclosures', ref => ref.orderBy('time', 'desc').limit(n)).valueChanges())
     .map(e => e.map(_e => new Disclosure(_e)));
   }
 
   public by_date(date: string): Observable<Disclosure[]> {
     const start = moment(date).utcOffset(9).valueOf();
     const end =   moment(date).utcOffset(9).add(1, 'days').valueOf()
-    return this.afs.collection('disclosures', ref => ref.orderBy('time', 'desc').where('time', '>=', start).where('time', '<', end)).valueChanges().map(e => e.map(_e => new Disclosure(_e)));
+    return this.afAuth.authState.do(user => console.log(user)).filter(user => !!user)
+    .mergeMap(() => this.afs.collection('disclosures', ref => ref.orderBy('time', 'desc').where('time', '>=', start).where('time', '<', end)).valueChanges())
+    .map(e => e.map(_e => new Disclosure(_e)));
   }
 
   public get(code: string = '', n: number = 20, pointer: any = null) {

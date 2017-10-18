@@ -20,8 +20,8 @@ export class SettingsProvider {
   constructor(private afs: AngularFirestore, private afAuth: AngularFireAuth) {
     console.log('Hello SettingsProvider Provider');
     this.afAuth.authState
+    .filter(user => !!user)
     .map(user => user.uid)
-    .filter(uid => uid.length > 0)
     .mergeMap(uid => this.ref(uid).get())
     .map(doc => doc.exists ? <Setting>doc.data().setting : <Setting>{})
     .subscribe(this.settingSubject);
