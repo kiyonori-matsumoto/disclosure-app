@@ -9,12 +9,16 @@ import { FCM } from '@ionic-native/fcm';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { FcmProvider } from '../providers/fcm/fcm';
+import { DocumentStreamPage } from '../pages/document-stream/document-stream';
+import { SettingPage } from '../pages/setting/setting';
 
 @Component({
   templateUrl: 'app.html'
 })
 export class MyApp {
-  rootPage:any = HomePage;
+  rootPage:any = DocumentStreamPage;
+
+  pages: {title: string, component: any, name?: string}[];
 
   @ViewChild('myNav') nav: NavController
 
@@ -30,12 +34,12 @@ export class MyApp {
   ) {
     Promise.all([
       platform.ready(),
-      afAuth.auth.signInAnonymously(),
     ]).then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
+      afAuth.auth.signInAnonymously().then(console.log)
       if(platform.is('cordova')) {
         const uploadToken = (token) => {
           console.log(token)
@@ -50,6 +54,18 @@ export class MyApp {
         fcm.getToken().then(uploadToken);
       }
     });
+
+    this.pages = [
+      { title: '適時開示一覧', component: DocumentStreamPage, name: 'document' },
+      { title: '設定', component: SettingPage, name: 'settings' },
+    ]
+  }
+
+  openPage(page) {
+    // Reset the content nav to have just this page
+    // we wouldn't want the back button to show in this scenario
+    this.nav.setRoot(page.component);
+    // this.nav.push(page.component);
   }
 }
 

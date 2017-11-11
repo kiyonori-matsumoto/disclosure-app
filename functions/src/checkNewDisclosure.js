@@ -7,74 +7,93 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const https = require('https');
 
+const co = require('co');
+
 const DB_PATH = 'disclosures';
 const TIME_MAX = 9999999999999;
 
-const myBucket = admin.storage().bucket(functions.config().firebase.storageBucket);
+const zeroPad = (n) => {
+  return ('000000' + n).slice(-3)
+}
 
 const checkNewDisclosure = (event) => {
   const time = moment(event.timestamp).utcOffset(9);
-  // const time = moment('2017/09/19 23:50:00+0900').utcOffset(9);
-  console.log(`viewing: ${time.format('YYYYMMDD')}`);
-  return Promise.all([
-    rp.get(`https://www.release.tdnet.info/inbs/I_list_001_${time.format('YYYYMMDD')}.html`),
-    admin.firestore().collection(DB_PATH).orderBy('time', 'desc').limit(1).get(),
-  ]).then(([data, lastDisclosures]) => {
-    let lastDocument = '';
+  // const time = moment('2017-11-02T23:50:00+0900').utcOffset(9);
+  const start = moment(time).utcOffset(9).startOf('date').valueOf();
+  const end =   moment(start).utcOffset(9).add(1, 'days').valueOf();
+
+  const batch = admin.firestore().batch();
+
+  console.log(`viewing: ${time.format('YYYYMMDD')}, ${start}, ${end}`);
+  return co(function* () {
+    const lastDisclosures = yield admin.firestore().collection(DB_PATH).orderBy('time', 'desc').where('time', '>=', start).where('time', '<', end).limit(1).get();
     
-    lastDisclosures.forEach(e => {
-      console.log(e.data());
-      lastDocument = e.data().document;
-      return true;
-    })
+    const lastDocuments = lastDisclosures.docs.map((doc) => doc.data().document);
+    const lastCount = lastDisclosures.docs.map((doc) => doc.data().time % 1000).reduce((a, e) => e, 0);
 
-    const $ = cheerio.load(data);
-    const promises = []
-    $('table#main-list-table tr').each((i, elem) => {
-      const doc = $(elem).find('.kjTitle a').attr('href').replace(/\.pdf/, '');
-      if(doc !== lastDocument) {
+    console.log(`lastCount = ${lastCount}`);
 
-        // save document
-        const ws = myBucket.file(`${DB_PATH}/${doc}.pdf`).createWriteStream({gzip: true})
-        request(`https://www.release.tdnet.info/inbs/${doc}.pdf`).pipe(ws);
-        promises.push(new Promise((resolve, reject) => {
-          ws.on('finish', () => {
-            resolve(true);
-          });
-
-          ws.on('error', (err) => {
-            reject(err);
-          });
-        }));
-
-        // save table data
-        const t = $(elem).find('.kjTime').text().split(':').map(e => parseInt(e, 10));
-        const code = $(elem).find('.kjCode').text().slice(0, 4);
-        const data = {
-          code: code,
-          company: $(elem).find('.kjName').text(),
-          title: $(elem).find('.kjTitle a').text(),
-          document: doc,
-          exchanges: $(elem).find('.kjPlace').text().trim(), 
-          time: time.clone().hour(t[0]).minute(t[1]).second(0).millisecond(999-i).valueOf(),
-        };
-
-        console.log(t, data);
-
-        promises.push(
-          // admin.database().ref(DB_PATH).push(data),
-          admin.firestore().collection(DB_PATH).doc((TIME_MAX - data.time).toString(10)).set(data).catch((e) => {
-            console.error(e);
-            return e;
-          })
-        );
-      } else {
-        return false;
+    let matched = false;
+    let count = 0;
+    for (let i = 1; i < 100; i++) {
+      let data;
+      try {
+        data = yield rp.get(`https://www.release.tdnet.info/inbs/I_list_${zeroPad(i)}_${time.format('YYYYMMDD')}.html`)
+      } catch(err) {
+        if (err.statusCode === 404) {
+          console.log(err);
+          break;
+        } else {
+          throw err;
+        }
       }
-    })
-    return Promise.all(promises);
+      const $ = cheerio.load(data);
+      if (count === 0) {
+        const countText = $('.kaijiSum').text();
+        if (!countText) {
+          console.log('no documents');
+          return;
+        } 
+        count = parseInt($('.kaijiSum').text().replace(/\s+/, '').match(/全(\d+)件/)[1]);
+        console.log(`current count=${count}`);
+        if (!count && count !== 0) {
+          throw new RangeError('cannot get kaijiSum');
+        }
+      }
+      const m = $('table#main-list-table tr')
+      m.each((j, elem) => {
+        const doc = $(elem).find('.kjTitle a').attr('href').replace(/\.pdf/, '');
+        if(lastDocuments.indexOf(doc) < 0) { // not found.
+  
+          // save table data
+          const t = $(elem).find('.kjTime').text().split(':').map(e => parseInt(e, 10));
+          const code = $(elem).find('.kjCode').text().slice(0, 4);
+          const docTime = time.clone().hour(t[0]).minute(t[1]).second(0).millisecond(0).valueOf() + count;
+          const data = {
+            code: code,
+            company: $(elem).find('.kjName').text(),
+            title: $(elem).find('.kjTitle a').text(),
+            document: doc,
+            exchanges: $(elem).find('.kjPlace').text().trim(), 
+            time: docTime,
+          };
+          count --;
+
+          console.log(t, data);
+
+          batch.set(admin.firestore().collection(DB_PATH).doc(docTime.toString(10)), data);
+        } else {
+          matched = true;
+          return false;
+        }
+      })
+      if (matched || m.length != 100) break;
+    }
+    return batch.commit();
+
   })
 };
+
 
 // checkNewDisclosure({timestamp: moment().toISOString() }).then(console.log, console.log);
 

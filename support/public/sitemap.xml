@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://disclosure-app.firebaseapp.com/howto/notify-new-disclosure/</loc>
+    <lastmod>2017-11-06T00:09:26+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://disclosure-app.firebaseapp.com/howto/list-disclosures/</loc>
+    <lastmod>2017-10-22T22:04:58+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://disclosure-app.firebaseapp.com/about/</loc>
+    <lastmod>2017-10-22T21:51:54+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://disclosure-app.firebaseapp.com/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://disclosure-app.firebaseapp.com/howto/</loc>
+    <lastmod>2017-11-06T00:09:26+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://disclosure-app.firebaseapp.com/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://disclosure-app.firebaseapp.com/</loc>
+    <lastmod>2017-11-06T00:09:26+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

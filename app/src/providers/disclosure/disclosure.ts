@@ -15,6 +15,8 @@ import { AngularFireAuth } from 'angularfire2/auth';
 @Injectable()
 export class DisclosureProvider {
 
+  private readonly COLLECTION_NAME = 'disclosures';
+
   private lastVisible: any;
 
   constructor(
@@ -24,7 +26,7 @@ export class DisclosureProvider {
 
   public all(n: number = 20) {
     return this.afAuth.authState.filter(user => !!user)
-    .mergeMap(() => this.afs.collection('disclosures', ref => ref.orderBy('time', 'desc').limit(n)).valueChanges())
+    .mergeMap(() => this.afs.collection(this.COLLECTION_NAME, ref => ref.orderBy('time', 'desc').limit(n)).valueChanges())
     .map(e => e.map(_e => new Disclosure(_e)));
   }
 
@@ -32,14 +34,14 @@ export class DisclosureProvider {
     const start = moment(date).utcOffset(9).valueOf();
     const end =   moment(date).utcOffset(9).add(1, 'days').valueOf()
     return this.afAuth.authState.do(user => console.log(user)).filter(user => !!user)
-    .mergeMap(() => this.afs.collection('disclosures', ref => ref.orderBy('time', 'desc').where('time', '>=', start).where('time', '<', end)).valueChanges())
+    .mergeMap(() => this.afs.collection(this.COLLECTION_NAME, ref => ref.orderBy('time', 'desc').where('time', '>=', start).where('time', '<', end)).valueChanges())
     .map(e => e.map(_e => new Disclosure(_e)));
   }
 
   public get(code: string = '', n: number = 20, pointer: any = null) {
     // console.log("lv", this.lastVisible);
     console.log(pointer && pointer.data())
-    let query = this.afs.firestore.collection('disclosures').orderBy('time', 'desc')
+    let query = this.afs.firestore.collection(this.COLLECTION_NAME).orderBy('time', 'desc')
     
     if(code) { query = query.where('code', '==', code); }
 

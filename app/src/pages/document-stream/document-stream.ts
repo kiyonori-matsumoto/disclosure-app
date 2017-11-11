@@ -14,7 +14,7 @@ import { FirebaseApp } from 'angularfire2';
 
 import 'rxjs/add/operator/mergeMap'
 import { PopoverFunnelPage } from '../popover-funnel/popover-funnel';
-import { Content } from 'ionic-angular';
+import { Content, VirtualScroll } from 'ionic-angular';
 import { SettingsProvider } from '../../providers/settings/settings';
 import { Disclosure } from '../../model/Disclosure';
 
@@ -48,8 +48,8 @@ export class DocumentStreamPage {
 
   object = Object;
 
-  @ViewChild(Content)
-  content: Content;
+  @ViewChild(Content) content: Content;
+  @ViewChild(VirtualScroll) vs: VirtualScroll;
 
   constructor(
     public navCtrl: NavController,
@@ -105,12 +105,16 @@ export class DocumentStreamPage {
   }
 
   private updateItems() {
+    this.firebase.logEvent('documentStream', this.date.toString()).then(console.log, console.error);
     const share = this.dp.by_date(this.date).share(); 
     this.items = Observable.combineLatest(
       share,
       this.changeTag$.asObservable(),
-      this.sp.get()
-    ).map(([docs, tags, st]) => {
+      this.sp.get(),
+    )
+    // .mergeMap(() => this.content.scrollToTop(0), (o, i) => o)
+    .map(([docs, tags, setting]) => {
+      console.log(docs)
       const tagList = Object.keys(tags).filter(e => tags[e]);
       let f1, f2;
       if(tagList.length === 0) {
@@ -120,18 +124,19 @@ export class DocumentStreamPage {
         f1 = <any>docs.filter((doc: any) => tagList.some(tag => doc.tags && doc.tags[tag]))
       }
 
-      if (st.hideDailyDisclosure)  {
+      if (setting.hideDailyDisclosure)  {
         f2 = f1.filter((doc: any) => !doc.tags || (doc.tags && doc.tags["日々の開示事項"] != true))
       } else {
         f2 = f1;
       }
-
       this.itemsAsync = f2;
+      this.content.scrollTo(0, 1, 0);
       return this.itemsAsync;
     })
     .catch((err) => {
+      console.error(err);
       this.alertCtrl.create({message: err.message, title: "Error"}).present();
-      this.firebase.logError(JSON.stringify(err)).then(console.log);
+      // this.firebase.logError(JSON.stringify(err)).then(console.log);
       // this.platform.exitApp();
       return [];
     })
@@ -141,6 +146,12 @@ export class DocumentStreamPage {
   virtualTrack(index, item) {
     // console.log("virtual track", index, item);
     return item.document;
+    // return Math.random().toString(16).slice(0, 10);
+  }
+
+  toggleExpand(event, item) {
+    event.stopPropagation();
+    item.expand = !item.expand;
   }
 
   onFunnelClick(ev: UIEvent) {
@@ -155,7 +166,12 @@ export class DocumentStreamPage {
     })
   }
 
-  viewDocument(item: Disclosure) {
+  selectItem(item: Disclosure) {
+    item.select = true;
+  }
+
+  viewDocument(event, item: Disclosure) {
+    event.stopPropagation();
     console.log(item, item.documentPath());
     if(this.platform.is('cordova')) {
       const loading = this.loadingCtrl.create({

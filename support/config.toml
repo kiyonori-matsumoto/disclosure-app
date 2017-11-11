@@ -1,0 +1,20 @@
+baseURL = "https://disclosure-app.firebaseapp.com/"
+languageCode = "ja-jp"
+hasCJKLanguage = true
+title = "適時開示(TDNet) Notifier サポートサイト"
+theme = "hugo_theme_robust"
+
+googleAnalytics =  "UA-80739523-3"
+
+[params]
+  googlefonts = "https://fonts.googleapis.com/earlyaccess/mplus1p.css"
+  fontfamily = "'Mplus 1p','Roboto Slab','ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro',メイリオ,Meiryo,sans-serif"
+
+
+[params.author]
+  name = "MatsukiyoLab"
+  description = "MatsukiyoLab"
+  twitter = "https://twitter.com/ma_tsu_ki_yo"
+
+[outputs]
+  page = [ "HTML", "AMP" ]

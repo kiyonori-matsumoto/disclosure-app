@@ -6,6 +6,7 @@ export class Disclosure {
   public exchanges: string;
   public time: number;
   public tags: any;
+  public select: boolean;
 
   constructor(obj: any = {}) {
     Object.assign(this, obj);

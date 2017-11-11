@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.disclosure.android" version="0.0.6" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.disclosure.android" version="0.0.9" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>適時開示リーダー</name>
     <description>適時開示を表示して通知します</description>
     <author email="kiyonori.matsumoto@gmail.com" href="http://ionicframework.com/">Matsukiyo Lab</author>
@@ -80,6 +80,8 @@
     <allow-navigation href="http://192.168.2.101:8100" />
     <allow-navigation href="http://192.168.2.101:8101" />
     <allow-navigation href="http://192.168.2.102:8101" />
+    <allow-navigation href="http://192.168.2.102:8100" />
+    <engine name="android" spec="^6.3.0" />
     <plugin name="cordova-plugin-console" spec="^1.1.0" />
     <plugin name="cordova-plugin-device" spec="^1.1.6" />
     <plugin name="cordova-plugin-document-viewer" spec="^0.9.5" />
@@ -87,10 +89,10 @@
     <plugin name="cordova-plugin-file" spec="^4.3.3" />
     <plugin name="cordova-plugin-file-opener2" spec="^2.0.19" />
     <plugin name="cordova-plugin-file-transfer" spec="^1.6.3" />
+    <plugin name="cordova-plugin-firebase" spec="^0.1.24" />
     <plugin name="cordova-plugin-splashscreen" spec="^4.0.3" />
     <plugin name="cordova-plugin-statusbar" spec="^2.2.3" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.2" />
     <plugin name="de.appplant.cordova.plugin.local-notification" spec="^0.8.5" />
     <plugin name="ionic-plugin-keyboard" spec="^2.2.1" />
-    <engine name="android" spec="~6.2.3" />
 </widget>

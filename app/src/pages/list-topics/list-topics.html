@@ -23,6 +23,10 @@
     </button>
   </ion-item>
   <ion-list>
+    <ion-item *ngIf="(listCodeAsync | async)?.length === 0">
+      トピックが登録されていません<br>
+      興味のある企業の通知を登録できます。
+    </ion-item> 
     <ion-item-sliding #item *ngFor="let elem of listCodeAsync | async" >
       <ion-item>
         {{elem.title}}

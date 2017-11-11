@@ -2,7 +2,8 @@ const admin = require('firebase-admin');
 
 const sendTopic = (event) => {
   const data = event.data.data();
-  console.log(data.title, data.code);
+  console.log(data.title, data.code, data.noSend);
+  if (data.noSend) return true;
   return admin.messaging().sendToTopic(`code_${data.code}`, {
     notification: {
       body: `(${data.code}) ${data.title}`,

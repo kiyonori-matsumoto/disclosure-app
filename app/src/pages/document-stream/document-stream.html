@@ -6,6 +6,9 @@
 -->
 <ion-header>
   <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
     <ion-buttons end>
       <button ion-button icon-only [navPush]="searchStocksPage">
         <ion-icon name="search"></ion-icon>
@@ -31,17 +34,28 @@
     
     
 <ion-content fullscreen (ionScroll)="onScroll($event)">
-  <ion-list [virtualScroll]="itemsAsync" [virtualTrackBy]="virtualTrack" approxItemHeight="92px">
-    <!-- <ion-item *ngFor="let item of items | async" > -->
-    <ion-item *virtualItem="let item">
-      <div style="display: flex; justify-content:flex-end;">
-        <button (click)="addTag(tag)" *ngFor="let tag of item.tags | keys" ion-button small color="secondary" clear>{{tag}}</button>
-      </div>
-      <button style="text-align: left; background-color: white; width: 100%; overflow-x:hidden" (click)="viewDocument(item)" class="text">
+  <ion-list [virtualScroll]="itemsAsync" approxItemHeight="90px">
+  <!-- <ion-list> -->
+    <!-- <ion-item *ngFor="let item of (items | async); trackBy: virtualTrack" [ngClass]="{active: item.select}" (tap)="viewDocument(item)"> -->
+    <ion-item *virtualItem="let item" (click)="viewDocument($event, item)">
+      <!-- <ion-avatar item-start>
+        <ion-icon class="avatar-icon" name="folder"></ion-icon>
+      </ion-avatar> -->
+      <button item-end ion-button icon-only clear (click)="toggleExpand($event, item)"><ion-icon name="arrow-dropdown" class="dropdown-icon" [ngClass]="{toggled: item.expand}" ></ion-icon></button>
+      <ion-note class="dropdown">
+        <span *ngFor="let tag of item.tags | keys">{{tag}} | </span>
+        {{item.time | shortTime}}</ion-note>
+      <h2>{{item.company}}<small>({{item.code}})</small></h2>
+      <p [ngClass]="{fade: !item.expand, nofade: item.expand}">{{item.title}}</p>
+      <!-- <div style="position:relative;top:-1em;right: 0;"><ion-note *ngFor="let tag of item.tags | keys" >{{tag}}</ion-note></div> -->
+      <!-- <div style="text-align: left; overflow-x:hidden" (tap)="viewDocument(item)" (press)="selectItem(item)" class="text">
         <h2>{{item.company}}<small>({{item.code}})</small>
           <ion-note>{{item.time | twitterTime }}</ion-note></h2>
         <p style="white-space: normal">{{item.title}}</p>
-      </button>
+      </div>
+      <div style="display: flex; justify-content:flex-end;">
+        <button (tap)="addTag(tag)" *ngFor="let tag of item.tags | keys" ion-button small color="secondary" clear>{{tag}}</button>
+      </div> -->
     </ion-item>
   </ion-list>
   <div *ngIf="loading | async" style="display:flex;justify-content:center;">

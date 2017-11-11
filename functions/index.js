@@ -14,8 +14,8 @@ exports.createCompanyDict = functions.pubsub.topic('weekly-tick').onPublish(requ
 // exports.sendTopic = functions.database.ref('/disclosures/{key}').onCreate(require('./src/sendTopic'));
 exports.sendTopicFs = functions.firestore.document('disclosures/{key}').onCreate(require('./src/sendTopic'));
 exports.addTagFs = functions.firestore.document('disclosures/{key}').onCreate(require('./src/addTag'));
+exports.saveDocumentFs = functions.firestore.document('disclosures/{key}').onCreate(require('./src/saveDocument'));
 
-// exports.saveDocument = functions.database.ref('/disclosures/{key}').onCreate(require('./src/sendTopic'));
 
 exports.listTopics = functions.https.onRequest(require('./src/listTopics'));
 
@@ -23,3 +23,4 @@ exports.changeTopic = functions.database.ref('/user/topics/{userId}').onWrite(re
 
 // exports.checkNewDisclosureDev = functions.pubsub.topic('minutely5-tick').onPublish(require('./src/dev-checkNewDisclosure'));
 
+// exports.saveDocumentFsDev = functions.firestore.document('dev-disclosures/{key}').onCreate(require('./src/dev-saveDocument'));
