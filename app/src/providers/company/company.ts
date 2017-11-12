@@ -26,7 +26,10 @@ export class CompanyProvider {
   }
 
   public byCode(code: string) {
-    return this.all().map(e => e.find(_e => _e.id === code));
+    return this.all()
+    .map(e => e.find(_e => _e.id === code))
+    .map(e => e ? e.data(): {})
+    .do(e=>console.log(e))
   }
 
 }

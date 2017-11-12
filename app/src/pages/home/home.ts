@@ -27,17 +27,17 @@ export class HomePage {
     //     navCtrl.push('DocumentListPage', { code });
     //   })
     // }
-    if(platform.is('cordova')) {
-      platform.ready().then(() => {
-        fcm.onNotification().subscribe(data => {
-          console.log(JSON.stringify(data));
+    // if(platform.is('cordova')) {
+    //   platform.ready().then(() => {
+    //     fcm.onNotification().subscribe(data => {
+    //       console.log(JSON.stringify(data));
 
-          const code = data.code;
-          console.log(code);
-          this.nav.push(DocumentListPage, { code }, {});
-        })
-      })
-    }
+    //       const code = data.code;
+    //       console.log(code);
+    //       this.nav.push(DocumentListPage, { code }, {});
+    //     })
+    //   })
+    // }
   }
 
 }

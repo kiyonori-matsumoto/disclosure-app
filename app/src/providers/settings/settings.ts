@@ -15,7 +15,8 @@ import { Observable, Subject, ReplaySubject } from 'rxjs';
 export class SettingsProvider {
 
   private readonly settingSubject = new ReplaySubject<Setting>(1);
-  public readonly setting$: Observable<Setting> = this.settingSubject.asObservable();
+  public readonly setting$: Observable<Setting> = this.settingSubject
+  .publishReplay(1).refCount();
 
   constructor(private afs: AngularFirestore, private afAuth: AngularFireAuth) {
     console.log('Hello SettingsProvider Provider');
@@ -27,8 +28,12 @@ export class SettingsProvider {
     .subscribe(this.settingSubject);
   }
 
+  private doc(uid) {
+    return this.afs.collection('users').doc(uid);
+  }
+
   private ref(uid) {
-    return this.afs.collection('users').doc(uid).ref;
+    return this.doc(uid).ref;
   }
 
   public get() {

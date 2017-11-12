@@ -39,6 +39,10 @@ import { PopoverFunnelPage } from '../pages/popover-funnel/popover-funnel';
 import { SettingsProvider } from '../providers/settings/settings';
 import { CompanyProvider } from '../providers/company/company';
 import { Firebase } from '@ionic-native/firebase';
+import { NotificationSettingProvider } from '../providers/notification-setting/notification-setting';
+import { FavoriteProvider } from '../providers/favorite/favorite';
+import { FavoritesPage } from '../pages/favorites/favorites';
+import { FavoritesPageModule } from '../pages/favorites/favorites.module';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -68,6 +72,7 @@ export const firebaseConfig = {
     ListTopicsPageModule,
     SettingPageModule,
     SearchStocksPageModule,
+    FavoritesPageModule,
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -80,6 +85,7 @@ export const firebaseConfig = {
     SettingPage,
     SearchStocksPage,
     PopoverFunnelPage,
+    FavoritesPage,
   ],
   providers: [
     StatusBar,
@@ -97,6 +103,8 @@ export const firebaseConfig = {
     FcmProvider,
     SettingsProvider,
     CompanyProvider,
+    NotificationSettingProvider,
+    FavoriteProvider,
   ]
 })
 export class AppModule {}

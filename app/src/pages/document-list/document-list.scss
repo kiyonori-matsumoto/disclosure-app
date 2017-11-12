@@ -1,7 +1,67 @@
 page-document-list {
-  ion-note {
+  .dropdown {
     font-size: 12px;
     float: right;
+  }
+
+  button.dropdown {
+    margin: 0;
+    height: 15px !important;
+  }
+
+  ion-note {
+    font-size: 12px;
+    align-self: flex-start;
     // margin-top: 14px;
+  }
+
+  .tag-on-button {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+  }
+
+  .active {
+    background-color: skyblue;
+  }
+
+  .avatar-icon {
+    font-size: 1.8em;
+    background-color: gray;
+    padding: 8px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+  }
+
+  .fade {
+    position: relative;
+    height: 38px; /* exactly three lines */
+    white-space: normal;
+  }
+  .fade:after {
+    content: "";
+    text-align: right;
+    position: absolute;
+    margin: 0;
+    bottom: 0;
+    right: 0;
+    width: 30%;
+    height: 19px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%);
+  }
+
+  .nofade {
+    position: relative;
+    height: 100%;
+    white-space: normal;
+  }
+
+  .dropdown-icon {
+    transition: all 0.3s ease-in-out;
+  }
+
+  .toggled {
+    transform: rotate(180deg);
   }
 }

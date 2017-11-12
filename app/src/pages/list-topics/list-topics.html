@@ -29,10 +29,10 @@
     </ion-item> 
     <ion-item-sliding #item *ngFor="let elem of listCodeAsync | async" >
       <ion-item>
-        {{elem.title}}
+        {{elem.id}} {{(elem.data | async)?.name }}
       </ion-item>
       <ion-item-options slide="left">
-        <button ion-button (click)="delete(elem.topic)">
+        <button ion-button (click)="delete(elem.id)">
           <ion-icon name="trash"></ion-icon>
           削除
         </button>

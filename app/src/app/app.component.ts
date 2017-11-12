@@ -11,6 +11,8 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { FcmProvider } from '../providers/fcm/fcm';
 import { DocumentStreamPage } from '../pages/document-stream/document-stream';
 import { SettingPage } from '../pages/setting/setting';
+import { DocumentListPage } from '../pages/document-list/document-list';
+import { FavoritesPage } from '../pages/favorites/favorites';
 
 @Component({
   templateUrl: 'app.html'
@@ -52,11 +54,19 @@ export class MyApp {
         };
         fcm.onTokenRefresh().subscribe(uploadToken);
         fcm.getToken().then(uploadToken);
+        fcm.onNotification().subscribe(data => {
+          console.log(JSON.stringify(data));
+
+          const code = data.code;
+          console.log(code);
+          this.nav.push(DocumentListPage, { code }, {});
+        })
       }
     });
 
     this.pages = [
       { title: '適時開示一覧', component: DocumentStreamPage, name: 'document' },
+      { title: 'お気に入り', component: FavoritesPage, name: 'star' },
       { title: '設定', component: SettingPage, name: 'settings' },
     ]
   }
