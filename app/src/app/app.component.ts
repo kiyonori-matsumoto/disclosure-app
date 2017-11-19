@@ -3,16 +3,15 @@ import { Platform, NavController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-import { HomePage } from '../pages/home/home';
 import { AuthProvider } from "../providers/auth/auth";
-import { FCM } from '@ionic-native/fcm';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { FcmProvider } from '../providers/fcm/fcm';
 import { DocumentStreamPage } from '../pages/document-stream/document-stream';
 import { SettingPage } from '../pages/setting/setting';
 import { DocumentListPage } from '../pages/document-list/document-list';
 import { FavoritesPage } from '../pages/favorites/favorites';
+import { AdMobFree, AdMobFreeBannerConfig } from '@ionic-native/admob-free';
+import { Firebase } from '@ionic-native/firebase';
 
 @Component({
   templateUrl: 'app.html'
@@ -29,10 +28,10 @@ export class MyApp {
     statusBar: StatusBar,
     splashScreen: SplashScreen,
     auth: AuthProvider,
-    fcm: FCM,
+    firebase: Firebase,
     private afDb: AngularFireDatabase,
     private afAuth: AngularFireAuth,
-    fcmProvider: FcmProvider,
+    private admob: AdMobFree,
   ) {
     Promise.all([
       platform.ready(),
@@ -52,16 +51,31 @@ export class MyApp {
             }
           })
         };
-        fcm.onTokenRefresh().subscribe(uploadToken);
-        fcm.getToken().then(uploadToken);
-        fcm.onNotification().subscribe(data => {
+        firebase.onTokenRefresh().subscribe(uploadToken);
+        firebase.getToken().then(uploadToken);
+        firebase.onNotificationOpen().subscribe(data => {
           console.log(JSON.stringify(data));
 
           const code = data.code;
           console.log(code);
           this.nav.push(DocumentListPage, { code }, {});
         })
+        
+        const bannerConfig: AdMobFreeBannerConfig = {
+          // isTesting: true,
+          autoShow: true,
+          id: 'ca-app-pub-5131663294295156/8292017322',
+          
+        };
+        this.admob.banner.config(bannerConfig);
+  
+        this.admob.banner.prepare()
+        .then(() => {
+          // if autoshow is false, set true to show
+        })
+        .catch(e => console.error(e));
       }
+
     });
 
     this.pages = [

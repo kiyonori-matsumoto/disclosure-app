@@ -10,7 +10,7 @@ const sendTopic = (event) => {
       tag: `code_${data.code}`,
       color: '#006064',
       title: '新しい開示情報',
-      click_action: 'FCM_PLUGIN_ACTIVITY',
+      click_action: 'FCM_PLUGIN_ACTIVITY', // remove here when cordova-plugin-firebase 
     }, data: {
       code: `${data.code}`,
     }

@@ -1,9 +1,9 @@
 import { Injectable, OnInit } from '@angular/core';
 import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
-import { FCM } from '@ionic-native/fcm';
 import { Observable, Subject, AsyncSubject, BehaviorSubject, ReplaySubject } from 'rxjs';
 import { Platform } from 'ionic-angular';
+import { Firebase } from '@ionic-native/firebase';
 
 /*
   Generated class for the ConnectionSettingProvider provider.
@@ -24,7 +24,7 @@ export class NotificationSettingProvider implements OnInit {
 
   constructor(
     private http: Http,
-    private fcm: FCM,
+    private firebase: Firebase,
     private platform: Platform,
   ) {
     console.log('Hello NotificationSettingProvider Provider');
@@ -39,7 +39,7 @@ export class NotificationSettingProvider implements OnInit {
   public initialize() {
     this.notifications.clear();
     if(this.platform.is('cordova')) {
-      return Observable.fromPromise(this.fcm.getToken())
+      return Observable.fromPromise(this.firebase.getToken())
       .mergeMap(token => this.http.post('https://us-central1-disclosure-app.cloudfunctions.net/listTopics', { IID_TOKEN: token}))
       .take(1)
       .map(e => {
@@ -75,14 +75,14 @@ export class NotificationSettingProvider implements OnInit {
     const s = this.toTopic(code);
     this.notifications.add(s);
     this.notificationSubject.next(this.notifications.values());
-    return this.fcm.subscribeToTopic(s);
+    return this.firebase.subscribe(s);
   }
 
   public delete(code) {
     const s = this.toTopic(code);
     this.notifications.delete(s);
     this.notificationSubject.next(this.notifications.values());
-    return this.fcm.unsubscribeFromTopic(s);
+    return this.firebase.unsubscribe(s);
   }
 
   public switch(code) {

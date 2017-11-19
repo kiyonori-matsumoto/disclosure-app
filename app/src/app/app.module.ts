@@ -20,7 +20,6 @@ import { SettingPageModule } from "../pages/setting/setting.module";
 import { SettingPage } from "../pages/setting/setting";
 import { SignInProvider } from '../providers/sign-in/sign-in';
 import { AuthProvider } from '../providers/auth/auth';
-import { FCM } from "@ionic-native/fcm";
 import { DocumentStreamPage } from '../pages/document-stream/document-stream';
 import { DocumentStreamPageModule } from '../pages/document-stream/document-stream.module';
 import { TwitterTimePipe } from '../pipes/twitter-time/twitter-time';
@@ -33,7 +32,6 @@ import { DocumentViewer } from '@ionic-native/document-viewer';
 import { FileTransfer } from '@ionic-native/file-transfer';
 import { File } from '@ionic-native/file';
 import { FileOpener } from '@ionic-native/file-opener';
-import { FcmProvider } from '../providers/fcm/fcm';
 import { PopoverFunnelPageModule } from '../pages/popover-funnel/popover-funnel.module';
 import { PopoverFunnelPage } from '../pages/popover-funnel/popover-funnel';
 import { SettingsProvider } from '../providers/settings/settings';
@@ -43,6 +41,7 @@ import { NotificationSettingProvider } from '../providers/notification-setting/n
 import { FavoriteProvider } from '../providers/favorite/favorite';
 import { FavoritesPage } from '../pages/favorites/favorites';
 import { FavoritesPageModule } from '../pages/favorites/favorites.module';
+import { AdMobFree } from '@ionic-native/admob-free';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -94,17 +93,16 @@ export const firebaseConfig = {
     DisclosureProvider,
     SignInProvider,
     AuthProvider,
-    FCM,
     Firebase,
     // DocumentViewer,
     FileOpener,
     FileTransfer,
     File,
-    FcmProvider,
     SettingsProvider,
     CompanyProvider,
     NotificationSettingProvider,
     FavoriteProvider,
+    AdMobFree,
   ]
 })
 export class AppModule {}

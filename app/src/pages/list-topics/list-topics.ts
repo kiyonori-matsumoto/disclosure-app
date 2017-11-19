@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, Platform, ToastController } from 'ionic-angular';
 import { Http } from '@angular/http';
-import { FCM } from '@ionic-native/fcm';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable, Subject } from 'rxjs';
 import { NotificationSettingProvider } from '../../providers/notification-setting/notification-setting';
