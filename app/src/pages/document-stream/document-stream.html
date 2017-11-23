@@ -9,11 +9,11 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-buttons end>
+    <!-- <ion-buttons end>
       <button ion-button icon-only [navPush]="searchStocksPage">
         <ion-icon name="search"></ion-icon>
       </button>
-    </ion-buttons>
+    </ion-buttons> -->
     <ion-title>適時開示一覧</ion-title>
   </ion-navbar>
   <ion-toolbar *ngIf="selectionCount <= 0" >
@@ -37,7 +37,7 @@
       </button>
     </ion-buttons>
     <ion-buttons right>
-      <button ion-button icon-only class="button-with-tag">
+      <button ion-button icon-only class="button-with-tag" (click)="saveToDocumentBox()">
         <ion-icon end name="bookmark">
           <ion-badge *ngIf="selectionCount > 0"  class="tag-on-button" color="danger">{{selectionCount}}</ion-badge>
         </ion-icon>
