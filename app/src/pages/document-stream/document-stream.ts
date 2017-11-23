@@ -42,6 +42,7 @@ export class DocumentStreamPage {
   fileTransfer: FileTransferObject;
   loading: Observable<boolean>;
   headerScroll: number = 0;
+  selectionCount: number = 0;
 
   filterConditions: any = {};
   changeTag$ = new BehaviorSubject<any>({});
@@ -168,6 +169,35 @@ export class DocumentStreamPage {
 
   selectItem(item: Disclosure) {
     item.select = true;
+    this.selectionCount ++;
+  }
+
+  switchSelectItem(event, item: Disclosure) {
+    item.select = ! item.select;
+    if (item.select) { // false to true
+      this.selectionCount ++;
+    } else {
+      this.selectionCount --;
+    }
+  }
+
+  clearAllSelection() {
+    this.itemsAsync.filter(e => e.select)
+    .forEach(item => item.select = false);
+    this.selectionCount = 0;
+  }
+
+  saveToDocumentBox() {
+    
+  }
+
+  deselectItemOrViewDocument(event, item: Disclosure) {
+    if (item.select) {
+      item.select = false;
+      this.selectionCount --;
+    } else {
+      this.viewDocument(event, item);
+    }
   }
 
   viewDocument(event, item: Disclosure) {

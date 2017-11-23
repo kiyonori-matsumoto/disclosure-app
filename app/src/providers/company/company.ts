@@ -3,6 +3,7 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { ReplaySubject, Observable, ConnectableObservable } from 'rxjs';
+import { File } from '@ionic-native/file';
 import * as firebase from 'firebase';
 
 /*
@@ -14,11 +15,22 @@ import * as firebase from 'firebase';
 @Injectable()
 export class CompanyProvider {
 
-  private readonly obs: Observable<firebase.firestore.QuerySnapshot>;
+  private obs: Observable<firebase.firestore.QuerySnapshot>;
 
-  constructor(private afs: AngularFirestore) {
+  constructor(
+    private afs: AngularFirestore,
+    private file: File,
+  ) {
     console.log('Hello CompanyProvider Provider');
-    this.obs = Observable.fromPromise(this.afs.collection('companies').ref.get()).publishReplay(1).refCount();
+    const filename = 'companies.json';
+    file.checkFile(file.dataDirectory, filename)
+    .then(result => {
+      if (result) {
+
+      } else {
+        this.obs = Observable.fromPromise(this.afs.collection('companies').ref.get()).publishReplay(1).refCount();
+      }
+    })
   }
 
   public all() {

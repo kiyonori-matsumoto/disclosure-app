@@ -23,6 +23,9 @@ page-document-stream {
 
   .active {
     background-color: skyblue;
+    .fade:after {
+      background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(135, 206, 235, 1) 50%);
+    }
   }
 
   .avatar-icon {

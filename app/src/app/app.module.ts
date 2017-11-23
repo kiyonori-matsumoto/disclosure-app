@@ -42,6 +42,7 @@ import { FavoriteProvider } from '../providers/favorite/favorite';
 import { FavoritesPage } from '../pages/favorites/favorites';
 import { FavoritesPageModule } from '../pages/favorites/favorites.module';
 import { AdMobFree } from '@ionic-native/admob-free';
+import { DocumentBoxProvider } from '../providers/document-box/document-box';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -103,6 +104,7 @@ export const firebaseConfig = {
     NotificationSettingProvider,
     FavoriteProvider,
     AdMobFree,
+    DocumentBoxProvider,
   ]
 })
 export class AppModule {}

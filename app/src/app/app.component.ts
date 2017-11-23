@@ -12,6 +12,7 @@ import { DocumentListPage } from '../pages/document-list/document-list';
 import { FavoritesPage } from '../pages/favorites/favorites';
 import { AdMobFree, AdMobFreeBannerConfig } from '@ionic-native/admob-free';
 import { Firebase } from '@ionic-native/firebase';
+import { SearchStocksPage } from '../pages/search-stocks/search-stocks';
 
 @Component({
   templateUrl: 'app.html'
@@ -80,6 +81,7 @@ export class MyApp {
 
     this.pages = [
       { title: '適時開示一覧', component: DocumentStreamPage, name: 'document' },
+      { title: '会社検索', component: SearchStocksPage, name: 'search' },
       { title: 'お気に入り', component: FavoritesPage, name: 'star' },
       { title: '設定', component: SettingPage, name: 'settings' },
     ]
