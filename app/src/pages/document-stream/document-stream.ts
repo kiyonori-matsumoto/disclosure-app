@@ -158,7 +158,7 @@ export class DocumentStreamPage {
   onFunnelClick(ev: UIEvent) {
     this.sp.setting$.take(1).subscribe(s => {
       let popover = this.popoverCtrl.create(PopoverFunnelPage, {
-        tags: ['株主優待', '決算', '配当', '業績予想', '日々の開示事項'],
+        tags: ['株主優待', '決算', '配当', '業績予想', '新株', '自己株式', '日々の開示事項'],
         tagCtrl: this.filterConditions,
         change$: this.changeTag$,
         disabled: {'日々の開示事項': s.hideDailyDisclosure}
