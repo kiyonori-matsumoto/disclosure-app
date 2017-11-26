@@ -25,21 +25,24 @@ export class CompanyProvider {
   ) {
     console.log('Hello CompanyProvider Provider');
     const filename = 'companies.json';
-    file.checkFile(file.dataDirectory, filename)
+    file.checkFile(file.externalCacheDirectory, filename)
     .then(result => {
       console.log(`result = ${result}`)
       if (!result) {
-        this.afs.collection('companies').ref.get()
+        return this.afs.collection('companies').ref.get()
         .then(query => {
           console.log(`length = ${query.docs.length}`)
           const companies = query.docs.map(e => Object.assign({}, e.data(), {id: e.id})) || [];
-          this.file.writeFile(file.dataDirectory, filename, JSON.stringify(companies), {replace: true})
+          this.file.writeFile(file.externalCacheDirectory, filename, JSON.stringify(companies), {replace: true})
           .then(() => this.companiesSubject.next(companies));
         })
       } else {
-        this.file.readAsText(file.dataDirectory, filename)
+        return this.file.readAsText(file.externalCacheDirectory, filename)
         .then(text => JSON.parse(text))
-        .then(companies => this.companiesSubject.next(companies));
+        .then(companies => {
+          console.log(`length = ${companies.length}`)
+          this.companiesSubject.next(companies)
+        });
       }
       // if (result) {
         
@@ -54,7 +57,7 @@ export class CompanyProvider {
       .then(query => {
         console.log(`length = ${query.docs.length}`)
         const companies = query.docs.map(e => Object.assign({}, e.data(), {id: e.id})) || [];
-        this.file.writeFile(file.dataDirectory, filename, JSON.stringify(companies), {replace: true})
+        this.file.writeFile(file.externalCacheDirectory, filename, JSON.stringify(companies), {replace: true})
         .then(() => this.companiesSubject.next(companies));
       })
     })

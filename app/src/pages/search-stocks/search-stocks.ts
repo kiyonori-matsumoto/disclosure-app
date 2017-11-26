@@ -31,11 +31,12 @@ export class SearchStocksPage {
       this.cp.all(),
       this.input$.asObservable(),
     ).map(([companies, filter]) => {
+      console.log(`companies length = ${companies.length}, companies[0] = ${JSON.stringify(companies[0])}`)
       if (filter.length < 2) return [];
       return companies.filter(c => c.id.includes(filter))
         .map(e => { return {
           id: e.id,
-          data: e.data(),
+          data: e,
         }; })
     })
   }
