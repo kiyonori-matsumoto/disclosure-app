@@ -28,5 +28,10 @@
       <ion-label>日々の開示情報を表示しない</ion-label>
       <ion-toggle [(ngModel)]="settings.hideDailyDisclosure" (ionChange)="onSettingChange()"></ion-toggle>
     </ion-item>
+    <ion-list-header>アカウント設定</ion-list-header>
+    <button ion-item color="danger" (click)="onGoogleLoginClick()">
+      <ion-icon name="logo-google" item-start></ion-icon>
+      GOOGLE連携
+    </button>
   </ion-list>
 </ion-content>
