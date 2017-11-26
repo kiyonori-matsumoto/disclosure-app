@@ -45,6 +45,8 @@ export class DocumentListPage {
   isFavorite: Observable<boolean>;
   isNotification: Observable<boolean>;
 
+  getfn;
+
   updateItems = e => {
     const val = e.docs.map(d => d.data() );
     this.items.push(... Object.keys(val).map(key => val[key]).sort((a, b) => b.time - a.time));
@@ -69,7 +71,9 @@ export class DocumentListPage {
     private toastCtrl: ToastController,
   ) {
     this.code = navParams.get('code');
+    this.getfn = this.dp.get;
     this.dp.get(navParams.get('code')).then(this.updateItems);
+    // this.getfn(this.code).then(this.updateItems);
     this.fileTransfer = this.transfer.create();
   }
   

@@ -14,9 +14,10 @@ import { FirebaseApp } from 'angularfire2';
 
 import 'rxjs/add/operator/mergeMap'
 import { PopoverFunnelPage } from '../popover-funnel/popover-funnel';
-import { Content, VirtualScroll } from 'ionic-angular';
+import { Content, VirtualScroll, ToastController } from 'ionic-angular';
 import { SettingsProvider } from '../../providers/settings/settings';
 import { Disclosure } from '../../model/Disclosure';
+import { DocumentBoxProvider } from '../../providers/document-box/document-box';
 
 /**
  * Generated class for the DocumentStreamPage page.
@@ -56,6 +57,8 @@ export class DocumentStreamPage {
     public navCtrl: NavController,
     public navParams: NavParams,
     private dp: DisclosureProvider,
+    private dbp: DocumentBoxProvider,
+    private sp: SettingsProvider,
     private platform: Platform,
     private fileOpener: FileOpener,
     private app: FirebaseApp,
@@ -64,8 +67,8 @@ export class DocumentStreamPage {
     private file: File,
     private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController,
-    private sp: SettingsProvider,
     private firebase: Firebase,
+    private toastCtrl: ToastController,
   ) {
     this.date = moment().format("YYYY-MM-DD");
   }
@@ -158,7 +161,7 @@ export class DocumentStreamPage {
   onFunnelClick(ev: UIEvent) {
     this.sp.setting$.take(1).subscribe(s => {
       let popover = this.popoverCtrl.create(PopoverFunnelPage, {
-        tags: ['株主優待', '決算', '配当', '業績予想', '日々の開示事項'],
+        tags: ['株主優待', '決算', '配当', '業績予想', '新株', '自己株式', '日々の開示事項'],
         tagCtrl: this.filterConditions,
         change$: this.changeTag$,
         disabled: {'日々の開示事項': s.hideDailyDisclosure}
@@ -188,6 +191,17 @@ export class DocumentStreamPage {
   }
 
   saveToDocumentBox() {
+    const saves = this.itemsAsync.filter(e => e.select)
+    .map(e => this.dbp.add(e.document, Object.assign({}, e)).toPromise())
+
+    Promise.all(saves)
+    .then(() => {
+      this.toastCtrl.create({message: '保存しました', showCloseButton: true}).present();
+      this.clearAllSelection();
+    })
+    .catch((err) => {
+      this.alertCtrl.create({message: err.message, title: 'ERROR'}).present();
+    })
     
   }
 
