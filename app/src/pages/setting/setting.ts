@@ -6,6 +6,8 @@ import { GooglePlus } from '@ionic-native/google-plus';
 import * as firebase from 'firebase'
 import { AngularFireAuth } from 'angularfire2/auth';
 import { ToastController } from 'ionic-angular/components/toast/toast-controller';
+import { AuthProvider } from '../../providers/auth/auth';
+import { duration } from 'moment';
 
 /**
  * Generated class for the SettingPage page.
@@ -31,6 +33,7 @@ export class SettingPage {
     private googlePlus: GooglePlus,
     private afAuth: AngularFireAuth,
     private toastCtrl: ToastController,
+    public  auth: AuthProvider,
   ) {
   }
 
@@ -44,24 +47,25 @@ export class SettingPage {
     .subscribe(console.log);
   }
 
-  onGoogleLoginClick() {
-    this.googlePlus.login({
-      webClientId: '1069938845824-sp6urskq03e06h52lm0sgrq77t0nln28.apps.googleusercontent.com',
-      offline: true
-    })
-    .then(res => {
-      console.log(JSON.stringify(res));
-      const idToken = res.idToken;
-      const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
-      this.afAuth.auth.signInWithCredential(credential)
-      .then((user: firebase.User) => {
-        this.toastCtrl.create({message: `Welcome, ${user.displayName}`}).present({duration: 5000})
-      })
-    })
+  onLinkToGoogleClick() {
+    this.auth.linkToGoogle()
+    .then(() => 
+      this.toastCtrl.create({message: 'アカウント連携が完了しました', duration: 5000}).present()
+    )
     .catch((err) => {
       console.error(err);
       this.toastCtrl.create({message: err.message || err.code || err, showCloseButton: true}).present()
     })
   }
 
+  onDisconnectFromGoogleClick() {
+    this.auth.unlinkFromGoogle()
+    .then(() => 
+      this.toastCtrl.create({message: 'アカウント連携を解除しました', duration: 5000}).present()
+    )
+    .catch((err) => {
+      console.error(err);
+      this.toastCtrl.create({message: err.message || err.code || err, showCloseButton: true}).present()
+    })
+  }
 }

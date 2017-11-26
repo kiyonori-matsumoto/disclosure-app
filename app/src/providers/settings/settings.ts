@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { Observable, Subject, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 
 /*
   Generated class for the SettingsProvider provider.
@@ -22,6 +21,7 @@ export class SettingsProvider {
     console.log('Hello SettingsProvider Provider');
     this.afAuth.authState
     .filter(user => !!user)
+    .do(e => console.log(`UserInfo: ${JSON.stringify(e)}`))
     .map(user => user.uid)
     .mergeMap(uid => this.ref(uid).get())
     .map(doc => doc.exists ? <Setting>doc.data().setting : <Setting>{})
