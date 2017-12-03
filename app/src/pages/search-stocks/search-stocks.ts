@@ -27,9 +27,13 @@ export class SearchStocksPage {
   input$ = new Subject<any>();
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private cp: CompanyProvider) {
+  }
+
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad SearchStocksPage');
     this.itemsAsync = Observable.combineLatest(
-      this.cp.all(),
-      this.input$.asObservable(),
+      this.cp.companies$,
+      this.input$,
     ).map(([companies, filter]) => {
       console.log(`companies length = ${companies.length}, companies[0] = ${JSON.stringify(companies[0])}`)
       if (filter.length < 2) return [];
@@ -41,8 +45,8 @@ export class SearchStocksPage {
     })
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad SearchStocksPage');
+  viewCompany() {
+    this.navCtrl.push(DocumentListPage, {code: this.input})
   }
 
   changeInput() {

@@ -27,21 +27,27 @@ export class AuthProvider {
     private afAuth: AngularFireAuth,
     private googlePlus: GooglePlus,
   ) {
-    this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS).then(res => {
-      console.log('do google login');
-      const idToken = res.idToken;
-      const displayName = res.displayName;
-      const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
-      return this.afAuth.auth.signInWithCredential(credential)
-    }, err => {
-      console.log('do anonymous login');
-      return afAuth.auth.signInAnonymously();
-    })
-    .then(() => console.log('successfully logged in'))
-    .catch(err => console.error(`login failed: ${err.message || err.code || err}`))
+    this.afAuth.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(console.log);
+    
+    if (! afAuth.auth.currentUser) {
+      this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS).then(res => {
+        console.log('do google login');
+        const idToken = res.idToken;
+        const displayName = res.displayName;
+        const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+        return this.afAuth.auth.signInWithCredential(credential)
+      }, err => {
+        console.log(JSON.parse(err));
+        console.log('do anonymous login');
+        return afAuth.auth.signInAnonymously();
+      })
+      .then(() => console.log('successfully logged in'))
+      .catch(err => console.error(`login failed: ${err.message || err.code || err}`))
+    }
 
     this.uid$ = afAuth.authState.filter(e => !!e)
-    .map(u => u.uid)
+    .map(u => u.uid).publishReplay(1).refCount()
 
     this.loginProvider$ = afAuth.authState.map(user => {
       if (!user) return {};

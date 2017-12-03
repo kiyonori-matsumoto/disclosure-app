@@ -29,20 +29,23 @@ export class FavoritesPage {
     private fp: FavoriteProvider,
     private cp: CompanyProvider,
   ) {
-    this.favorites = this.fp.favorite$
-    .map(s =>
-      s.map(e => {
-        return {
-          id: e,
-          data: this.cp.byCode(e)
-        }
-      })
-    );
-    this.loading = this.fp.favorite$.map(() => false).startWith(true);
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad FavoritesPage');
+    this.favorites = Observable.combineLatest(
+      this.fp.favorite$,
+      this.cp.companies$.startWith([]),
+    ).map(([favorites, companies]) => {
+      console.log(companies.length)
+      return favorites.map(code => {
+        return {
+          id: code,
+          data: companies.find(f => f.id === code)
+        }
+      })
+    })
+    this.loading = this.favorites.map(() => false).startWith(true);
   }
 
   delete(item) {

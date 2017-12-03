@@ -19,6 +19,7 @@ export class FavoriteProvider {
   private favorites: Set<string>;
   private favoriteSubject: Subject<IterableIterator<string>> = new Subject();
   public readonly favorite$: Observable<string[]>;
+  private uid
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -40,6 +41,8 @@ export class FavoriteProvider {
       this.favorites = new Set(favorites);
       this.favoriteSubject.next(this.favorites.values())
     });
+
+    this.ap.uid$.subscribe(uid => this.uid = uid)
   }
 
   private doc(uid) {
@@ -51,8 +54,9 @@ export class FavoriteProvider {
   }
 
   private update() {
-    return this.ap.uid$
-    .mergeMap(uid => this.ref(uid).set({favorites: Array.from(this.favorites.values())}, {merge: true}))
+    // return this.ap.uid$
+    // .mergeMap(uid => this.ref(uid).set({favorites: Array.from(this.favorites.values())}, {merge: true}))
+    return Observable.fromPromise(this.ref(this.uid).set({favorites: Array.from(this.favorites.values())}, {merge: true}))
   }
 
   public add(code: string) {

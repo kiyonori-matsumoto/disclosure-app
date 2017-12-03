@@ -20,7 +20,7 @@
 
 
 <ion-content padding>
-  <ion-searchbar [(ngModel)]="input" type="number" (ionInput)="changeInput()">
+  <ion-searchbar [(ngModel)]="input" type="number" (ionInput)="changeInput()" (keyup.enter)="viewCompany()">
   </ion-searchbar>
   <ion-list>
     <button ion-item *ngFor="let item of itemsAsync | async" [navPush]="documentListPage" [navParams]="{code: item.id}">

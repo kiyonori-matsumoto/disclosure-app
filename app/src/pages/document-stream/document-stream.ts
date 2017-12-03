@@ -215,35 +215,42 @@ export class DocumentStreamPage {
   }
 
   viewDocument(event, item: Disclosure) {
-    event.stopPropagation();
+    // event.stopPropagation();
     console.log(item, item.documentPath());
     if(this.platform.is('cordova')) {
-      const loading = this.loadingCtrl.create({
-        content: 'ファイルをダウンロード中',
-        enableBackdropDismiss: true,
-        dismissOnPageChange: true,
+      this.file.checkFile(this.file.externalCacheDirectory, item.document + '.pdf')
+      .then(() => 
+        this.file.resolveDirectoryUrl(this.file.externalCacheDirectory)
+        .then(dir => this.file.getFile(dir, item.document + '.pdf', {}))
+        .then(entry => this.fileOpener.open(entry.toURL(), 'application/pdf')
+      ))
+      .catch(() => {
+        const loading = this.loadingCtrl.create({
+          content: 'ファイルをダウンロード中',
+          enableBackdropDismiss: true,
+          dismissOnPageChange: true,
+        })
+        loading.present();
+        const viewDoc$ = Observable.fromPromise(this.app.storage().ref().child(item.documentPath()).getDownloadURL())
+        .do(e => console.log(e))
+        .mergeMap(url => this.fileTransfer.download(url, this.file.externalCacheDirectory + item.document + '.pdf'))
+        .catch(err => {
+          let alert = this.alertCtrl.create({
+            title: 'Error',
+            subTitle: err.message,
+            buttons: ['Dismiss'],
+          });
+          loading.dismiss()
+          alert.present();
+          throw err;
+        })
+        .subscribe(entry => {
+          console.log(entry.toURL());
+          loading.dismiss()
+          this.fileOpener.open(entry.toURL(), 'application/pdf');
+        })
+        // loading.onWillDismiss(() => viewDoc$.unsubscribe());
       })
-      loading.present();
-      const viewDoc$ = Observable.fromPromise(this.app.storage().ref().child(item.documentPath()).getDownloadURL())
-      .do(e => console.log(e))
-      .mergeMap(url => this.fileTransfer.download(url, this.file.dataDirectory + item.document + '.pdf'))
-      .catch(err => {
-        let alert = this.alertCtrl.create({
-          title: 'Error',
-          subTitle: err.message,
-          buttons: ['Dismiss'],
-        });
-        loading.dismiss()
-        alert.present();
-        throw err;
-      })
-      .subscribe(entry => {
-        console.log(entry.toURL());
-        loading.dismiss()
-        this.fileOpener.open(entry.toURL(), 'application/pdf');
-      })
-      // loading.onWillDismiss(() => viewDoc$.unsubscribe());
-
     } else {
       this.navCtrl.push(DocumentViewPage, item);
     }

@@ -24,7 +24,8 @@ export class SettingsProvider {
     .do(e => console.log(`UserInfo: ${JSON.stringify(e)}`))
     .map(user => user.uid)
     .mergeMap(uid => this.ref(uid).get())
-    .map(doc => doc.exists ? <Setting>doc.data().setting : <Setting>{})
+    .map(doc => doc.exists && doc.data().setting ?
+      <Setting>doc.data().setting : <Setting>{})
     .subscribe(this.settingSubject);
   }
 
