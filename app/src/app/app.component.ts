@@ -41,12 +41,13 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
-      afAuth.auth.signInAnonymously().then(console.log)
+      // afAuth.auth.signInAnonymously().then(console.log)
       if(platform.is('cordova')) {
         const uploadToken = (token) => {
           console.log(token)
-          this.afAuth.authState.subscribe(d => {
-            const uid = d.uid;
+          // this.afAuth.authState.subscribe(d => {
+          //   const uid = d.uid;
+          auth.uid$.subscribe(uid => {
             if(uid) {
               afDb.object(`/user/tokens/${uid}/`).set(token).then(console.log);
             }

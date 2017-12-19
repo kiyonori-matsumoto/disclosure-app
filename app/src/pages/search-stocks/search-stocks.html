@@ -10,6 +10,9 @@
     </ion-searchbar>
   </ion-toolbar> -->
   <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
     <ion-title>会社検索</ion-title>
   </ion-navbar>
 
@@ -17,7 +20,7 @@
 
 
 <ion-content padding>
-  <ion-searchbar [(ngModel)]="input" type="number" (ionInput)="changeInput()">
+  <ion-searchbar [(ngModel)]="input" type="number" (ionInput)="changeInput()" (keyup.enter)="viewCompany()">
   </ion-searchbar>
   <ion-list>
     <button ion-item *ngFor="let item of itemsAsync | async" [navPush]="documentListPage" [navParams]="{code: item.id}">

@@ -27,21 +27,26 @@ export class SearchStocksPage {
   input$ = new Subject<any>();
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private cp: CompanyProvider) {
-    this.itemsAsync = Observable.combineLatest(
-      this.cp.all(),
-      this.input$.asObservable(),
-    ).map(([companies, filter]) => {
-      if (filter.length < 2) return [];
-      return companies.filter(c => c.id.includes(filter))
-        .map(e => { return {
-          id: e.id,
-          data: e.data(),
-        }; })
-    })
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad SearchStocksPage');
+    this.itemsAsync = Observable.combineLatest(
+      this.cp.companies$,
+      this.input$,
+    ).map(([companies, filter]) => {
+      console.log(`companies length = ${companies.length}, companies[0] = ${JSON.stringify(companies[0])}`)
+      if (filter.length < 2) return [];
+      return companies.filter(c => c.id.includes(filter))
+        .map(e => { return {
+          id: e.id,
+          data: e,
+        }; })
+    })
+  }
+
+  viewCompany() {
+    this.navCtrl.push(DocumentListPage, {code: this.input})
   }
 
   changeInput() {

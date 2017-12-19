@@ -41,24 +41,27 @@ export class ListTopicsPage {
     private cp: CompanyProvider,
   ) {
 
-    this.listCodeAsync = this.nsp.list$
-    .map(s => 
-      s.map(e => {
-        return {
-          id: e,
-          data: this.cp.byCode(e)
-        }
-      })
-    );
-    this.loading = this.nsp.list$.map(() => false).startWith(true);
-    this.nsp.list$.subscribe(e => console.log(e), (err) => {
-      console.error(err);
-      this.toastCtrl.create({message: JSON.stringify(err) }).present();
-    })
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad ListTopicsPage');
+    this.listCodeAsync = Observable.combineLatest(
+      this.nsp.list$,
+      this.cp.companies$.startWith([])
+    ).map(([list, companies]) => {
+      return list.map(code => {
+        return {
+          id: code,
+          data: companies.find(f => f.id === code)
+        }
+      })
+    })
+    this.loading = this.listCodeAsync.map(() => false).startWith(true);
+    
+    this.nsp.list$.subscribe(e => console.log(e), (err) => {
+      console.error(err);
+      this.toastCtrl.create({message: JSON.stringify(err) }).present();
+    })
   }
 
   delete(item) { 

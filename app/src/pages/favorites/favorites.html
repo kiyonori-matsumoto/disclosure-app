@@ -23,7 +23,8 @@
     </ion-item> 
     <ion-item-sliding #item *ngFor="let elem of favorites | async" >
       <button ion-item [navPush]="documentListPage" [navParams]="{code: elem.id}">
-        {{elem.id}} {{(elem.data | async)?.name }}
+        <!-- {{elem.id}} {{(elem.data | async)?.name }} -->
+        {{elem.id}} {{elem.data?.name }}
       </button>
       <ion-item-options slide="left">
         <button ion-button (click)="delete(elem.id)">

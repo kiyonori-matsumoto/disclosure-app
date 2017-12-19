@@ -28,5 +28,21 @@
       <ion-label>日々の開示情報を表示しない</ion-label>
       <ion-toggle [(ngModel)]="settings.hideDailyDisclosure" (ionChange)="onSettingChange()"></ion-toggle>
     </ion-item>
+    <ion-list-header>アカウント設定</ion-list-header>
+    <!-- <ion-item>
+      {{auth.uid$ | async}}
+    </ion-item> -->
+    <button ion-item color="danger" (click)="onLinkToGoogleClick()" *ngIf="!(auth.loginProvider$ | async)?.google_com">
+      <ion-icon name="logo-google" item-start></ion-icon>
+      GOOGLE連携
+    </button>
+    <button ion-item color="danger" (click)="onDisconnectFromGoogleClick()" *ngIf="(auth.loginProvider$ | async)?.google_com">
+      <ion-icon name="logo-google" item-start></ion-icon>
+      GOOGLE連携を解除する
+    </button>
+    <ion-list-header>プライバシーポリシー</ion-list-header>
+    <ion-item>
+      <a href="https://disclosure-app.firebaseapp.com/privacy/">プライバシーポリシー</a>
+    </ion-item>
   </ion-list>
 </ion-content>

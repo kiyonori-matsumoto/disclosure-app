@@ -25,10 +25,8 @@ import { DocumentStreamPageModule } from '../pages/document-stream/document-stre
 import { TwitterTimePipe } from '../pipes/twitter-time/twitter-time';
 import { ListTopicsPageModule } from '../pages/list-topics/list-topics.module';
 import { ListTopicsPage } from '../pages/list-topics/list-topics';
-import { HttpModule } from '@angular/http';
 import { SearchStocksPageModule } from '../pages/search-stocks/search-stocks.module';
 import { SearchStocksPage } from '../pages/search-stocks/search-stocks';
-import { DocumentViewer } from '@ionic-native/document-viewer';
 import { FileTransfer } from '@ionic-native/file-transfer';
 import { File } from '@ionic-native/file';
 import { FileOpener } from '@ionic-native/file-opener';
@@ -43,6 +41,7 @@ import { FavoritesPage } from '../pages/favorites/favorites';
 import { FavoritesPageModule } from '../pages/favorites/favorites.module';
 import { AdMobFree } from '@ionic-native/admob-free';
 import { DocumentBoxProvider } from '../providers/document-box/document-box';
+import { GooglePlus } from '@ionic-native/google-plus';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -99,6 +98,7 @@ export const firebaseConfig = {
     FileOpener,
     FileTransfer,
     File,
+    GooglePlus,
     SettingsProvider,
     CompanyProvider,
     NotificationSettingProvider,
