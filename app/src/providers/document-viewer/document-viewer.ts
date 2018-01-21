@@ -44,7 +44,8 @@ export class DocumentViewerProvider {
     if(this.platform.is('cordova')) {
       this.firebase.logEvent('select_content', {
         content_type: 'disclosure_pdf', 
-        item_id: item.document
+        item_id: item.document,
+        code: item.code,
       }).then(() => console.log('document viewed'))
 
       const loading = this.loadingCtrl.create({
