@@ -15,6 +15,8 @@ import { CompanyProvider } from '../../providers/company/company';
 import { NotificationSettingProvider } from '../../providers/notification-setting/notification-setting';
 import { SettingsProvider } from '../../providers/settings/settings';
 import { FavoriteProvider } from '../../providers/favorite/favorite';
+import { DocumentViewerProvider } from '../../providers/document-viewer/document-viewer';
+import { Disclosure } from '../../model/Disclosure';
 
 /**
  * Generated class for the DocumentListPage page.
@@ -32,10 +34,6 @@ export class DocumentListPage {
   // private readonly REF_BASE = 'disclosures';
   private readonly ITEMS_PER_PAGE = 10;
 
-  fileTransfer: FileTransferObject;
-  queryBase: firebase.database.Query;
-
-  documentViewPage = DocumentViewPage;
   pointer: any = '';
   code: string;
   companyName: Observable<string>;
@@ -58,23 +56,19 @@ export class DocumentListPage {
     public navParams: NavParams,
     private dp: DisclosureProvider,
     private platform: Platform,
-    private fileOpener: FileOpener,
     private app: FirebaseApp,
     private alertCtrl: AlertController,
-    private transfer: FileTransfer,
-    private file: File,
     private loadingCtrl: LoadingController,
     public cp: CompanyProvider,
     private nsp: NotificationSettingProvider,
     private sp: SettingsProvider,
     private fp: FavoriteProvider,
     private toastCtrl: ToastController,
+    private documentViewer: DocumentViewerProvider,
   ) {
     this.code = navParams.get('code');
     this.getfn = this.dp.get;
     this.dp.get(navParams.get('code')).then(this.updateItems);
-    // this.getfn(this.code).then(this.updateItems);
-    this.fileTransfer = this.transfer.create();
   }
   
   doInfinite(infiniteScroll) {
@@ -119,35 +113,8 @@ export class DocumentListPage {
     });
   }
 
-  viewDocument(item) {
-    if(this.platform.is('cordova')) {
-      const loading = this.loadingCtrl.create({
-        content: 'ファイルをダウンロード中',
-        enableBackdropDismiss: true,
-        dismissOnPageChange: true,
-      })
-      loading.present();
-      Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${item.document}.pdf`).getDownloadURL())
-      .do(e => console.log(e))
-      .mergeMap(url => this.fileTransfer.download(url, this.file.dataDirectory + item.document + '.pdf'))
-      .catch(err => {
-        let alert = this.alertCtrl.create({
-          title: 'Error',
-          subTitle: err.message,
-          buttons: ['Dismiss'],
-        });
-        loading.dismiss()
-        alert.present();
-        throw err;
-      })
-      .subscribe(entry => {
-        console.log(entry.toURL());
-        loading.dismiss()
-        this.fileOpener.open(entry.toURL(), 'application/pdf');
-      })
-    } else {
-      this.navCtrl.push(DocumentViewPage, item);
-    }
+  viewDocument(item: Disclosure) {
+    this.documentViewer.viewDisclosure(this.navCtrl, item);
   }
 
 }

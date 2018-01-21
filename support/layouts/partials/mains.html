@@ -1,0 +1,9 @@
+<section class="sidebar">
+  <header>MAIN CONTENTS</header>
+  <div>
+    <div class="articles sm">
+      {{ with .Site.GetPage "page" "global/about.md" }}{{ .Render "li_sm" }}{{ end }}
+      {{ with .Site.GetPage "page" "global/privacy.md" }}{{ .Render "li_sm" }}{{ end }}
+    </div>
+  </div>
+</section>

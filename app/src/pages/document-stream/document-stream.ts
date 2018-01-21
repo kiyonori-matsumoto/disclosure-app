@@ -18,6 +18,7 @@ import { Content, VirtualScroll, ToastController } from 'ionic-angular';
 import { SettingsProvider } from '../../providers/settings/settings';
 import { Disclosure } from '../../model/Disclosure';
 import { DocumentBoxProvider } from '../../providers/document-box/document-box';
+import { DocumentViewerProvider } from '../../providers/document-viewer/document-viewer';
 
 /**
  * Generated class for the DocumentStreamPage page.
@@ -60,33 +61,28 @@ export class DocumentStreamPage {
     private dbp: DocumentBoxProvider,
     private sp: SettingsProvider,
     private platform: Platform,
-    private fileOpener: FileOpener,
     private app: FirebaseApp,
     private alertCtrl: AlertController,
-    private transfer: FileTransfer,
-    private file: File,
     private loadingCtrl: LoadingController,
     private popoverCtrl: PopoverController,
     private firebase: Firebase,
     private toastCtrl: ToastController,
+    private documentViewer: DocumentViewerProvider,
   ) {
     this.date = moment().format("YYYY-MM-DD");
   }
 
   ionViewDidLoad() {
     this.updateItems();
-    if(this.platform.is('cordova')) {
-      this.platform.ready().then(() => {
-        this.fileTransfer = this.transfer.create();
-      })
-    }
+    // if(this.platform.is('cordova')) {
+    // }
     console.log('ionViewDidLoad DocumentStreamPage');
   }
 
   onChangeDate() {
     console.log(this.date);
     this.clearItems();
-    this.content.scrollToTop();
+    // this.content.scrollToTop();
     this.updateItems();
   }
 
@@ -116,7 +112,6 @@ export class DocumentStreamPage {
       this.changeTag$.asObservable(),
       this.sp.get(),
     )
-    // .mergeMap(() => this.content.scrollToTop(0), (o, i) => o)
     .map(([docs, tags, setting]) => {
       console.log(docs)
       const tagList = Object.keys(tags).filter(e => tags[e]);
@@ -143,7 +138,7 @@ export class DocumentStreamPage {
       // this.firebase.logError(JSON.stringify(err)).then(console.log);
       // this.platform.exitApp();
       return [];
-    })
+    }).shareReplay(1)
     this.loading  = share.map(() => false).startWith(true);
   }
 
@@ -192,7 +187,9 @@ export class DocumentStreamPage {
 
   saveToDocumentBox() {
     const saves = this.itemsAsync.filter(e => e.select)
-    .map(e => this.dbp.add(e.document, Object.assign({}, e)).toPromise())
+    .map(e => this.dbp.add(e.document, Object.assign({
+      add_at: moment().valueOf(),
+    }, e)).toPromise())
 
     Promise.all(saves)
     .then(() => {
@@ -215,45 +212,7 @@ export class DocumentStreamPage {
   }
 
   viewDocument(event, item: Disclosure) {
-    // event.stopPropagation();
-    console.log(item, item.documentPath());
-    if(this.platform.is('cordova')) {
-      this.file.checkFile(this.file.externalCacheDirectory, item.document + '.pdf')
-      .then(() => 
-        this.file.resolveDirectoryUrl(this.file.externalCacheDirectory)
-        .then(dir => this.file.getFile(dir, item.document + '.pdf', {}))
-        .then(entry => this.fileOpener.open(entry.toURL(), 'application/pdf')
-      ))
-      .catch(() => {
-        const loading = this.loadingCtrl.create({
-          content: 'ファイルをダウンロード中',
-          enableBackdropDismiss: true,
-          dismissOnPageChange: true,
-        })
-        loading.present();
-        const viewDoc$ = Observable.fromPromise(this.app.storage().ref().child(item.documentPath()).getDownloadURL())
-        .do(e => console.log(e))
-        .mergeMap(url => this.fileTransfer.download(url, this.file.externalCacheDirectory + item.document + '.pdf'))
-        .catch(err => {
-          let alert = this.alertCtrl.create({
-            title: 'Error',
-            subTitle: err.message,
-            buttons: ['Dismiss'],
-          });
-          loading.dismiss()
-          alert.present();
-          throw err;
-        })
-        .subscribe(entry => {
-          console.log(entry.toURL());
-          loading.dismiss()
-          this.fileOpener.open(entry.toURL(), 'application/pdf');
-        })
-        // loading.onWillDismiss(() => viewDoc$.unsubscribe());
-      })
-    } else {
-      this.navCtrl.push(DocumentViewPage, item);
-    }
+    this.documentViewer.viewDisclosure(this.navCtrl, item);
   }
 
 }

@@ -37,7 +37,7 @@ export class SearchStocksPage {
     ).map(([companies, filter]) => {
       console.log(`companies length = ${companies.length}, companies[0] = ${JSON.stringify(companies[0])}`)
       if (filter.length < 2) return [];
-      return companies.filter(c => c.id.includes(filter))
+      return companies.filter(c => (<string>c.id).startsWith(filter) || (<string>c.name).toLowerCase().includes(filter.toLowerCase()))
         .map(e => { return {
           id: e.id,
           data: e,

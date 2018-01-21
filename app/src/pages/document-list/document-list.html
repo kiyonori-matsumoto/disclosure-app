@@ -21,28 +21,23 @@
 </ion-header>
 
 
-<ion-content padding>
-  <!-- <ion-refresher>
-    <ion-refresher-content> -->
-      <!-- <ion-list [virtualScroll]="(items | async) || []"> -->
-      <ion-refresher (ionRefresh)="doRefresh($event)">
-        <ion-refresher-content></ion-refresher-content>
-      </ion-refresher>
-      <ion-list>
-        <button ion-item (click)="viewDocument(item)" class="text" *ngFor="let item of items" >
-        <!-- <button ion-item [navPush]="documentViewPage" [navParams]="item" class="text" *virtualItem="let item" > -->
-          <ion-note class="dropdown">
-            <span *ngFor="let tag of item.tags | keys">{{tag}} | </span>
-            {{item.time | middleTime}}
-          </ion-note>
-          <h2>{{item.company}}<small>({{item.code}})</small>
-          </h2>
-          <p class="fade">{{item.title}}</p>
-        </button>
-      </ion-list>
-      <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
-        <ion-infinite-scroll-content></ion-infinite-scroll-content>
-      </ion-infinite-scroll>
-    <!-- </ion-refresher-content>
-  </ion-refresher> -->
+<ion-content fullscreen>
+  <ion-refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+  <ion-list>
+    <button ion-item (click)="viewDocument(item)" class="text" *ngFor="let item of items" >
+    <!-- <button ion-item [navPush]="documentViewPage" [navParams]="item" class="text" *virtualItem="let item" > -->
+      <ion-note class="dropdown">
+        <span *ngFor="let tag of item.tags | keys">{{tag}} | </span>
+        {{item.time | middleTime}}
+      </ion-note>
+      <h2>{{item.company}}<small>({{item.code}})</small>
+      </h2>
+      <p class="fade">{{item.title}}</p>
+    </button>
+  </ion-list>
+  <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>

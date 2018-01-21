@@ -33,7 +33,7 @@ export class DocumentBoxProvider {
   }
   
   private collection(uid) {
-    return this.afs.collection('users').doc(uid).collection('disclosures')
+    return this.afs.collection('users').doc(uid).collection('disclosures', ref => ref.orderBy('add_at', 'desc'))
   }
 
   private doc(uid, doc_id) {

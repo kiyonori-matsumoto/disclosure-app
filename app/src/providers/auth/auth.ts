@@ -5,6 +5,7 @@ import { AngularFireAuth } from "angularfire2/auth";
 import { Observable } from 'rxjs';
 import { GooglePlus } from '@ionic-native/google-plus';
 import * as firebase from 'firebase'
+import { Platform } from 'ionic-angular/platform/platform';
 
 /*
   Generated class for the AuthProvider provider.
@@ -26,19 +27,28 @@ export class AuthProvider {
   constructor(
     private afAuth: AngularFireAuth,
     private googlePlus: GooglePlus,
+    private platform: Platform,
   ) {
     this.afAuth.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(console.log);
     
     if (! afAuth.auth.currentUser) {
-      this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS).then(res => {
+      const cordova_login = () => {
+        if (this.platform.is('cordova')) {
+          return this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS);
+        }
+        return Promise.reject('not cordova');
+      }
+      // this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS)
+      cordova_login()
+      .then(res => {
         console.log('do google login');
         const idToken = res.idToken;
         const displayName = res.displayName;
         const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
         return this.afAuth.auth.signInWithCredential(credential)
       }, err => {
-        console.log(JSON.parse(err));
+        console.log(err);
         console.log('do anonymous login');
         return afAuth.auth.signInAnonymously();
       })

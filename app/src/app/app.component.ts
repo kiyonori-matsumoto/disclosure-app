@@ -84,6 +84,7 @@ export class MyApp {
       { title: '適時開示一覧', component: DocumentStreamPage, name: 'document' },
       { title: '会社検索', component: SearchStocksPage, name: 'search' },
       { title: 'お気に入り', component: FavoritesPage, name: 'star' },
+      { title: '保存した開示情報', component: 'SavedDocumentPage', name: 'bookmark'},
       { title: '設定', component: SettingPage, name: 'settings' },
     ]
   }

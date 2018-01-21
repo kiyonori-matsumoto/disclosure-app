@@ -39,9 +39,12 @@ import { NotificationSettingProvider } from '../providers/notification-setting/n
 import { FavoriteProvider } from '../providers/favorite/favorite';
 import { FavoritesPage } from '../pages/favorites/favorites';
 import { FavoritesPageModule } from '../pages/favorites/favorites.module';
+import { SavedDocumentPageModule } from '../pages/saved-document/saved-document.module';
 import { AdMobFree } from '@ionic-native/admob-free';
 import { DocumentBoxProvider } from '../providers/document-box/document-box';
 import { GooglePlus } from '@ionic-native/google-plus';
+import { DocumentViewerProvider } from '../providers/document-viewer/document-viewer';
+import { HammerGestureConfig, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -51,6 +54,13 @@ export const firebaseConfig = {
   storageBucket: "disclosure-app.appspot.com",
   messagingSenderId: "1069938845824"
 };
+
+export class CustomHammerConfig extends HammerGestureConfig {
+  overrides = {
+    'press': { time: 700 }  //set press delay for 1 second
+  }
+}
+
 
 @NgModule({
   declarations: [
@@ -72,6 +82,7 @@ export const firebaseConfig = {
     SettingPageModule,
     SearchStocksPageModule,
     FavoritesPageModule,
+    SavedDocumentPageModule,
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -90,11 +101,11 @@ export const firebaseConfig = {
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
+    // { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig }, // これを入れるとdocument-streamがスクロールしなくなる...
     DisclosureProvider,
     SignInProvider,
     AuthProvider,
     Firebase,
-    // DocumentViewer,
     FileOpener,
     FileTransfer,
     File,
@@ -105,6 +116,7 @@ export const firebaseConfig = {
     FavoriteProvider,
     AdMobFree,
     DocumentBoxProvider,
+    DocumentViewerProvider,
   ]
 })
 export class AppModule {}
