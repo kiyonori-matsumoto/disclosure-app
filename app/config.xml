@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.disclosure.android" version="0.0.13" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.disclosure.android" version="0.0.14" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>適時開示(TDNet) Notifier</name>
     <description>適時開示を表示して通知します</description>
     <author email="kiyonori.matsumoto@gmail.com" href="http://ionicframework.com/">Matsukiyo Lab</author>
@@ -100,4 +100,5 @@
     <plugin name="cordova-plugin-admob-free" spec="^0.11.0" />
     <plugin name="cordova-plugin-file" spec="^5.0.0" />
     <plugin name="cordova-plugin-googleplus" spec="^5.1.1" />
+    <plugin name="cordova-sqlite-storage" spec="^2.2.0" />
 </widget>

@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { GooglePlus } from '@ionic-native/google-plus';
 import * as firebase from 'firebase'
 import { Platform } from 'ionic-angular/platform/platform';
+import { Storage } from '@ionic/storage';
 
 /*
   Generated class for the AuthProvider provider.
@@ -19,6 +20,8 @@ export class AuthProvider {
   uid$: Observable<string>
   loginProvider$: Observable<any>;
 
+  private readonly HAS_LOGGED_IN = 'has_logged_in';
+
   private readonly GOOGLE_OPTIONS = {
     webClientId: '1069938845824-sp6urskq03e06h52lm0sgrq77t0nln28.apps.googleusercontent.com',
     offline: true
@@ -28,33 +31,38 @@ export class AuthProvider {
     private afAuth: AngularFireAuth,
     private googlePlus: GooglePlus,
     private platform: Platform,
+    private storage: Storage,
   ) {
     this.afAuth.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(console.log);
     
-    if (! afAuth.auth.currentUser) {
-      const cordova_login = () => {
-        if (this.platform.is('cordova')) {
-          return this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS);
+    this.platform.ready()
+    .then(() => {
+      if (! afAuth.auth.currentUser) {
+      // if (this.storage.get(this.HAS_LOGGED_IN)) {
+        const cordova_login = () => {
+          if (this.platform.is('cordova')) {
+            return this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS);
+          }
+          return Promise.reject('not cordova');
         }
-        return Promise.reject('not cordova');
+        // this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS)
+        cordova_login()
+        .then(res => {
+          console.log('do google login');
+          const idToken = res.idToken;
+          const displayName = res.displayName;
+          const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+          return this.afAuth.auth.signInWithCredential(credential)
+        }, err => {
+          console.log(err);
+          console.log('do anonymous login');
+          return afAuth.auth.signInAnonymously();
+        })
+        .then(() => console.log('successfully logged in'))
+        .catch(err => console.error(`login failed: ${err.message || err.code || err}`))
       }
-      // this.googlePlus.trySilentLogin(this.GOOGLE_OPTIONS)
-      cordova_login()
-      .then(res => {
-        console.log('do google login');
-        const idToken = res.idToken;
-        const displayName = res.displayName;
-        const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
-        return this.afAuth.auth.signInWithCredential(credential)
-      }, err => {
-        console.log(err);
-        console.log('do anonymous login');
-        return afAuth.auth.signInAnonymously();
-      })
-      .then(() => console.log('successfully logged in'))
-      .catch(err => console.error(`login failed: ${err.message || err.code || err}`))
-    }
+    });
 
     this.uid$ = afAuth.authState.filter(e => !!e)
     .map(u => u.uid).publishReplay(1).refCount()

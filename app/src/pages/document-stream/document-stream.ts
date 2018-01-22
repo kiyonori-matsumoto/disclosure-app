@@ -129,7 +129,9 @@ export class DocumentStreamPage {
         f2 = f1;
       }
       this.itemsAsync = f2;
-      this.content.scrollTo(0, 1, 0);
+      // if (this.content) { 
+      //   this.content.scrollTo(0, 1, 0);
+      // }
       return this.itemsAsync;
     })
     .catch((err) => {

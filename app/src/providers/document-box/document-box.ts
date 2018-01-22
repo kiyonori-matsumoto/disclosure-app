@@ -26,6 +26,7 @@ export class DocumentBoxProvider {
     this.uid$ = this.afAuth.authState
     .filter(user => !!user)
     .map(user => user.uid)
+    .do(console.log)
 
     this.uid$
     .mergeMap(uid => this.collection(uid).valueChanges())

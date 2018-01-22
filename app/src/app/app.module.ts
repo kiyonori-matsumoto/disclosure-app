@@ -45,6 +45,7 @@ import { DocumentBoxProvider } from '../providers/document-box/document-box';
 import { GooglePlus } from '@ionic-native/google-plus';
 import { DocumentViewerProvider } from '../providers/document-viewer/document-viewer';
 import { HammerGestureConfig, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
+import { IonicStorageModule } from '@ionic/storage';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -83,6 +84,7 @@ export class CustomHammerConfig extends HammerGestureConfig {
     SearchStocksPageModule,
     FavoritesPageModule,
     SavedDocumentPageModule,
+    IonicStorageModule.forRoot(),
   ],
   bootstrap: [IonicApp],
   entryComponents: [
