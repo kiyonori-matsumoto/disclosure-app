@@ -54,7 +54,7 @@ export class DocumentViewerProvider {
         dismissOnPageChange: true,
       })
       loading.present();
-      Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${item.document}.pdf`).getDownloadURL())
+      const obs = Observable.fromPromise(this.app.storage().ref().child(`/disclosures/${item.document}.pdf`).getDownloadURL())
       .do(e => console.log(e))
       .mergeMap(url => this.fileTransfer.download(url, this.file.dataDirectory + item.document + '.pdf'))
       .catch(err => {
@@ -71,6 +71,9 @@ export class DocumentViewerProvider {
         console.log(entry.toURL());
         loading.dismiss()
         this.fileOpener.open(entry.toURL(), 'application/pdf');
+      })
+      loading.onDidDismiss(() => {
+        obs.unsubscribe();
       })
     } else {
       navCtrl.push('DocumentViewPage', item);
