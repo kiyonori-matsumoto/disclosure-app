@@ -29,9 +29,6 @@
       <ion-toggle [(ngModel)]="settings.hideDailyDisclosure" (ionChange)="onSettingChange()"></ion-toggle>
     </ion-item>
     <ion-list-header>アカウント設定</ion-list-header>
-    <!-- <ion-item>
-      {{auth.uid$ | async}}
-    </ion-item> -->
     <button ion-item color="danger" (click)="onLinkToGoogleClick()" *ngIf="!(auth.loginProvider$ | async)?.google_com">
       <ion-icon name="logo-google" item-start></ion-icon>
       GOOGLE連携
