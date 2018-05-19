@@ -8,6 +8,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { ToastController } from 'ionic-angular/components/toast/toast-controller';
 import { AuthProvider } from '../../providers/auth/auth';
 import { duration } from 'moment';
+import { CustomTagsPage } from '../custom-tags/custom-tags';
 
 /**
  * Generated class for the SettingPage page.
@@ -24,6 +25,7 @@ import { duration } from 'moment';
 export class SettingPage {
 
   listTopicsPage = ListTopicsPage;
+  customTagsPage = CustomTagsPage;
   settings: Setting = <Setting>{};
 
   constructor(

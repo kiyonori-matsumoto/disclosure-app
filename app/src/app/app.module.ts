@@ -46,6 +46,9 @@ import { GooglePlus } from '@ionic-native/google-plus';
 import { DocumentViewerProvider } from '../providers/document-viewer/document-viewer';
 import { HammerGestureConfig, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 import { IonicStorageModule } from '@ionic/storage';
+import { CustomTagsPageModule } from '../pages/custom-tags/custom-tags.module';
+import { CustomTagsPage } from '../pages/custom-tags/custom-tags';
+import { CustomTagsProvider } from '../providers/custom-tags/custom-tags';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyALnFQtoerM7eH2dZm9ZPXhUvXo7bzZ2og",
@@ -83,6 +86,7 @@ export class CustomHammerConfig extends HammerGestureConfig {
     SettingPageModule,
     SearchStocksPageModule,
     FavoritesPageModule,
+    CustomTagsPageModule,
     SavedDocumentPageModule,
     IonicStorageModule.forRoot(),
   ],
@@ -98,6 +102,7 @@ export class CustomHammerConfig extends HammerGestureConfig {
     SearchStocksPage,
     PopoverFunnelPage,
     FavoritesPage,
+    CustomTagsPage,
   ],
   providers: [
     StatusBar,
@@ -119,6 +124,7 @@ export class CustomHammerConfig extends HammerGestureConfig {
     AdMobFree,
     DocumentBoxProvider,
     DocumentViewerProvider,
+    CustomTagsProvider,
   ]
 })
 export class AppModule {}
