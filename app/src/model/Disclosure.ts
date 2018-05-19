@@ -12,7 +12,4 @@ export class Disclosure {
     Object.assign(this, obj);
   }
 
-  public documentPath() {
-    return `disclosures/${this.document}.pdf`
-  }
 }
