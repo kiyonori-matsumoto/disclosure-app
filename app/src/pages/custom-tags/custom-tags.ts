@@ -13,12 +13,13 @@ import { Observable } from 'rxjs';
 @IonicPage()
 @Component({
   selector: 'page-favorites',
-  templateUrl: 'favorites.html',
+  templateUrl: 'custom-tags.html',
 })
 export class CustomTagsPage {
 
   tags;
   loading: Observable<boolean>;
+  item: string;
 
   constructor(
     public navCtrl: NavController,
@@ -34,7 +35,14 @@ export class CustomTagsPage {
 
   delete(item) {
     console.log(`deleting ${item}`);
-    this.tags.delete(item);
+    this.ctp.delete(item);
+  }
+
+  add() {
+    if (this.item) {
+      this.ctp.add(this.item);
+      this.item = "";
+    }
   }
 
 }

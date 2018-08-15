@@ -16,7 +16,7 @@
     </ion-buttons> -->
     <ion-title>適時開示一覧</ion-title>
   </ion-navbar>
-  <ion-toolbar *ngIf="selectionCount <= 0" >
+  <ion-toolbar *ngIf="selectionCount <= 0">
     <ion-item>
       <ion-label fixed>公開日</ion-label>
       <ion-datetime displayFormat="YYYY/MM/DD" [(ngModel)]="date" (ionChange)="onChangeDate()"></ion-datetime>
@@ -25,7 +25,7 @@
     <ion-buttons end>
       <button ion-button icon-only (click)="onFunnelClick($event)" class="button-with-tag">
         <ion-icon end name="funnel">
-          <ion-badge *ngIf="changeTag$ | async | tagCount"  class="tag-on-button" color="danger">{{changeTag$ | async | tagCount}}</ion-badge>
+          <ion-badge *ngIf="changeTag$ | async | tagCount" class="tag-on-button" color="danger">{{changeTag$ | async | tagCount}}</ion-badge>
         </ion-icon>
       </button>
     </ion-buttons>
@@ -39,27 +39,31 @@
     <ion-buttons right>
       <button ion-button icon-only class="button-with-tag" (click)="saveToDocumentBox()">
         <ion-icon end name="bookmark">
-          <ion-badge *ngIf="selectionCount > 0"  class="tag-on-button" color="danger">{{selectionCount}}</ion-badge>
+          <ion-badge *ngIf="selectionCount > 0" class="tag-on-button" color="danger">{{selectionCount}}</ion-badge>
         </ion-icon>
       </button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-    
-    
+
+
 <ion-content fullscreen (ionScroll)="onScroll($event)">
   <ion-list [virtualScroll]="itemsAsync" approxItemHeight="90px">
-  <!-- <ion-list> -->
+    <!-- <ion-list> -->
     <!-- <ion-item *ngFor="let item of (items | async); trackBy: virtualTrack" [ngClass]="{active: item.select}" (tap)="viewDocument(item)"> -->
-    <ion-item *virtualItem="let item" (tap)="deselectItemOrViewDocument($event, item)" (press)="switchSelectItem($event, item)" [ngClass]="{active: item.select}">
+    <ion-item *virtualItem="let item" (tap)="deselectItemOrViewDocument($event, item)" (press)="switchSelectItem($event, item)"
+      [ngClass]="{active: item.select}">
       <!-- <ion-avatar item-start>
         <ion-icon class="avatar-icon" name="folder"></ion-icon>
       </ion-avatar> -->
       <!-- <button item-end ion-button icon-only clear (click)="toggleExpand($event, item)"><ion-icon name="arrow-dropdown" class="dropdown-icon" [ngClass]="{toggled: item.expand}" ></ion-icon></button> -->
       <ion-note class="dropdown">
+        <span *ngIf="item.view_count" ><ion-icon name="eye"></ion-icon>{{item.view_count}} | </span>
         <span *ngFor="let tag of item.tags | keys">{{tag}} | </span>
         {{item.time | shortTime}}</ion-note>
-      <h2>{{item.company}}<small>({{item.code}})</small></h2>
+      <h2>{{item.company}}
+        <small>({{item.code}})</small>
+      </h2>
       <p [ngClass]="{fade: !item.expand, nofade: item.expand}">{{item.title}}</p>
       <!-- <div style="position:relative;top:-1em;right: 0;"><ion-note *ngFor="let tag of item.tags | keys" >{{tag}}</ion-note></div> -->
       <!-- <div style="text-align: left; overflow-x:hidden" (tap)="viewDocument(item)" (press)="selectItem(item)" class="text">
@@ -74,6 +78,5 @@
   </ion-list>
   <div *ngIf="loading | async" style="display:flex;justify-content:center;">
     <ion-spinner></ion-spinner>
-  </div> 
+  </div>
 </ion-content>
-    

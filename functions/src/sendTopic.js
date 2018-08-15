@@ -1,7 +1,7 @@
 const admin = require('firebase-admin');
 
-const sendTopic = (event) => {
-  const data = event.data.data();
+const sendTopic = (snapshot, context) => {
+  const data = snapshot.data();
   console.log(data.title, data.code, data.noSend);
   if (data.noSend) return true;
   return admin.messaging().sendToTopic(`code_${data.code}`, {

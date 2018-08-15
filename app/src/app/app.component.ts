@@ -39,7 +39,6 @@ export class MyApp {
     ]).then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
-      statusBar.styleDefault();
       splashScreen.hide();
       // afAuth.auth.signInAnonymously().then(console.log)
       if(platform.is('cordova')) {
@@ -56,8 +55,6 @@ export class MyApp {
         firebase.onTokenRefresh().subscribe(uploadToken);
         firebase.getToken().then(uploadToken);
         firebase.onNotificationOpen().subscribe(data => {
-          console.log(JSON.stringify(data));
-
           const code = data.code;
           console.log(code);
           this.nav.push(DocumentListPage, { code }, {});

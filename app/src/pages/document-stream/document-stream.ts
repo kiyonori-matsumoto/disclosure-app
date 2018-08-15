@@ -176,7 +176,7 @@ export class DocumentStreamPage {
   }
 
   onFunnelClick(ev: UIEvent) {
-    Observable.combineLatest(this.sp.setting$.take(1), this.ctp.tag$).subscribe(
+    Observable.combineLatest(this.sp.setting$.take(1), this.ctp.tag$).take(1).subscribe(
       ([s, tags]) => {
         let popover = this.popoverCtrl.create(PopoverFunnelPage, {
           tags: [

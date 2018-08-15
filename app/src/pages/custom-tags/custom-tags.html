@@ -18,7 +18,7 @@
 
 <ion-content padding>
   <ion-list>
-    <ion-item *ngIf="(favorites | async)?.length === 0">
+    <ion-item *ngIf="(tags | async)?.length === 0">
       カスタムタグが登録されていません
     </ion-item> 
     <ion-item-sliding #item *ngFor="let elem of tags | async" >
@@ -32,6 +32,13 @@
         </button>
       </ion-item-options>
     </ion-item-sliding>
+    <ion-item>
+      <ion-label stacked>タグ</ion-label>
+      <ion-input [(ngModel)]="item"></ion-input>
+      <button ion-button item-end icon-only (click)="add()">
+        <ion-icon name="add"></ion-icon>
+      </button>
+    </ion-item>
   </ion-list>
   <div *ngIf="loading | async" style="display:flex;justify-content:center;">
     <ion-spinner></ion-spinner>

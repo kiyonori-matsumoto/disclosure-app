@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
 
 const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
+admin.initializeApp();
 
 const checkNewDisclosure = require('./src/checkNewDisclosure');
 
@@ -11,7 +11,6 @@ const checkNewDisclosure = require('./src/checkNewDisclosure');
 exports.checkNewDisclosure = functions.pubsub.topic('minutely5-tick').onPublish(checkNewDisclosure);
 exports.createCompanyDict = functions.pubsub.topic('weekly-tick').onPublish(require('./src/createCompanyDict'));
 
-// exports.sendTopic = functions.database.ref('/disclosures/{key}').onCreate(require('./src/sendTopic'));
 exports.sendTopicFs = functions.firestore.document('disclosures/{key}').onCreate(require('./src/sendTopic'));
 exports.addTagFs = functions.firestore.document('disclosures/{key}').onCreate(require('./src/addTag'));
 exports.saveDocumentFs = functions.firestore.document('disclosures/{key}').onCreate(require('./src/saveDocument'));
@@ -20,6 +19,8 @@ exports.saveDocumentFs = functions.firestore.document('disclosures/{key}').onCre
 exports.listTopics = functions.https.onRequest(require('./src/listTopics'));
 
 exports.changeTopic = functions.database.ref('/user/topics/{userId}').onWrite(require('./src/changeTopic'));
+
+exports.handleContentViewEvent = functions.analytics.event('select_content').onLog(require('./src/handleContentViewEvent'));
 
 // exports.checkNewDisclosureDev = functions.pubsub.topic('minutely5-tick').onPublish(require('./src/dev-checkNewDisclosure'));
 

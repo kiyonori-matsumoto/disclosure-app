@@ -16,8 +16,8 @@ const zeroPad = (n) => {
   return ('000000' + n).slice(-3)
 }
 
-const checkNewDisclosure = (event) => {
-  const time = moment(event.timestamp).utcOffset(9);
+const checkNewDisclosure = (data, context) => {
+  const time = moment(context.timestamp).utcOffset(9);
   // const time = moment('2017-11-02T23:50:00+0900').utcOffset(9);
   const start = moment(time).utcOffset(9).startOf('date').valueOf();
   const end = moment(start).utcOffset(9).add(1, 'days').valueOf();

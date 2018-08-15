@@ -12,7 +12,7 @@ export class KeysPipe implements PipeTransform {
   /**
    * Takes a value and makes it lowercase.
    */
-  transform(value: string, ...args) {
-    return Object.keys(value || {});
+  transform(value: object, ...args) {
+    return Object.keys(value || {}).filter(e => !!value[e]);
   }
 }

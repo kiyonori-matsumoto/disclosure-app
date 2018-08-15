@@ -3,11 +3,11 @@ const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 
 const DB_PATH = 'disclosures';
+const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+const myBucket = admin.storage().bucket(firebaseConfig.storageBucket);
 
-const myBucket = admin.storage().bucket(functions.config().firebase.storageBucket);
-
-const saveDocument = (event) => {
-  const data = event.data.data();
+const saveDocument = (snapshot, context) => {
+  const data = snapshot.data();
   const ws = myBucket.file(`${DB_PATH}/${data.document}.pdf`).createWriteStream({
     gzip: true
   })
