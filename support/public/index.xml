@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>適時開示(TDNet) Notifier サポートサイト</title>
+    <link>https://disclosure-app.firebaseapp.com/</link>
+    <description>Recent content on 適時開示(TDNet) Notifier サポートサイト</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Thu, 16 Aug 2018 00:04:00 +0900</lastBuildDate>
+    
+	<atom:link href="https://disclosure-app.firebaseapp.com/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>カスタムタグの作成</title>
+      <link>https://disclosure-app.firebaseapp.com/howto/custom-tag/</link>
+      <pubDate>Thu, 16 Aug 2018 00:04:00 +0900</pubDate>
+      
+      <guid>https://disclosure-app.firebaseapp.com/howto/custom-tag/</guid>
+      <description>カスタムタグの作成 設定画面にカスタムタグの公開メニューがあるのでクリックします。 カスタムタグの値を入れて+ボタンを押すことでタグを追加します</description>
+    </item>
+    
+    <item>
+      <title>プライバシーポリシー</title>
+      <link>https://disclosure-app.firebaseapp.com/global/privacy/</link>
+      <pubDate>Sun, 03 Dec 2017 16:13:50 +0900</pubDate>
+      
+      <guid>https://disclosure-app.firebaseapp.com/global/privacy/</guid>
+      <description>Matsukiyo Lab（以下，「当社」といいます。）は，本ウェブサイト上・及びスマホ用アプリ適時開示(TDNet) Notifierで提供するサービス（以下</description>
+    </item>
+    
+    <item>
+      <title>適時開示情報の通知を行う</title>
+      <link>https://disclosure-app.firebaseapp.com/howto/notify-new-disclosure/</link>
+      <pubDate>Mon, 06 Nov 2017 00:09:26 +0900</pubDate>
+      
+      <guid>https://disclosure-app.firebaseapp.com/howto/notify-new-disclosure/</guid>
+      <description>適時開示情報の通知を行う ① 設定→通知設定画面を開きます ② 通知が無い場合は「トピックが登録されていません」という画面が表示されます ③ 証券コード</description>
+    </item>
+    
+    <item>
+      <title>適時開示情報の一覧表示</title>
+      <link>https://disclosure-app.firebaseapp.com/howto/list-disclosures/</link>
+      <pubDate>Sun, 22 Oct 2017 22:04:58 +0900</pubDate>
+      
+      <guid>https://disclosure-app.firebaseapp.com/howto/list-disclosures/</guid>
+      <description>適時開示情報の一覧表示 起動すると、適時開示情報の一覧表示画面になります。 各タイトルをクリックすると、PDFをダウンロードして表示します 公開日</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://disclosure-app.firebaseapp.com/global/about/</link>
+      <pubDate>Sun, 22 Oct 2017 21:51:54 +0900</pubDate>
+      
+      <guid>https://disclosure-app.firebaseapp.com/global/about/</guid>
+      <description>このサイトについて このサイトは、Androidアプリ「適時開示(TDNet) Notifier」のサポートサイトです。 適時開示(TDNet) N</description>
+    </item>
+    
+  </channel>
+</rss>

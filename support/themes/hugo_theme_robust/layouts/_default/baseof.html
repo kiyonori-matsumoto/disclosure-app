@@ -17,12 +17,12 @@
       {{ with .Site.Params.fontfamily }} body { font-family: {{ . | safeCSS }}; } {{ end }}
       {{ with .Site.Params.logofontfamily }} .h-logo { font-family: {{ . | safeCSS }}; } {{ end }}
     </style>
-    {{ if ne (getenv "HUGO_ENV") "DEV" }}
-    {{ partial "gtag.html" . }}
-    {{ end }}
   </head>
 
   <body>
+    {{ if ne (getenv "HUGO_ENV") "DEV" }}
+    {{ template "_internal/google_analytics.html" . }}
+    {{ end }}
 
     <header class="l-header">
       <div class="l-container">
