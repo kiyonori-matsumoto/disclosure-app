@@ -1,31 +1,77 @@
-const admin = require('firebase-admin');
-const csvParse = require('csv-parse');
-const rp = require('request-promise-native');
-const encoding = require('encoding');
+const admin = require("firebase-admin");
+const csvParse = require("csv-parse/lib/sync");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const request = require("request");
+const encoding = require("encoding");
+const unzipper = require("unzipper");
 
-const createCompanyDict = (event) => {
-  return rp.get('http://k-db.com/stocks/?download=csv', {followAllRedirects: true, encoding: null})
-  .then(data => {
-    const batches = [];
-    data = encoding.convert(data, 'UTF-8', 'SHIFT_JIS', true).toString();
-    let csv = csvParse(data, {columns: true, relax_column_count: true});
-    
-    while(csv.length > 0) {
-      s = csv.slice(0, 500);
-      csv = csv.slice(500, 10000);
-      const batch = admin.firestore().batch();
-      s.forEach(company => {
-        const ref = admin.firestore().collection('companies').doc(company["コード"].slice(0, 4))
-        batch.set(ref, {
-          name: company["銘柄名"],
-          exchange: company["市場"],
-        });
-      })
-      batches.push(batch.commit());
-      console.log(`batch created, length = ${s.length}`);
-    }
-    return Promise.all(batches);
-  })
-}
+const tmpDir = os.tmpdir();
+
+const createCompanyDict = () => {
+  return request(
+    "https://disclosure.edinet-fsa.go.jp/E01EW/download?uji.verb=W1E62071EdinetCodeDownload&uji.bean=ee.bean.W1E62071.EEW1E62071Bean&TID=W1E62071&PID=W1E62071&downloadFileName=&lgKbn=2&dflg=0&iflg=0&dispKbn=1",
+    { rejectUnauthorized: false }
+  )
+    .pipe(unzipper.Extract({ path: tmpDir }))
+    .on("close", () => {
+      console.log("unzipped");
+    })
+    .promise()
+    .then(() => {
+      const data = fs.readFileSync(path.join(tmpDir, "EdinetcodeDlInfo.csv"));
+      const data_utf = encoding
+        .convert(data, "UTF-8", "SHIFT_JIS", true)
+        .toString();
+      const csv = csvParse(data_utf, {
+        relax_column_count: true
+      });
+
+      return csv
+        .slice(2)
+        .map(line => {
+          const [
+            edinetCode,
+            type,
+            classification,
+            hasConsolidated,
+            capital,
+            closingDate,
+            name,
+            nameEn,
+            nameKana,
+            address,
+            industory,
+            code,
+            corporateNumber
+          ] = line;
+          return {
+            edinetCode,
+            // type,
+            classification,
+            hasConsolidated,
+            capital,
+            closingDate,
+            name,
+            nameEn,
+            nameKana,
+            // address,
+            industory,
+            code,
+            corporateNumber
+          };
+        })
+        .filter(l => l.code);
+    })
+    .then(obj => JSON.stringify(obj))
+    .then(jsonStr =>
+      admin
+        .storage()
+        .bucket()
+        .file("companies.json")
+        .save(jsonStr, { gzip: true })
+    );
+};
 
 module.exports = createCompanyDict;
