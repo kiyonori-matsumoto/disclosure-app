@@ -10,8 +10,9 @@ const sendTopic = (snapshot, context) => {
       tag: `code_${data.code}`,
       color: '#006064',
       title: `新しい開示情報 ${data.company}(${data.code})`,
-      // click_action: 'FCM_PLUGIN_ACTIVITY', // remove here when cordova-plugin-firebase 
-    }, data: {
+      click_action: 'FLUTTER_NOTIFICATION_CLICK',
+    },
+    data: {
       code: `${data.code}`,
     }
   })
