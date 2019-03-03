@@ -23,7 +23,8 @@ const createCompanyDict = () => {
       const data = fs.readFileSync(path.join(tmpDir, "EdinetcodeDlInfo.csv"));
       const data_utf = encoding
         .convert(data, "UTF-8", "SHIFT_JIS", true)
-        .toString();
+        .toString()
+        .normalize("NFKC");
       const csv = csvParse(data_utf, {
         relax_column_count: true
       });
