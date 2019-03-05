@@ -1,6 +1,10 @@
 {
   "name": "functions",
   "description": "Cloud Functions for Firebase",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "8"
+  },
   "dependencies": {
     "@google-cloud/firestore": "^0.16.0",
     "@google-cloud/storage": "^1.7.0",
@@ -12,6 +16,7 @@
     "firebase-functions": "^2.0.4",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
+    "puppeteer": "^1.12.2",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "unzipper": "^0.9.10",
@@ -20,10 +25,15 @@
   "private": true,
   "devDependencies": {
     "chai": "^4.1.2",
+    "firebase-functions-test": "^0.1.6",
     "mocha": "^3.5.3",
-    "sinon": "^3.3.0"
+    "sinon": "^3.3.0",
+    "ts-node": "^8.0.2",
+    "tslint": "^5.12.1",
+    "typescript": "^3.3.3"
   },
   "scripts": {
-    "test": "mocha"
+    "build": "./node_modules/.bin/tslint --project tsconfig.json && ./node_modules/.bin/tsc",
+    "test": "mocha --recursive --require ts-node/register \"src/test\""
   }
 }

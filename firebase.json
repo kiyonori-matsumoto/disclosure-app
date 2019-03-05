@@ -1,5 +1,11 @@
 {
   "hosting": {
     "public": "support/public"
+  },
+  "functions": {
+    "source": "functions",
+    "predeploy": [
+      "npm --prefix functions run build"
+    ]
   }
 }

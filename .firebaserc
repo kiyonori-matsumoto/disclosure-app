@@ -1,6 +1,7 @@
 {
   "projects": {
     "release": "disclosure-app",
-    "develop": "disclosure-app-dev"
+    "develop": "disclosure-app-dev",
+    "default": "disclosure-app"
   }
 }

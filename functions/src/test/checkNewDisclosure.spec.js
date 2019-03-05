@@ -4,6 +4,8 @@ const sinon = require('sinon');
 
 const moment = require('moment');
 
+const test = require('firebase-functions-test')();
+
 const errors = require('request-promise-core/errors');
 
 const fs = require('fs')
@@ -20,6 +22,8 @@ const dummyhtml_180511 = Array.from(Array(20).keys()).map(add1).map(zeroPad).map
 
 // mocks requests
 const rp = require('request-promise-native');
+const admin = require('firebase-admin');
+const functions = require('firebase-functions');
 
 let f;
 
@@ -27,39 +31,40 @@ let stubs = {};
 
 describe('checkNewDisclosure', () => {
   let batchCommitStub;
+  let f;
 
   before(() => {
     // Since index.js makes calls to functions.config and admin.initializeApp at the top of the file,
     // we need to stub both of these functions before requiring index.js. This is because the
     // functions will be executed as a part of the require process.
     // Here we stub admin.initializeApp to be a dummy function that doesn't do anything.
-    admin = require('firebase-admin');
-    adminInitStub = sinon.stub(admin, 'initializeApp');
+    const adminInitStub = sinon.stub(admin, 'initializeApp');
     // Next we stub functions.config(). Normally config values are loaded from Cloud Runtime Config;
     // here we'll just provide some fake values for firebase.databaseURL and firebase.storageBucket
     // so that an error is not thrown during admin.initializeApp's parameter check
-    functions = require('firebase-functions');
-    configStub = sinon.stub(functions, 'config').returns({
-      firebase: {
-        databaseURL: 'https://not-a-project.firebaseio.com',
-        storageBucket: 'not-a-project.appspot.com',
-      }
-      // You can stub any other config values needed by your functions here, for example:
-      // foo: 'bar'
-    });
-    f = require('../src/checkNewDisclosure');
-    admin.initializeApp(functions.config().firebase);
+    // const configStub = sinon.stub(functions, 'config').returns({
+    //   firebase: {
+    //     databaseURL: 'https://not-a-project.firebaseio.com',
+    //     storageBucket: 'not-a-project.appspot.com',
+    //   }
+    //   // You can stub any other config values needed by your functions here, for example:
+    //   // foo: 'bar'
+    // });
+    const index = require('..');
+    f = test.wrap(index.checkNewDisclosure);
+    // f = require('../checkNewDisclosure');
+    // admin.initializeApp(functions.config().firebase);
 
     //mocking of admin.firestore().collection(DB_PATH).orderBy('time', 'desc').where('time', '>=', start).where('time', '<', end).limit(1).get();
     // admin.firestore().batch();
-    refStub = sinon.stub();
-    collectionsStub = sinon.stub();
-    orderByStub = sinon.stub();
-    whereStub = sinon.stub();
-    limitStub = sinon.stub();
-    stubs.getStub = getStub = sinon.stub();
-    docStub = sinon.stub();
-    queryStub = {
+    const refStub = sinon.stub();
+    const collectionsStub = sinon.stub();
+    const orderByStub = sinon.stub();
+    const whereStub = sinon.stub();
+    const limitStub = sinon.stub();
+    const getStub = stubs.getStub = sinon.stub();
+    const docStub = sinon.stub();
+    const queryStub = {
       orderBy: orderByStub,
       where: whereStub,
       limit: limitStub,
@@ -67,14 +72,14 @@ describe('checkNewDisclosure', () => {
       doc: docStub,
     }
 
-    stubs.batchSetStub = batchSetStub = sinon.stub();
-    batchCommitStub = sinon.stub();
-    batchStub = sinon.stub().returns({
+    const batchSetStub = stubs.batchSetStub = sinon.stub();
+    const batchCommitStub = sinon.stub();
+    const batchStub = sinon.stub().returns({
       set: batchSetStub,
       commit: batchCommitStub,
     });
 
-    datastoreStub = sinon.stub(admin, 'firestore').returns({
+    const datastoreStub = sinon.stub(admin, 'firestore').returns({
       batch: batchStub,
       collection: collectionsStub
     });
@@ -83,7 +88,7 @@ describe('checkNewDisclosure', () => {
     whereStub.returns(queryStub);
     limitStub.returns(queryStub);
 
-    rpGetStub = sinon.stub(rp, 'get')
+    const rpGetStub = sinon.stub(rp, 'get')
     rpGetStub.withArgs(`https://www.release.tdnet.info/inbs/I_list_001_20171015.html`)
       .resolves(dummyhtmls[0])
     rpGetStub.withArgs(`https://www.release.tdnet.info/inbs/I_list_002_20171015.html`)
@@ -120,7 +125,7 @@ describe('checkNewDisclosure', () => {
         }]
       })
 
-      return f({
+      return f({}, {
         timestamp: moment('2017-10-15T11:11:22').toISOString()
       }).then(() => {
         expect(batchSetStub.callCount).to.equals(129);
@@ -143,7 +148,7 @@ describe('checkNewDisclosure', () => {
         }]
       })
 
-      return f({
+      return f({}, {
         timestamp: moment('2017-10-15T11:11:22').toISOString()
       }).then(() => {
         expect(batchSetStub.callCount).to.equals(0);
@@ -156,7 +161,7 @@ describe('checkNewDisclosure', () => {
     stubs.getStub.resolves({
       docs: []
     })
-    return f({
+    return f({}, {
       timestamp: moment('2017-10-14T11:11:22').toISOString()
     }).then(() => {
       expect(batchSetStub.callCount).to.equals(0);
@@ -168,7 +173,7 @@ describe('checkNewDisclosure', () => {
     stubs.getStub.resolves({
       docs: []
     })
-    return f({
+    return f({}, {
       timestamp: moment('2017-10-13T11:11:22').toISOString()
     }).then(() => {
       throw 'failuer state error';
@@ -198,7 +203,7 @@ describe('checkNewDisclosure', () => {
       }]
     })
 
-    return f({
+    return f({}, {
       timestamp: moment('2018-05-11T23:00:00').toISOString()
     }).then(() => {
       expect(batchSetStub.callCount).to.equals(1990);
