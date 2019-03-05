@@ -4,7 +4,7 @@ const moment = require("moment");
 
 const xlsx = require("xlsx");
 
-const createSettlementDict = async () => {
+const createSettlementDict = () => {
   return rp
     .get(
       "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/tvdivq0000001ofb-att/kessan01_0301.xls",
