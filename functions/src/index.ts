@@ -6,12 +6,18 @@ admin.initializeApp();
 
 import * as checkNewDisclosure from "./checkNewDisclosure";
 
+import createSettlementDict from "./createSettlementDict";
+
 exports.checkNewDisclosure = functions.pubsub
   .topic("minutely5-tick")
   .onPublish(checkNewDisclosure);
 exports.createCompanyDict2 = functions.pubsub
   .topic("weekly-tick")
   .onPublish(require("./createCompanyDict"));
+
+exports.createSettlementDict = functions.pubsub
+  .topic("daily-tick")
+  .onPublish(createSettlementDict);
 
 exports.sendTopicFs = functions.firestore
   .document("disclosures/{key}")

@@ -49,14 +49,8 @@
 
 <ion-content fullscreen (ionScroll)="onScroll($event)">
   <ion-list [virtualScroll]="itemsAsync" approxItemHeight="90px">
-    <!-- <ion-list> -->
-    <!-- <ion-item *ngFor="let item of (items | async); trackBy: virtualTrack" [ngClass]="{active: item.select}" (tap)="viewDocument(item)"> -->
     <ion-item *virtualItem="let item" (tap)="deselectItemOrViewDocument($event, item)" (press)="switchSelectItem($event, item)"
       [ngClass]="{active: item.select}">
-      <!-- <ion-avatar item-start>
-        <ion-icon class="avatar-icon" name="folder"></ion-icon>
-      </ion-avatar> -->
-      <!-- <button item-end ion-button icon-only clear (click)="toggleExpand($event, item)"><ion-icon name="arrow-dropdown" class="dropdown-icon" [ngClass]="{toggled: item.expand}" ></ion-icon></button> -->
       <ion-note class="dropdown">
         <span *ngIf="item.view_count" ><ion-icon name="eye"></ion-icon>{{item.view_count}} | </span>
         <span *ngFor="let tag of item.tags | keys">{{tag}} | </span>
@@ -65,15 +59,6 @@
         <small>({{item.code}})</small>
       </h2>
       <p [ngClass]="{fade: !item.expand, nofade: item.expand}">{{item.title}}</p>
-      <!-- <div style="position:relative;top:-1em;right: 0;"><ion-note *ngFor="let tag of item.tags | keys" >{{tag}}</ion-note></div> -->
-      <!-- <div style="text-align: left; overflow-x:hidden" (tap)="viewDocument(item)" (press)="selectItem(item)" class="text">
-        <h2>{{item.company}}<small>({{item.code}})</small>
-          <ion-note>{{item.time | twitterTime }}</ion-note></h2>
-        <p style="white-space: normal">{{item.title}}</p>
-      </div>
-      <div style="display: flex; justify-content:flex-end;">
-        <button (tap)="addTag(tag)" *ngFor="let tag of item.tags | keys" ion-button small color="secondary" clear>{{tag}}</button>
-      </div> -->
     </ion-item>
   </ion-list>
   <div *ngIf="loading | async" style="display:flex;justify-content:center;">
