@@ -7,6 +7,7 @@ admin.initializeApp();
 import * as checkNewDisclosure from "./checkNewDisclosure";
 
 import createSettlementDict from "./createSettlementDict";
+import sendSettlementToTopic from "./sendSettlementToTopic";
 
 exports.checkNewDisclosure = functions.pubsub
   .topic("minutely5-tick")
@@ -18,6 +19,11 @@ exports.createCompanyDict2 = functions.pubsub
 exports.createSettlementDict = functions.pubsub
   .topic("daily-tick")
   .onPublish(createSettlementDict);
+
+// 毎朝8時に確認して送信する
+exports.sendSettlementToTopic = functions.pubsub
+  .topic("daily-8am-tick")
+  .onPublish(sendSettlementToTopic);
 
 exports.sendTopicFs = functions.firestore
   .document("disclosures/{key}")

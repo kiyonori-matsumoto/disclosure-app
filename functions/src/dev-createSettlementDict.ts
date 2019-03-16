@@ -1,3 +1,3 @@
 import { createSettlementDict } from "./lib/createSettlementDict";
 
-export default createSettlementDict("dev-companies");
+export default createSettlementDict("dev-settlements");

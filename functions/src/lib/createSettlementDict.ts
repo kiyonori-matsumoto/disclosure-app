@@ -63,7 +63,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
           .firestore()
           .collection(DB_PATH)
           .doc(_d.code),
-        { settlement: _d },
+        _d,
         { merge: true }
       )
     );
