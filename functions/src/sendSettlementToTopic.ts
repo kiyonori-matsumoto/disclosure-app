@@ -29,7 +29,13 @@ const sendSettlementToTopic = async () => {
       }
     };
   });
-  console.log(messages);
+  console.log(`sending ${messages.length} messages`);
+  console.log(messages[0]);
+  return Promise.all(
+    messages.map(msg =>
+      admin.messaging().sendToTopic(msg.notification.tag, msg)
+    )
+  );
 };
 
 export default sendSettlementToTopic;

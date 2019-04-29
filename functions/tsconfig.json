@@ -6,11 +6,11 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
+    "noUnusedParameters": false,
     "target": "es2015",
     "allowJs": true
   },
   "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+  "include": ["src"],
+  "exclude": ["**/__mocks__/**", "**/__tests__/**"]
 }

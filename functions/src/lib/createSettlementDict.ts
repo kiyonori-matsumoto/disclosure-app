@@ -1,11 +1,8 @@
 import * as admin from "firebase-admin";
 import * as rp from "request-promise-native";
 import * as cheerio from "cheerio";
-
 import * as xlsx from "xlsx";
-
 import * as _ from "lodash";
-
 import { URL } from "url";
 
 export const createSettlementDict = (DB_PATH: string) => async () => {
@@ -35,15 +32,21 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
             }
           )
         )
-        .then(obj =>
-          obj.map(e => ({
-            code: e["コード"],
-            schedule: e["発表予定日"],
-            name: e["会社名"],
-            settlementDate: e["決算期末"],
-            quote: e["種別"]
-          }))
-        )
+        .then(obj => {
+          return obj
+            .filter(e => (e["発表予定日"] as string).match(/\d{4}-\d{2}-\d{2}/))
+            .map(e => {
+              // const schedule = ((v: string) =>
+              //   v.match(/\d{4}-\d{2}-\d{2}/) ? v : "2000-01-01")(e["発表予定日"]);
+              return {
+                code: e["コード"],
+                schedule: e["発表予定日"],
+                name: e["会社名"],
+                settlementDate: e["決算期末"],
+                quote: e["種別"]
+              };
+            });
+        })
     );
   };
 

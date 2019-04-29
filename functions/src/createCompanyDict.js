@@ -71,7 +71,7 @@ const createCompanyDict = () => {
         .storage()
         .bucket()
         .file("companies.json")
-        .save(jsonStr, { gzip: true })
+        .save(jsonStr, { gzip: true, contentType: "application/json" })
     );
 };
 

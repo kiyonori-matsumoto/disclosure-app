@@ -7,11 +7,18 @@ admin.initializeApp();
 import * as checkNewDisclosure from "./checkNewDisclosure";
 
 import createSettlementDict from "./createSettlementDict";
+// import devCreateSettlementDict from "./dev-createSettlementDict";
 import sendSettlementToTopic from "./sendSettlementToTopic";
+import checkNewEdinet from "./checkNewEdinet";
+import sendEdinetToTopic from "./sendEdinetToTopic";
 
 exports.checkNewDisclosure = functions.pubsub
   .topic("minutely5-tick")
   .onPublish(checkNewDisclosure);
+exports.checkNewEdinet = functions.pubsub
+  .topic("minutely5-tick")
+  .onPublish(checkNewEdinet);
+
 exports.createCompanyDict2 = functions.pubsub
   .topic("weekly-tick")
   .onPublish(require("./createCompanyDict"));
@@ -19,6 +26,10 @@ exports.createCompanyDict2 = functions.pubsub
 exports.createSettlementDict = functions.pubsub
   .topic("daily-tick")
   .onPublish(createSettlementDict);
+
+// exports.devCreateSettlementDict = functions.pubsub
+//   .topic("daily-tick")
+//   .onPublish(devCreateSettlementDict);
 
 // 毎朝8時に確認して送信する
 exports.sendSettlementToTopic = functions.pubsub
@@ -34,6 +45,9 @@ exports.addTagFs = functions.firestore
 exports.saveDocumentFs = functions.firestore
   .document("disclosures/{key}")
   .onCreate(require("./saveDocument"));
+exports.sendEdinetToTopic = functions.firestore
+  .document("edinets/{key}")
+  .onCreate(sendEdinetToTopic);
 
 exports.listTopics = functions.https.onRequest(require("./listTopics"));
 
