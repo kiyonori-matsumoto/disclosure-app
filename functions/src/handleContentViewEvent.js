@@ -1,11 +1,29 @@
 const admin = require("firebase-admin");
 
-
 const handleContentViewEvent = (event, context) => {
   const db = admin.firestore();
 
-  if (event.params.content_type === 'edinet_pdf') {
-    return null;
+  if (event.params.content_type === "edinet_pdf") {
+    const DB_PATH = "edinets";
+    const document = event.params.item_id;
+    console.log("document", document);
+
+    const doc = db
+      .collection(DB_PATH)
+      .doc(document)
+      .get();
+
+    return doc.then(d => {
+      if (!d.exists) {
+        console.log(`${document} is not exists`);
+        return true;
+      }
+      const ref = d.ref;
+      const view_count = (d.data().view_count || 0) + 1;
+      console.log(`set ${document} view_count to ${view_count}`);
+
+      return ref.update({ view_count });
+    });
   } else {
     const DB_PATH = "disclosures";
     const document = event.params.item_id;

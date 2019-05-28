@@ -1,8 +1,13 @@
 import "jest";
 
 const docFn = jest.fn(() => query);
+const getFn = jest.fn();
 const query: jest.Mock = jest.fn(() => ({
-  doc: docFn
+  doc: docFn,
+  orderBy: query,
+  where: query,
+  limit: query,
+  get: getFn
 }));
 
 const setFn = jest.fn();
@@ -13,5 +18,6 @@ export const firestore = () => ({
     set: setFn,
     commit: commitFn
   })),
-  collection: query
+  collection: query,
+  settings: jest.fn()
 });

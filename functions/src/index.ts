@@ -4,7 +4,7 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
-import * as checkNewDisclosure from "./checkNewDisclosure";
+import { checkNewDisclosure } from "./checkNewDisclosure";
 
 import createSettlementDict from "./createSettlementDict";
 // import devCreateSettlementDict from "./dev-createSettlementDict";
@@ -12,9 +12,10 @@ import sendSettlementToTopic from "./sendSettlementToTopic";
 import checkNewEdinet from "./checkNewEdinet";
 import sendEdinetToTopic from "./sendEdinetToTopic";
 
-exports.checkNewDisclosure = functions.pubsub
+exports.checkNewDisclosure2 = functions.pubsub
   .topic("minutely5-tick")
   .onPublish(checkNewDisclosure);
+
 exports.checkNewEdinet = functions.pubsub
   .topic("minutely5-tick")
   .onPublish(checkNewEdinet);

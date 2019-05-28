@@ -42,7 +42,7 @@ const sendEdinetToTopic = async (
       if (!company) return null;
       const code = company.code.substring(0, 4);
 
-      return {
+      const d = {
         notification: {
           body: docDescription,
           tag: `code_${code}`,
@@ -52,14 +52,20 @@ const sendEdinetToTopic = async (
         data: {
           title: docDescription,
           code,
+          edinetCode: key,
           company: company.name,
+          type: "edinet",
           click_action: "FLUTTER_NOTIFICATION_CLICK"
-        },
-        topic: `'code_${code} in topics && '/topics/edinet' in topics`
+        }
       };
+      return admin
+        .messaging()
+        .sendToCondition(
+          `'code_${code}' in topics && 'edinet_notification' in topics`,
+          d
+        );
     })
-    .filter(notEmpty)
-    .map(d => admin.messaging().send(d, true));
+    .filter(notEmpty);
 
   return Promise.all(promises).then(console.log);
 };
