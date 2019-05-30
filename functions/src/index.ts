@@ -40,9 +40,9 @@ exports.sendSettlementToTopic = functions.pubsub
 exports.sendTopicFs = functions.firestore
   .document("disclosures/{key}")
   .onCreate(require("./sendTopic"));
-exports.addTagFs = functions.firestore
-  .document("disclosures/{key}")
-  .onCreate(require("./addTag"));
+// exports.addTagFs = functions.firestore
+//   .document("disclosures/{key}")
+//   .onCreate(require("./addTag"));
 exports.saveDocumentFs = functions.firestore
   .document("disclosures/{key}")
   .onCreate(require("./saveDocument"));
