@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Globals on 適時開示(TDNet) Notifier サポートサイト</title>
+    <title>Globals on 適時開示(TDNet / EDINet) Notifier サポートサイト</title>
     <link>https://disclosure-app.firebaseapp.com/global/</link>
-    <description>Recent content in Globals on 適時開示(TDNet) Notifier サポートサイト</description>
+    <description>Recent content in Globals on 適時開示(TDNet / EDINet) Notifier サポートサイト</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
     <lastBuildDate>Sun, 03 Dec 2017 16:13:50 +0900</lastBuildDate>
@@ -26,7 +26,7 @@
       <pubDate>Sun, 22 Oct 2017 21:51:54 +0900</pubDate>
       
       <guid>https://disclosure-app.firebaseapp.com/global/about/</guid>
-      <description>このサイトについて このサイトは、Androidアプリ「適時開示(TDNet) Notifier」のサポートサイトです。 適時開示(TDNet) N</description>
+      <description>このサイトについて このサイトは、Android アプリ「適時開示(TDNet / Edinet) Notifier」のサポートサイトです。 適時開示(TDNet /</description>
     </item>
     
   </channel>

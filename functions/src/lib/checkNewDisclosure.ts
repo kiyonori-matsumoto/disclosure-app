@@ -5,6 +5,7 @@ import * as moment from "moment";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { zeroPad } from "./util";
+import { Disclosure } from "../models/disclosure";
 
 // const TIME_MAX = 9999999999999;
 const TAGS = [
@@ -132,7 +133,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           a[e] = true; //Todo: そのうち'docTime'に変更する;
           return a;
         }, {});
-        const docData = {
+        const docData: Disclosure = {
           code: code,
           company: $(elem)
             .find(".kjName")

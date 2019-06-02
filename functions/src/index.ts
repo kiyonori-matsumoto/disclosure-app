@@ -5,6 +5,7 @@ import * as admin from "firebase-admin";
 admin.initializeApp();
 
 import { checkNewDisclosure } from "./checkNewDisclosure";
+import sendTopic from "./sendTopic";
 
 import createSettlementDict from "./createSettlementDict";
 // import devCreateSettlementDict from "./dev-createSettlementDict";
@@ -37,9 +38,9 @@ exports.sendSettlementToTopic = functions.pubsub
   .topic("daily-8am-tick")
   .onPublish(sendSettlementToTopic);
 
-exports.sendTopicFs = functions.firestore
+exports.sendTopicFs2 = functions.firestore
   .document("disclosures/{key}")
-  .onCreate(require("./sendTopic"));
+  .onCreate(sendTopic);
 // exports.addTagFs = functions.firestore
 //   .document("disclosures/{key}")
 //   .onCreate(require("./addTag"));

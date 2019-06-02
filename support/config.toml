@@ -1,7 +1,7 @@
 baseURL = "https://disclosure-app.firebaseapp.com/"
 languageCode = "ja-jp"
 hasCJKLanguage = true
-title = "適時開示(TDNet) Notifier サポートサイト"
+title = "適時開示(TDNet / EDINet) Notifier サポートサイト"
 theme = "hugo_theme_robust"
 
 googleAnalytics =  "UA-80739523-3"
