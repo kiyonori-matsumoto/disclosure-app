@@ -73,7 +73,7 @@ describe("lib/checkNewDisclosure", () => {
     console.log = jest.fn();
 
     await checkNewDisclosure("test-disclosures")(
-      {} as any,
+      { attributes: {} } as any,
       {
         timestamp: moment("2017-10-05T11:11:22").toISOString()
       } as any
@@ -85,6 +85,7 @@ describe("lib/checkNewDisclosure", () => {
       document: "140120171005486134",
       exchanges: "東",
       tags: { 業績予想: true }, // tagがつくこと
+      tags2: ["業績予想"],
       time: 1507204500129, // 最後が129個目のドキュメントなので129になること
       title: "業績予想の修正並びに中期経営計画の取り下げに関するお知らせ"
     });
@@ -113,7 +114,7 @@ describe("lib/checkNewDisclosure", () => {
     console.log = jest.fn();
 
     await checkNewDisclosure("test-disclosures")(
-      {} as any,
+      { attributes: {} } as any,
       {
         timestamp: moment("2017-10-05T11:11:22").toISOString()
       } as any
@@ -125,7 +126,7 @@ describe("lib/checkNewDisclosure", () => {
     getMock.mockResolvedValue({ docs: [] });
     console.log = jest.fn();
     await checkNewDisclosure("test-disclosures")(
-      {} as any,
+      { attributes: {} } as any,
       {
         timestamp: moment("2017-10-14T11:11:22").toISOString()
       } as any
@@ -139,7 +140,7 @@ describe("lib/checkNewDisclosure", () => {
     console.log = jest.fn();
     await expect(
       checkNewDisclosure("test-disclosures")(
-        {} as any,
+        { attributes: {} } as any,
         {
           timestamp: moment("2017-10-13T11:11:22").toISOString()
         } as any
@@ -166,7 +167,7 @@ describe("lib/checkNewDisclosure", () => {
       ]
     });
     await checkNewDisclosure("test-disclosures")(
-      {} as any,
+      { attributes: {} } as any,
       {
         timestamp: moment("2018-05-11T23:00:00").toISOString()
       } as any

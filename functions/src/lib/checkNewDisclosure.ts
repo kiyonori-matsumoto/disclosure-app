@@ -127,7 +127,8 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
         const title = $(elem)
           .find(".kjTitle a")
           .text();
-        const tags = TAGS.filter(e => title.match(e)).reduce<{
+        const tags2 = TAGS.filter(e => title.match(e));
+        const tags = tags2.reduce<{
           [key: string]: boolean;
         }>((a, e) => {
           a[e] = true; //Todo: そのうち'docTime'に変更する;
@@ -140,6 +141,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
             .text(),
           title,
           tags,
+          tags2,
           document: doc,
           exchanges: $(elem)
             .find(".kjPlace")
