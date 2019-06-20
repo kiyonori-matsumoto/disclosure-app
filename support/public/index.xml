@@ -6,7 +6,7 @@
     <description>Recent content on 適時開示(TDNet / EDINet) Notifier サポートサイト</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Mon, 03 Jun 2019 00:12:54 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 20 Jun 2019 00:12:54 +0900</lastBuildDate>
     
 	<atom:link href="https://disclosure-app.firebaseapp.com/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>1.1 の新機能</title>
       <link>https://disclosure-app.firebaseapp.com/whatsnew/1.1/</link>
-      <pubDate>Mon, 03 Jun 2019 00:12:54 +0900</pubDate>
+      <pubDate>Thu, 20 Jun 2019 00:12:54 +0900</pubDate>
       
       <guid>https://disclosure-app.firebaseapp.com/whatsnew/1.1/</guid>
       <description>お気に入りと通知を共通にしました。 お気に入りに入れると自動的に通知されるようになりました。また、お気に入りから解除すると自動的に通知が解除さ</description>
