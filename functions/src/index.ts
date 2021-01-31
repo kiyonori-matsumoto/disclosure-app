@@ -41,9 +41,6 @@ exports.sendSettlementToTopic = functions.pubsub
 exports.sendTopicFs2 = functions.firestore
   .document("disclosures/{key}")
   .onCreate(sendTopic);
-// exports.addTagFs = functions.firestore
-//   .document("disclosures/{key}")
-//   .onCreate(require("./addTag"));
 exports.saveDocumentFs = functions.firestore
   .document("disclosures/{key}")
   .onCreate(require("./saveDocument"));
