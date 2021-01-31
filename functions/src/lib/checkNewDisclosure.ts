@@ -15,7 +15,8 @@ const TAGS = [
   "業績予想",
   "日々の開示事項",
   "自己株式",
-  "新株"
+  "短信",
+  "新株",
 ];
 
 const firestore = admin.firestore();
@@ -28,14 +29,8 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
   const time = moment(
     snapshot.attributes.timestampForTest || context.timestamp
   ).utcOffset(9);
-  const start = moment(time)
-    .utcOffset(9)
-    .startOf("date")
-    .valueOf();
-  const end = moment(start)
-    .utcOffset(9)
-    .add(1, "days")
-    .valueOf();
+  const start = moment(time).utcOffset(9).startOf("date").valueOf();
+  const end = moment(start).utcOffset(9).add(1, "days").valueOf();
   console.log(`viewing: ${time.format("YYYYMMDD")}, ${start}, ${end}`);
 
   const lastDisclosures = await firestore
@@ -46,9 +41,9 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
     .limit(1)
     .get();
 
-  const lastDocuments = lastDisclosures.docs.map(doc => doc.data().document);
+  const lastDocuments = lastDisclosures.docs.map((doc) => doc.data().document);
   const lastCount = lastDisclosures.docs
-    .map(doc => doc.data().time % 1000)
+    .map((doc) => doc.data().time % 1000)
     .reduce((a, e) => e, 0);
   console.log(`lastCount = ${lastCount}`);
 
@@ -99,9 +94,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
     const m = $("table#main-list-table tr");
     m.each((j, elem) => {
       const doc = (
-        $(elem)
-          .find(".kjTitle a")
-          .attr("href") || "NOMATCH"
+        $(elem).find(".kjTitle a").attr("href") || "NOMATCH"
       ).replace(/\.pdf/, "");
       if (lastDocuments.indexOf(doc) < 0) {
         // not found.
@@ -111,11 +104,8 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           .find(".kjTime")
           .text()
           .split(":")
-          .map(e => parseInt(e, 10));
-        const code = $(elem)
-          .find(".kjCode")
-          .text()
-          .slice(0, 4);
+          .map((e) => parseInt(e, 10));
+        const code = $(elem).find(".kjCode").text().slice(0, 4);
         const docTime =
           time
             .clone()
@@ -124,10 +114,8 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
             .second(0)
             .millisecond(0)
             .valueOf() + count;
-        const title = $(elem)
-          .find(".kjTitle a")
-          .text();
-        const tags2 = TAGS.filter(e => title.match(e));
+        const title = $(elem).find(".kjTitle a").text();
+        const tags2 = TAGS.filter((e) => title.match(e));
         const tags = tags2.reduce<{
           [key: string]: boolean;
         }>((a, e) => {
@@ -136,18 +124,13 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
         }, {});
         const docData: Disclosure = {
           code: code,
-          company: $(elem)
-            .find(".kjName")
-            .text(),
+          company: $(elem).find(".kjName").text(),
           title,
           tags,
           tags2,
           document: doc,
-          exchanges: $(elem)
-            .find(".kjPlace")
-            .text()
-            .trim(),
-          time: docTime
+          exchanges: $(elem).find(".kjPlace").text().trim(),
+          time: docTime,
         };
         count--;
 
