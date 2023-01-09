@@ -13,8 +13,8 @@
     "co": "^4.6.0",
     "csv-parse": "^1.2.4",
     "encoding": "^0.1.12",
-    "firebase-admin": "^5.4.1",
-    "firebase-functions": "^0.7.1",
+    "firebase-admin": "^11.4.1",
+    "firebase-functions": "^4.1.1",
     "moment": "^2.19.1",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5"
