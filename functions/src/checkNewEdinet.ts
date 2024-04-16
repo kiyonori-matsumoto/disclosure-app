@@ -9,7 +9,9 @@ const DB_PATH = "edinets";
 
 const fetchAndMapEdinet = async (date: string) => {
   const payload = await rp.get(
-    `https://disclosure.edinet-fsa.go.jp/api/v1/documents.json?date=${date}&type=2`,
+    `https://api.edinet-fsa.go.jp/api/v2/documents.json?date=${date}&type=2&Subscription-Key=${
+      functions.config().edinet.apikey
+    }`,
     { rejectUnauthorized: false, json: true }
   );
   return (payload.results as any[])
@@ -28,7 +30,7 @@ const fetchAndMapEdinet = async (date: string) => {
           issuerEdinetCode,
           subjectEdinetCode,
           subsidiaryEdinetCode,
-          pdfFlag
+          pdfFlag,
         } = result;
         const [dateStr] = submitDateTime.split(" ");
         const time = moment(submitDateTime).unix();
@@ -46,7 +48,7 @@ const fetchAndMapEdinet = async (date: string) => {
         }
 
         if (subsidiaryEdinetCodes.length > 0) {
-          subsidiaryEdinetCodes.forEach(c => (map[c] = time));
+          subsidiaryEdinetCodes.forEach((c) => (map[c] = time));
         }
 
         return {
@@ -64,7 +66,7 @@ const fetchAndMapEdinet = async (date: string) => {
           subjectEdinetCode,
           subsidiaryEdinetCode,
           pdfFlag,
-          map
+          map,
         };
       } catch (e) {
         console.error(e);
@@ -82,10 +84,7 @@ const checkNewEdinet = async (
   const time_msg = _.get(message, "json.timestamp");
   const today = moment(time_msg ? time_msg : context!.timestamp).utcOffset(9);
   const start = today.startOf("days").format("YYYY-MM-DD");
-  const end = today
-    .startOf("days")
-    .add(1, "day")
-    .format("YYYY-MM-DD");
+  const end = today.startOf("days").add(1, "day").format("YYYY-MM-DD");
 
   console.log(`viewing: ${today.format("llll")}, start: ${start}, end: ${end}`);
 
@@ -101,7 +100,7 @@ const checkNewEdinet = async (
 
   const [data, lastEdinetDoc] = await Promise.all([
     fetchAndMapEdinet(start),
-    getLastEdinetDoc()
+    getLastEdinetDoc(),
   ]);
 
   const lastSeqNumber = lastEdinetDoc.empty
@@ -114,20 +113,17 @@ const checkNewEdinet = async (
     }`
   );
 
-  const saveData = _.chunk(data.filter(e => e.seqNumber > lastSeqNumber), 500);
+  const saveData = _.chunk(
+    data.filter((e) => e.seqNumber > lastSeqNumber),
+    500
+  );
 
   console.log(`trying to write ${_.get(saveData, "[0].length")} files`);
 
-  const transaction = saveData.map(d => {
+  const transaction = saveData.map((d) => {
     const batch = admin.firestore().batch();
-    d.forEach(_d =>
-      batch.set(
-        admin
-          .firestore()
-          .collection(DB_PATH)
-          .doc(_d.docID),
-        _d
-      )
+    d.forEach((_d) =>
+      batch.set(admin.firestore().collection(DB_PATH).doc(_d.docID), _d)
     );
     return batch.commit();
   });
