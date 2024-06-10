@@ -12,6 +12,8 @@ import createSettlementDict from "./createSettlementDict";
 import sendSettlementToTopic from "./sendSettlementToTopic";
 import checkNewEdinet from "./checkNewEdinet";
 import sendEdinetToTopic from "./sendEdinetToTopic";
+import getDownloadUrlEdinet from "./downloadNewEdinet";
+import createCompanyDict from "./createCompanyDict";
 
 exports.checkNewDisclosure2 = functions.pubsub
   .topic("minutely5-tick")
@@ -21,9 +23,10 @@ exports.checkNewEdinet = functions.pubsub
   .topic("minutely5-tick")
   .onPublish(checkNewEdinet);
 
-exports.createCompanyDict2 = functions.pubsub
-  .topic("weekly-tick")
-  .onPublish(require("./createCompanyDict"));
+exports.createCompanyDict2 = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 300 })
+  .pubsub.topic("weekly-tick")
+  .onPublish(createCompanyDict);
 
 exports.createSettlementDict = functions.pubsub
   .topic("daily-tick")
@@ -49,6 +52,8 @@ exports.sendEdinetToTopic = functions.firestore
   .onCreate(sendEdinetToTopic);
 
 exports.listTopics = functions.https.onRequest(require("./listTopics"));
+
+exports.getDownloadUrlEdinet = functions.https.onRequest(getDownloadUrlEdinet);
 
 exports.changeTopic = functions.database
   .ref("/user/topics/{userId}")

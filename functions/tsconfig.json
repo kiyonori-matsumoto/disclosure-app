@@ -10,7 +10,9 @@
     "moduleResolution": "node",
     "target": "es2015",
     "allowJs": true,
-    "types": ["jest"]
+    "types": ["jest", "node"],
+    "useUnknownInCatchVariables": false,
+    "skipLibCheck": true
   },
   "compileOnSave": true,
   "include": ["src"],
