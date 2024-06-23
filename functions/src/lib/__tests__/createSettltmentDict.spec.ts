@@ -5,78 +5,75 @@ import * as fs from "fs";
 jest.mock("firebase-admin");
 jest.mock("request-promise-native");
 
-import * as rp from "request-promise-native";
+// import * as rp from "request-promise-native";
 import * as admin from "firebase-admin";
 
 import { createSettlementDict } from "../createSettlementDict";
+import axios from "axios";
 
 const indexHtml = fs.readFileSync(__dirname + "/res/index.html");
-const kessan01 = fs.readFileSync(__dirname + "/res/kessan01_0301.xls"); // 177data, 未定=6
-const kessan02 = fs.readFileSync(__dirname + "/res/kessan02_0315.xls"); // 389data, 未定=18
-const kessan03 = fs.readFileSync(__dirname + "/res/kessan03_0315.xls"); // 2250data, 未定=91
+const kessan04 = fs.readFileSync(__dirname + "/res/kessan04_0607.xlsx"); // 2250data, 未定=91
+const kessan05 = fs.readFileSync(__dirname + "/res/kessan05_0621.xlsx"); // 451data, 未定=8
 
 describe("lib/createSettlementDict", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (rp.get as any) = jest.fn().mockImplementation((url, option) => {
+    (axios.get as any) = jest.fn().mockImplementation((url, option) => {
       if (
         url ===
         "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/index.html"
       ) {
-        return Promise.resolve(indexHtml);
+        return Promise.resolve({ data: indexHtml });
       }
       if (
         url ===
-        "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/tvdivq0000001ofb-att/kessan01_0301.xls"
+        "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/tvdivq0000001ofb-att/kessan04_0607.xlsx"
       ) {
-        return Promise.resolve(kessan01);
+        return Promise.resolve({ data: kessan04 });
       }
       if (
         url ===
-        "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/tvdivq0000001ofb-att/kessan02_0315.xls"
+        "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/tvdivq0000001ofb-att/kessan05_0621.xlsx"
       ) {
-        return Promise.resolve(kessan02);
-      }
-      if (
-        url ===
-        "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/tvdivq0000001ofb-att/kessan03_0315.xls"
-      ) {
-        return Promise.resolve(kessan03);
+        return Promise.resolve({ data: kessan05 });
       }
       return Promise.reject("not found");
     });
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("can execute", async () => {
     await createSettlementDict("test-settlement")();
-    expect(admin.firestore().batch().set).toBeCalledTimes(2701);
-    expect(admin.firestore().collection("d").doc).toBeCalledTimes(2701);
+    expect(admin.firestore().batch().set).toBeCalledTimes(659);
+    expect(admin.firestore().collection("d").doc).toBeCalledTimes(659);
     expect(admin.firestore().batch().set).nthCalledWith(
       1,
       expect.anything(),
       {
-        code: "2198",
-        schedule: "2019-03-01",
-        name: "アイ・ケイ・ケイ",
-        settlementDate: "10月31日",
-        quote: "第１四半期"
+        code: "4707",
+        schedule: "2024-05-24",
+        name: "キタック",
+        settlementDate: "10月20日",
+        quote: "第２四半期",
       },
       { merge: true }
     );
-    expect(admin.firestore().collection("d").doc).nthCalledWith(1, "2198");
-    expect(admin.firestore().collection("d").doc).nthCalledWith(172, "3391");
+    expect(admin.firestore().collection("d").doc).nthCalledWith(1, "4707");
+    expect(admin.firestore().collection("d").doc).nthCalledWith(172, "4075");
     expect(admin.firestore().batch().set).nthCalledWith(
       172,
       expect.anything(),
       {
-        code: "3391",
-        schedule: "2019-03-18",
-        name: "ツルハホールディングス",
-        settlementDate: "5月15日",
-        quote: "第３四半期"
+        code: "4075",
+        schedule: "2024-06-14",
+        name: "ブレインズテクノロジー",
+        settlementDate: "7月31日",
+        quote: "第３四半期",
       },
       { merge: true }
     );
-    expect(admin.firestore().batch().commit).toBeCalledTimes(6);
+    expect(admin.firestore().batch().commit).toBeCalledTimes(2);
   });
 });
