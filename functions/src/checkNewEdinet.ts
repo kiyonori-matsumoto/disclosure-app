@@ -1,6 +1,6 @@
 import * as rp from "request-promise-native";
 import * as moment from "moment";
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import * as _ from "lodash";
 import { zeroPad, notEmpty } from "./lib/util";

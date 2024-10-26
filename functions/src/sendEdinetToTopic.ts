@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import { notEmpty } from "./lib/util";
 
 let companies: any = null;
@@ -37,7 +37,7 @@ const sendEdinetToTopic = async (
   }
 
   const promises = Object.keys(map)
-    .map(key => {
+    .map((key) => {
       const company = companies[key];
       if (!company) return null;
       const code = company.code.substring(0, 4);
@@ -47,7 +47,7 @@ const sendEdinetToTopic = async (
           body: docDescription,
           tag: `code_${code}`,
           color: "#006064",
-          title: `新しいEdinet ${company.name}(${code})`
+          title: `新しいEdinet ${company.name}(${code})`,
         },
         data: {
           title: docDescription,
@@ -55,15 +55,14 @@ const sendEdinetToTopic = async (
           edinetCode: key,
           company: company.name,
           type: "edinet",
-          click_action: "FLUTTER_NOTIFICATION_CLICK"
-        }
+          click_action: "FLUTTER_NOTIFICATION_CLICK",
+        },
       };
-      return admin
-        .messaging()
-        .sendToCondition(
-          `'code_${code}' in topics && 'edinet_notification' in topics`,
-          d
-        );
+      return admin.messaging().send({
+        condition: `'code_${code}' in topics && 'edinet_notification' in topics`,
+        notification: d.notification,
+        data: d.data,
+      });
     })
     .filter(notEmpty);
 

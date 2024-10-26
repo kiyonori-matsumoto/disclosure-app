@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import { Disclosure } from "./models/disclosure";
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import base64url from "base64url";
 
 const createMessageTags = (topic: string, data: Disclosure, tag: string) => {
@@ -10,8 +10,8 @@ const createMessageTags = (topic: string, data: Disclosure, tag: string) => {
         body: `${data.title}`,
         tag: topic,
         color: "#311B92",
-        title: `新しい開示情報 ${tag} - ${data.company}`
-      }
+        title: `新しい開示情報 ${tag} - ${data.company}`,
+      },
     },
     data: {
       title: `${data.title}`,
@@ -19,13 +19,13 @@ const createMessageTags = (topic: string, data: Disclosure, tag: string) => {
       company: `${data.company}`,
       click_action: "FLUTTER_NOTIFICATION_CLICK",
       tag,
-      type: "tag"
+      type: "tag",
     },
     notification: {
       body: `${data.title}`,
-      title: `新しい開示情報 ${tag} - ${data.company}`
+      title: `新しい開示情報 ${tag} - ${data.company}`,
     },
-    topic: topic
+    topic: topic,
   };
 };
 
@@ -40,21 +40,21 @@ const createMessage = (
         body: `${data.title}`,
         tag: topic,
         color: "#311B92",
-        title: `新しい開示情報 ${data.company}(${data.code})`
-      }
+        title: `新しい開示情報 ${data.company}(${data.code})`,
+      },
     },
     data: {
       title: `${data.title}`,
       code: `${data.code}`,
       company: `${data.company}`,
       click_action: "FLUTTER_NOTIFICATION_CLICK",
-      ...additionals
+      ...additionals,
     },
     notification: {
       body: `${data.title}`,
-      title: `新しい開示情報 ${data.company}(${data.code})`
+      title: `新しい開示情報 ${data.company}(${data.code})`,
     },
-    topic: topic
+    topic: topic,
   };
 };
 
@@ -66,7 +66,7 @@ const sendTopic = (
   if (data === undefined) return true;
   console.log(data.title, data.code, data.noSend, data.company);
   if (data.noSend) return true;
-  const tagMessages = (data.tags2 || []).map(e => {
+  const tagMessages = (data.tags2 || []).map((e) => {
     const b64 = base64url.encode(e);
     return createMessageTags(`tags_${b64}`, data, e);
   });
@@ -77,8 +77,8 @@ const sendTopic = (
 
   return admin
     .messaging()
-    .sendAll(messages)
-    .then(d => console.log(JSON.stringify(d)));
+    .sendEach(messages)
+    .then((d) => console.log(JSON.stringify(d)));
 };
 
 export default sendTopic;
