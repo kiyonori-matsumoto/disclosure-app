@@ -14,6 +14,7 @@ import checkNewEdinet from "./checkNewEdinet";
 import sendEdinetToTopic from "./sendEdinetToTopic";
 import getDownloadUrlEdinet from "./downloadNewEdinet";
 import createCompanyDict from "./createCompanyDict";
+import { listTopics } from "./listTopics";
 
 exports.checkNewDisclosure2 = functions.pubsub
   .topic("minutely5-tick")
@@ -51,7 +52,7 @@ exports.sendEdinetToTopic = functions.firestore
   .document("edinets/{key}")
   .onCreate(sendEdinetToTopic);
 
-exports.listTopics = functions.https.onRequest(require("./listTopics"));
+exports.listTopics = functions.https.onRequest(listTopics);
 
 exports.getDownloadUrlEdinet = functions.https.onRequest(getDownloadUrlEdinet);
 
