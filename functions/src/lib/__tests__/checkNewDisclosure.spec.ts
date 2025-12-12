@@ -47,7 +47,7 @@ describe("lib/checkNewDisclosure", () => {
       ) {
         return Promise.reject(new errors.StatusCodeError(500, "server error"));
       }
-      return Promise.reject("not found");
+      return Promise.reject(new errors.StatusCodeError(404, "not found"));
     });
     getMock = admin.firestore().collection("d").get as any;
   });
@@ -169,7 +169,7 @@ describe("lib/checkNewDisclosure", () => {
     await checkNewDisclosure("test-disclosures")(
       { attributes: {} } as any,
       {
-        timestamp: moment("2018-05-11T23:00:00").toISOString()
+        timestamp: moment("2018-05-11T12:00:00").toISOString()
       } as any
     );
 
