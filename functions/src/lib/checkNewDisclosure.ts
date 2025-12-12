@@ -1,6 +1,6 @@
-import * as rp from "request-promise-native";
+import axios from "axios";
 import * as cheerio from "cheerio";
-import * as moment from "moment";
+import moment from "moment";
 
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
@@ -56,14 +56,16 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
 
     let data;
     try {
-      data = await rp.get(
+      const res = await axios.get(
         `https://www.release.tdnet.info/inbs/I_list_${zeroPad(
           i,
           3
-        )}_${time.format("YYYYMMDD")}.html`
+        )}_${time.format("YYYYMMDD")}.html`,
+        { responseType: "text" }
       );
+      data = res.data;
     } catch (err) {
-      if (err.statusCode === 404) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
         console.log(err);
         if (matched) {
           throw err;

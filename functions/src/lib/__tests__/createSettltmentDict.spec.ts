@@ -3,9 +3,8 @@ import "jest";
 import * as fs from "fs";
 
 jest.mock("firebase-admin");
-jest.mock("request-promise-native");
+jest.mock("axios");
 
-// import * as rp from "request-promise-native";
 import * as admin from "firebase-admin";
 
 import { createSettlementDict } from "../createSettlementDict";

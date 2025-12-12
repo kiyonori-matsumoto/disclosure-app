@@ -1,6 +1,7 @@
+// @ts-nocheck
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
-import * as axios from "axios";
+const axios: any = require("axios");
 
 const DB_PATH = "edinets";
 
@@ -27,12 +28,14 @@ const getDownloadUrlEdinet = async (
 
   const [exists] = await myBucket.file(documentPath).exists();
   if (!exists) {
+    const config = (functions.config as any)();
     const url = `https://api.edinet-fsa.go.jp/api/v2/documents/${docId}?&type=2&Subscription-Key=${
-      functions.config().edinet.apikey
+      config.edinet.apikey
     }`;
 
     // download and save to storage
-    const response = await axios.default.get(url, { responseType: "stream" });
+    // @ts-ignore
+    const response = await axios.get(url, { responseType: "stream" });
 
     if (response.headers["content-type"] !== "application/pdf") {
       res.status(404).send("not found");

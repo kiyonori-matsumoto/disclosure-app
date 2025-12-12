@@ -12,7 +12,8 @@
     "allowJs": true,
     "types": ["jest", "node"],
     "useUnknownInCatchVariables": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "compileOnSave": true,
   "include": ["src"],

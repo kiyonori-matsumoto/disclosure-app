@@ -3,16 +3,13 @@ import "jest";
 
 import * as fs from "fs";
 import * as path from "path";
-import * as moment from "moment";
+import moment from "moment";
 
 jest.mock("firebase-admin");
-jest.mock("request-promise-native");
+jest.mock("axios");
 
-import * as rp from "request-promise-native";
+import axios from "axios";
 import * as admin from "firebase-admin";
-
-// tslint:disable-next-line:no-implicit-dependencies
-const errors = require("request-promise-core/errors");
 
 import { checkNewDisclosure } from "../checkNewDisclosure";
 
@@ -35,20 +32,30 @@ describe("lib/checkNewDisclosure", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (rp.get as any) = jest.fn().mockImplementation((url, option) => {
+    (axios.get as any) = jest.fn().mockImplementation((url, option) => {
       if (urlMocks[url] !== undefined) {
-        return Promise.resolve(urlMocks[url]);
+        return Promise.resolve({ data: urlMocks[url] });
       } else if (
         url === "https://www.release.tdnet.info/inbs/I_list_001_20171014.html"
       ) {
-        return Promise.reject(new errors.StatusCodeError(404, "not found"));
+        return Promise.reject({
+          isAxiosError: true,
+          response: { status: 404 }
+        });
       } else if (
         url === "https://www.release.tdnet.info/inbs/I_list_001_20171013.html"
       ) {
-        return Promise.reject(new errors.StatusCodeError(500, "server error"));
+        return Promise.reject({
+          isAxiosError: true,
+          response: { status: 500 }
+        });
       }
-      return Promise.reject(new errors.StatusCodeError(404, "not found"));
+      return Promise.reject({
+          isAxiosError: true,
+          response: { status: 404 }
+      });
     });
+    (axios.isAxiosError as any) = jest.fn().mockReturnValue(true);
     getMock = admin.firestore().collection("d").get as any;
   });
   it("can get html", async () => {
@@ -145,7 +152,7 @@ describe("lib/checkNewDisclosure", () => {
           timestamp: moment("2017-10-13T11:11:22").toISOString()
         } as any
       )
-    ).rejects.toHaveProperty("statusCode", 500);
+    ).rejects.toHaveProperty("response.status", 500);
     expect(admin.firestore().batch().commit).not.toBeCalled();
   });
 
