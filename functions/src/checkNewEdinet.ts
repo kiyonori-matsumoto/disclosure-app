@@ -1,19 +1,24 @@
-import * as rp from "request-promise-native";
-import * as moment from "moment";
+// @ts-ignore
+import axios from "axios";
+import * as https from "https";
+import moment from "moment";
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
-import * as _ from "lodash";
-import { zeroPad, notEmpty } from "./lib/util";
+import { zeroPad, notEmpty, chunk } from "./lib/util";
 
 const DB_PATH = "edinets";
 
 const fetchAndMapEdinet = async (date: string) => {
-  const payload = await rp.get(
-    `https://api.edinet-fsa.go.jp/api/v2/documents.json?date=${date}&type=2&Subscription-Key=${
-      functions.config().edinet.apikey
-    }`,
-    { rejectUnauthorized: false, json: true }
-  );
+  const config = (functions.config as any)();
+  const url = `https://api.edinet-fsa.go.jp/api/v2/documents.json?date=${date}&type=2&Subscription-Key=${
+    config.edinet.apikey
+  }`;
+  // @ts-ignore
+  const res = await axios.get(url, {
+    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+    responseType: "json",
+  });
+  const payload = res.data;
   return (payload.results as any[])
     .map((result: { [key: string]: any }) => {
       try {
@@ -81,7 +86,7 @@ const checkNewEdinet = async (
   message?: functions.pubsub.Message,
   context?: { timestamp: string }
 ) => {
-  const time_msg = _.get(message, "json.timestamp");
+  const time_msg = message?.json?.timestamp;
   const today = moment(time_msg ? time_msg : context!.timestamp).utcOffset(9);
   const start = today.startOf("days").format("YYYY-MM-DD");
   const end = today.startOf("days").add(1, "day").format("YYYY-MM-DD");
@@ -113,12 +118,12 @@ const checkNewEdinet = async (
     }`
   );
 
-  const saveData = _.chunk(
+  const saveData = chunk(
     data.filter((e) => e.seqNumber > lastSeqNumber),
     500
   );
 
-  console.log(`trying to write ${_.get(saveData, "[0].length")} files`);
+  console.log(`trying to write ${saveData[0]?.length} files`);
 
   const transaction = saveData.map((d) => {
     const batch = admin.firestore().batch();

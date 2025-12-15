@@ -3,7 +3,7 @@ import * as os from "os";
 import * as fs from "fs";
 import * as unzipper from "unzipper";
 import path = require("path");
-import * as iconv from "iconv-lite";
+import iconv from "iconv-lite";
 import { parse } from "csv-parse/sync";
 import * as admin from "firebase-admin";
 

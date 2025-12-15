@@ -1,9 +1,9 @@
 import * as admin from "firebase-admin";
 import * as cheerio from "cheerio";
 import * as xlsx from "xlsx";
-import * as _ from "lodash";
 import { URL } from "url";
 import axios from "axios";
+import { chunk } from "./util";
 
 export const createSettlementDict = (DB_PATH: string) => async () => {
   const resIndex = await axios.get(
@@ -13,7 +13,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
 
   const urls = $("table.overtable a")
     .map((i, elem) => elem.attribs["href"])
-    .get() as string[];
+    .get();
 
   const formatDate = (date: string) => {
     if (!date) return "";
@@ -76,10 +76,10 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
   const objs = await Promise.all(urls.map(registerObjects));
 
   // 500件毎にデータをまとめる(firestoreの書き込み制限)
-  const _allData = _.flatten(objs).filter((e) => !!e.code);
+  const _allData = objs.flat().filter((e) => !!e.code);
   console.log(`total datas to register: ${_allData.length}`);
 
-  const datas = _.chunk(_allData, 500);
+  const datas = chunk(_allData, 500);
 
   const transaction = datas.map((d) => {
     const batch = admin.firestore().batch();

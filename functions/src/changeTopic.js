@@ -1,21 +1,26 @@
 const admin = require('firebase-admin');
-const _ = require('lodash');
 
-const changeTopic = (event) => {
-  const uid = event.params.userId;
+const changeTopic = (change, context) => {
+  const uid = context.params.userId;
   return admin.database().ref(`/user/tokens/${uid}`).once('value')
-  .then(token => {
-    const current = _.keys(event.current.val()).filter(e => e);
-    const previous = _.keys(event.previous.val()).filter(e => e);
-    const added = _.difference(current - previous);
-    const deleted = _.difference(previous - current);
-    
-    const promises = []
+  .then(tokenSnapshot => {
+    const token = tokenSnapshot.val();
+    if (!token) return null;
 
-    promises = promises.concat(
-      added.map(code => admin.messaging().subscribeToTopic(token, code)),
-      deleted.map(code => admin.messaging().unsubscribeFromTopic(token, code))
-    );
+    const currentObj = change.after.val() || {};
+    const previousObj = change.before.val() || {};
+
+    const current = Object.keys(currentObj).filter(e => e);
+    const previous = Object.keys(previousObj).filter(e => e);
+    
+    const added = current.filter(c => !previous.includes(c));
+    const deleted = previous.filter(c => !current.includes(c));
+
+    const promises = [];
+
+    added.forEach(code => promises.push(admin.messaging().subscribeToTopic(token, code)));
+    deleted.forEach(code => promises.push(admin.messaging().unsubscribeFromTopic(token, code)));
+
     return Promise.all(promises);
   })
 }

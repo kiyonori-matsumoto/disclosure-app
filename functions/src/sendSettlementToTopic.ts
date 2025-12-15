@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import * as moment from "moment";
+import moment from "moment";
 
 const settlementToStr = (d: any) =>
   `${d["name"]}の決算(${d["quote"]})は本日の予定です！`;

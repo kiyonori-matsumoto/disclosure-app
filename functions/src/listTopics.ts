@@ -1,4 +1,4 @@
-import * as axios from "axios";
+import axios from "axios";
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 
@@ -19,7 +19,7 @@ export const listTopics = async (
   }
 
   try {
-    const response = await axios.default.get(url, {
+    const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token.access_token}`,
         access_token_auth: "true",
@@ -30,7 +30,7 @@ export const listTopics = async (
 
     res.json(response.data.rel);
   } catch (err) {
-    if (axios.default.isAxiosError(err)) {
+    if (axios.isAxiosError(err)) {
       if (err.status === 400) {
         res.json({});
         return;

@@ -21,9 +21,9 @@ jest.mock("firebase-admin", () => {
 // Need to add batch() to firestore mock
 (admin.firestore as any).batch = jest.fn();
 
-jest.mock("request-promise-native");
+jest.mock("axios");
 
-import * as rp from "request-promise-native";
+import axios from "axios";
 import checkNewEdinet from "../checkNewEdinet";
 
 describe("checkNewEdinet", () => {
@@ -41,7 +41,7 @@ describe("checkNewEdinet", () => {
   });
 
   it("should fetch edinet data and save new documents", async () => {
-    // Mock request-promise-native
+    // Mock axios
     const mockEdinetResponse = {
       metadata: {
         title: "提出書類一覧及びメタデータ",
@@ -89,7 +89,7 @@ describe("checkNewEdinet", () => {
       ]
     };
 
-    (rp.get as any) = jest.fn().mockResolvedValue(mockEdinetResponse);
+    (axios.get as any) = jest.fn().mockResolvedValue({ data: mockEdinetResponse });
 
     // Mock Firestore get for last processed document
     // Case: No previous documents (start from 0)
@@ -123,8 +123,8 @@ describe("checkNewEdinet", () => {
     const context = { timestamp: "2024-05-30T12:00:00.000Z" };
     await checkNewEdinet(undefined, context);
 
-    // Verify rp.get was called
-    expect(rp.get).toHaveBeenCalled();
+    // Verify axios.get was called
+    expect(axios.get).toHaveBeenCalled();
 
     // Verify firestore save
     expect(firestoreMock.batch).toHaveBeenCalled();
@@ -133,7 +133,7 @@ describe("checkNewEdinet", () => {
   });
 
     it("should filter out already processed documents", async () => {
-    // Mock request-promise-native
+    // Mock axios
     const mockEdinetResponse = {
       results: [
         {
@@ -168,7 +168,7 @@ describe("checkNewEdinet", () => {
         }
       ]
     };
-    (rp.get as any) = jest.fn().mockResolvedValue(mockEdinetResponse);
+    (axios.get as any) = jest.fn().mockResolvedValue({ data: mockEdinetResponse });
 
     // Mock Firestore get for last processed document
     // Case: Last processed seqNumber is 10
