@@ -117,7 +117,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
             .millisecond(0)
             .valueOf() + count;
         const title = $(elem).find(".kjTitle a").text();
-        const tags2 = TAGS.filter((e) => title.match(e));
+        const tags2 = TAGS.filter((e) => title.includes(e));
         const tags = tags2.reduce<{
           [key: string]: boolean;
         }>((a, e) => {
