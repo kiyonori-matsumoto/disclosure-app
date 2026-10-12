@@ -123,8 +123,11 @@ describe("checkNewEdinet", () => {
     const context = { timestamp: "2024-05-30T12:00:00.000Z" };
     await checkNewEdinet(undefined, context);
 
-    // Verify axios.get was called
-    expect(axios.get).toHaveBeenCalled();
+    // Verify axios.get was called with secure options (no rejectUnauthorized: false)
+    expect(axios.get).toHaveBeenCalledWith(
+      expect.stringContaining("https://api.edinet-fsa.go.jp/api/v2/documents.json"),
+      { responseType: "json" }
+    );
 
     // Verify firestore save
     expect(firestoreMock.batch).toHaveBeenCalled();

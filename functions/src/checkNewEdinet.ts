@@ -1,6 +1,4 @@
-// @ts-ignore
 import axios from "axios";
-import * as https from "https";
 import moment from "moment";
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
@@ -13,9 +11,7 @@ const fetchAndMapEdinet = async (date: string) => {
   const url = `https://api.edinet-fsa.go.jp/api/v2/documents.json?date=${date}&type=2&Subscription-Key=${
     config.edinet.apikey
   }`;
-  // @ts-ignore
   const res = await axios.get(url, {
-    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
     responseType: "json",
   });
   const payload = res.data;
