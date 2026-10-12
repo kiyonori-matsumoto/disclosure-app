@@ -61,7 +61,13 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           i,
           3
         )}_${time.format("YYYYMMDD")}.html`,
-        { responseType: "text" }
+        {
+          responseType: "text",
+          timeout: 30000,
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; DisclosureAppBot/1.0)",
+          },
+        }
       );
       data = res.data;
     } catch (err) {

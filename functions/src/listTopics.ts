@@ -32,6 +32,7 @@ export const listTopics = async (
         Authorization: `Bearer ${token.access_token}`,
         access_token_auth: "true",
       },
+      timeout: 15000,
     });
 
     console.log("response", response.data);

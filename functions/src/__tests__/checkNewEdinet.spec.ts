@@ -137,6 +137,7 @@ describe("checkNewEdinet", () => {
     expect(calledOptions).toEqual({
       headers: { "Ocp-Apim-Subscription-Key": "test-api-key" },
       responseType: "json",
+      timeout: 30000,
     });
 
     // Verify firestore save
