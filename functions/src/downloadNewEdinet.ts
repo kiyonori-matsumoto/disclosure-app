@@ -1,61 +1,92 @@
-// @ts-nocheck
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
-const axios: any = require("axios");
+import axios from "axios";
+import { pipeline } from "stream/promises";
 
 const DB_PATH = "edinets";
 
-if (!process.env.FIREBASE_CONFIG) {
-  throw new Error("FIREBASE_CONFIG is not set");
-}
+// EDINET docID format: typically 8 alphanumeric characters (e.g. S100XXXX)
+// Must not contain path separators, traversal dots, or special characters
+const DOC_ID_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
 
-const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+const getStorageBucket = () => {
+  if (process.env.FIREBASE_CONFIG) {
+    try {
+      const config = JSON.parse(process.env.FIREBASE_CONFIG);
+      if (config.storageBucket) {
+        return admin.storage().bucket(config.storageBucket);
+      }
+    } catch {
+      // ignore parse error and fall back
+    }
+  }
+  return admin.storage().bucket();
+};
 
 const getDownloadUrlEdinet = async (
   req: functions.Request,
   res: functions.Response
 ) => {
-  const myBucket = admin.storage().bucket(firebaseConfig.storageBucket);
+  if (req.method !== "GET") {
+    res.status(405).send("Method Not Allowed");
+    return;
+  }
 
   const { docId } = req.query;
 
-  if (!docId) {
+  if (!docId || typeof docId !== "string") {
     res.status(400).send("docId is required");
     return;
   }
 
+  // Prevent path traversal and enforce alphanumeric docId
+  if (!DOC_ID_REGEX.test(docId)) {
+    res.status(400).send("Invalid docId format");
+    return;
+  }
+
+  const myBucket = getStorageBucket();
   const documentPath = `${DB_PATH}/${docId}.pdf`;
 
-  const [exists] = await myBucket.file(documentPath).exists();
-  if (!exists) {
-    const config = (functions.config as any)();
-    const url = `https://api.edinet-fsa.go.jp/api/v2/documents/${docId}?&type=2&Subscription-Key=${
-      config.edinet.apikey
-    }`;
+  try {
+    const [exists] = await myBucket.file(documentPath).exists();
+    if (!exists) {
+      const config = (functions.config as any)();
+      const apiKey = config?.edinet?.apikey;
+      const url = `https://api.edinet-fsa.go.jp/api/v2/documents/${encodeURIComponent(
+        docId
+      )}?type=2${apiKey ? `&Subscription-Key=${apiKey}` : ""}`;
 
-    // download and save to storage
-    // @ts-ignore
-    const response = await axios.get(url, { responseType: "stream" });
+      // download and save to storage with 30s timeout
+      const response = await axios.get(url, {
+        responseType: "stream",
+        timeout: 30000,
+      });
 
-    if (response.headers["content-type"] !== "application/pdf") {
+      if (response.headers["content-type"] !== "application/pdf") {
+        res.status(404).send("not found");
+        return;
+      }
+
+      const writer = myBucket.file(documentPath).createWriteStream();
+      await pipeline(response.data, writer);
+    }
+
+    const [signedUrl] = await myBucket.file(documentPath).getSignedUrl({
+      version: "v4",
+      action: "read",
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.json({ signedUrl });
+  } catch (err: any) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
       res.status(404).send("not found");
       return;
     }
-
-    const writer = myBucket.file(documentPath).createWriteStream();
-    response.data.pipe(writer);
-
-    await new Promise((resolve, reject) => {
-      writer.on("finish", resolve);
-      writer.on("error", reject);
-    });
+    console.error("Error downloading edinet document:", err);
+    res.status(500).send("Internal Server Error");
   }
-  const [signedUrl] = await myBucket.file(documentPath).getSignedUrl({
-    version: "v4",
-    action: "read",
-    expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-  });
-  res.json({ signedUrl });
 };
 
 export default getDownloadUrlEdinet;
