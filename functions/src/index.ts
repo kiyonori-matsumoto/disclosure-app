@@ -15,6 +15,7 @@ import sendEdinetToTopic from "./sendEdinetToTopic";
 import getDownloadUrlEdinet from "./downloadNewEdinet";
 import createCompanyDict from "./createCompanyDict";
 import { listTopics } from "./listTopics";
+import handleContentViewEvent from "./handleContentViewEvent";
 
 exports.checkNewDisclosure2 = functions.pubsub
   .topic("minutely5-tick")
@@ -62,7 +63,7 @@ exports.changeTopic = functions.database
 
 exports.handleContentViewEvent = functions.analytics
   .event("select_content")
-  .onLog(require("./handleContentViewEvent"));
+  .onLog(handleContentViewEvent);
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
