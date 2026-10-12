@@ -2,6 +2,7 @@ import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import axios from "axios";
 import { pipeline } from "stream/promises";
+import logger from "./lib/logger";
 
 const DB_PATH = "disclosures";
 const DOC_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
@@ -28,12 +29,12 @@ export const saveDocument = async (
   const document = data?.document;
 
   if (!document || typeof document !== "string") {
-    console.log("No valid document property found in snapshot");
+    logger.info("No valid document property found in snapshot");
     return true;
   }
 
   if (!DOC_REGEX.test(document)) {
-    console.warn(`Invalid document identifier: ${document}`);
+    logger.warn(`Invalid document identifier: ${document}`);
     return false;
   }
 
@@ -41,7 +42,7 @@ export const saveDocument = async (
   const filePath = `${DB_PATH}/${document}.pdf`;
   const url = `https://www.release.tdnet.info/inbs/${document}.pdf`;
 
-  console.log(`Downloading and saving document: ${filePath} from ${url}`);
+  logger.info(`Downloading and saving document: ${filePath} from ${url}`);
 
   try {
     const response = await axios.get(url, {
@@ -60,14 +61,14 @@ export const saveDocument = async (
     });
 
     await pipeline(response.data, ws);
-    console.log(`Successfully saved ${filePath}`);
+    logger.info(`Successfully saved ${filePath}`);
     return true;
   } catch (err: any) {
     if (axios.isAxiosError(err) && err.response?.status === 404) {
-      console.warn(`TDnet document not found (404): ${url}`);
+      logger.warn(`TDnet document not found (404): ${url}`);
       return false;
     }
-    console.error(`Failed to download or save document ${filePath}:`, err);
+    logger.error(`Failed to download or save document ${filePath}:`, err);
     throw err;
   }
 };

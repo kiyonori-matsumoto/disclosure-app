@@ -24,6 +24,7 @@ const getStorageBucket = () => {
 };
 
 import { getEdinetApiKey } from "./lib/config";
+import logger from "./lib/logger";
 
 const getDownloadUrlEdinet = async (
   req: functions.Request,
@@ -86,7 +87,7 @@ const getDownloadUrlEdinet = async (
       res.status(404).send("not found");
       return;
     }
-    console.error("Error downloading edinet document:", err);
+    logger.error("Error downloading edinet document:", err, { docId });
     res.status(500).send("Internal Server Error");
   }
 };
