@@ -13,6 +13,7 @@ const fetchAndMapEdinet = async (date: string) => {
   const res = await axios.get(url, {
     headers: apiKey ? { "Ocp-Apim-Subscription-Key": apiKey } : {},
     responseType: "json",
+    timeout: 30000,
   });
   const payload = res.data;
   if (!payload || !Array.isArray(payload.results)) {

@@ -7,7 +7,13 @@ import { chunk } from "./util";
 
 export const createSettlementDict = (DB_PATH: string) => async () => {
   const resIndex = await axios.get(
-    "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/index.html"
+    "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/index.html",
+    {
+      timeout: 30000,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; DisclosureAppBot/1.0)",
+      },
+    }
   );
   const $ = cheerio.load(resIndex.data);
 
@@ -29,6 +35,10 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
       const xlsxUrl = new URL(url, "https://www.jpx.co.jp");
       const res = await axios.get(xlsxUrl.toString(), {
         responseType: "arraybuffer",
+        timeout: 30000,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; DisclosureAppBot/1.0)",
+        },
       });
       const wb = xlsx.read(res.data, { cellText: false, cellDates: true });
       const sheetData = xlsx.utils.sheet_to_json<{ [key: string]: any }>(
