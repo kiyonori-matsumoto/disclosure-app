@@ -66,7 +66,19 @@ const sendEdinetToTopic = async (
     })
     .filter(notEmpty);
 
-  return Promise.all(promises).then(console.log);
+  const results = await Promise.allSettled(promises);
+  let succeeded = 0;
+  let failed = 0;
+  results.forEach((res, i) => {
+    if (res.status === "fulfilled") {
+      succeeded++;
+    } else {
+      failed++;
+      console.error(`FCM send failed for edinet message index ${i}:`, res.reason);
+    }
+  });
+  console.log(`FCM sendEdinetToTopic completed: ${succeeded} succeeded, ${failed} failed`);
+  return results;
 };
 
 export default sendEdinetToTopic;

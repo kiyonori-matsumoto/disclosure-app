@@ -29,7 +29,7 @@ const sendSettlementToTopic = async () => {
   });
   console.log(`sending ${messages.length} messages`);
   console.log(messages[0]);
-  return Promise.all(
+  const results = await Promise.allSettled(
     messages.map((msg) =>
       admin.messaging().send({
         topic: msg.notification.tag,
@@ -38,6 +38,24 @@ const sendSettlementToTopic = async () => {
       })
     )
   );
+
+  let succeeded = 0;
+  let failed = 0;
+  results.forEach((res, i) => {
+    if (res.status === "fulfilled") {
+      succeeded++;
+    } else {
+      failed++;
+      console.error(
+        `FCM send failed for settlement code ${messages[i]?.data?.code}:`,
+        res.reason
+      );
+    }
+  });
+  console.log(
+    `FCM sendSettlementToTopic completed: ${succeeded} succeeded, ${failed} failed`
+  );
+  return results;
 };
 
 export default sendSettlementToTopic;
