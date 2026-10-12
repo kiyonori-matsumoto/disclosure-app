@@ -23,9 +23,7 @@ const getStorageBucket = () => {
   return admin.storage().bucket();
 };
 
-const getEdinetApiKey = (): string | undefined => {
-  return process.env.EDINET_API_KEY || (functions.config as any)()?.edinet?.apikey;
-};
+import { getEdinetApiKey } from "./lib/config";
 
 const getDownloadUrlEdinet = async (
   req: functions.Request,

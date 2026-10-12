@@ -36,8 +36,11 @@ describe("getDownloadUrlEdinet", () => {
   let req: any;
   let res: any;
 
+  const originalEnv = process.env.EDINET_API_KEY;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.EDINET_API_KEY = "test-api-key";
     mockBucket.file.mockReturnValue(mockFile);
 
     req = {
@@ -50,6 +53,10 @@ describe("getDownloadUrlEdinet", () => {
       send: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
     };
+  });
+
+  afterEach(() => {
+    process.env.EDINET_API_KEY = originalEnv;
   });
 
   it("should return 405 if method is not GET", async () => {

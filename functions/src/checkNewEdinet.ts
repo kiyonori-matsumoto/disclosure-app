@@ -3,12 +3,9 @@ import moment from "moment";
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { zeroPad, notEmpty, chunk } from "./lib/util";
+import { getEdinetApiKey } from "./lib/config";
 
 const DB_PATH = "edinets";
-
-const getEdinetApiKey = (): string | undefined => {
-  return process.env.EDINET_API_KEY || (functions.config as any)()?.edinet?.apikey;
-};
 
 const fetchAndMapEdinet = async (date: string) => {
   const apiKey = getEdinetApiKey();
@@ -18,6 +15,12 @@ const fetchAndMapEdinet = async (date: string) => {
     responseType: "json",
   });
   const payload = res.data;
+  if (!payload || !Array.isArray(payload.results)) {
+    console.warn(
+      `EDINET API did not return results. StatusCode: ${payload?.StatusCode}, Message: ${payload?.message}`
+    );
+    return [];
+  }
   return (payload.results as any[])
     .map((result: { [key: string]: any }) => {
       try {

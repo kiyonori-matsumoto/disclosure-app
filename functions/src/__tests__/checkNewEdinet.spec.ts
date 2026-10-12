@@ -29,8 +29,11 @@ import checkNewEdinet from "../checkNewEdinet";
 describe("checkNewEdinet", () => {
   let firestoreMock: any;
 
+  const originalEnv = process.env.EDINET_API_KEY;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.EDINET_API_KEY = "test-api-key";
 
     // Setup Firestore mock structure
     firestoreMock = {
@@ -38,6 +41,10 @@ describe("checkNewEdinet", () => {
         batch: jest.fn()
     };
     (admin.firestore as any).mockReturnValue(firestoreMock);
+  });
+
+  afterEach(() => {
+    process.env.EDINET_API_KEY = originalEnv;
   });
 
   it("should fetch edinet data and save new documents", async () => {
@@ -217,5 +224,34 @@ describe("checkNewEdinet", () => {
         expect.objectContaining({ seqNumber: 11 })
     );
     expect(mockBatch.commit).toHaveBeenCalled();
+  });
+
+  it("should handle error response without results array gracefully", async () => {
+    (axios.get as any) = jest.fn().mockResolvedValue({
+      data: {
+        StatusCode: 401,
+        message: "Access denied due to invalid subscription key.",
+      },
+    });
+
+    const mockGet = jest.fn().mockResolvedValue({
+      empty: true,
+      docs: [],
+    });
+    const mockLimit = jest.fn().mockReturnValue({ get: mockGet });
+    const mockOrderBy = jest.fn().mockReturnValue({ limit: mockLimit });
+    const mockWhere2 = jest.fn().mockReturnValue({ orderBy: mockOrderBy });
+    const mockWhere1 = jest.fn().mockReturnValue({ where: mockWhere2 });
+
+    firestoreMock.collection.mockReturnValue({
+      where: mockWhere1,
+      doc: jest.fn(),
+    });
+
+    const context = { timestamp: "2024-05-30T12:00:00.000Z" };
+    const result = await checkNewEdinet(undefined, context);
+
+    expect(result).toEqual([]);
+    expect(firestoreMock.batch).not.toHaveBeenCalled();
   });
 });
