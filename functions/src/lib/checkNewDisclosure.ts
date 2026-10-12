@@ -6,6 +6,7 @@ import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { zeroPad } from "./util";
 import { Disclosure } from "../models/disclosure";
+import logger from "./logger";
 
 // const TIME_MAX = 9999999999999;
 const TAGS = [
@@ -31,7 +32,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
   ).utcOffset(9);
   const start = moment(time).utcOffset(9).startOf("date").valueOf();
   const end = moment(start).utcOffset(9).add(1, "days").valueOf();
-  console.log(`viewing: ${time.format("YYYYMMDD")}, ${start}, ${end}`);
+  logger.info(`viewing: ${time.format("YYYYMMDD")}, ${start}, ${end}`);
 
   const lastDisclosures = await firestore
     .collection(DB_PATH)
@@ -45,7 +46,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
   const lastCount = lastDisclosures.docs
     .map((doc) => doc.data().time % 1000)
     .reduce((a, e) => e, 0);
-  console.log(`lastCount = ${lastCount}`);
+  logger.info(`lastCount = ${lastCount}`);
 
   let matched = false;
   let count = 0;
@@ -72,7 +73,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
       data = res.data;
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 404) {
-        console.log(err);
+        logger.info(`TDnet list page ${i} not found (end of lists).`);
         if (matched) {
           throw err;
         }
@@ -85,7 +86,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
     if (count === 0) {
       const countText = $(".kaijiSum").text();
       if (!countText) {
-        console.log("no documents");
+        logger.info("no documents found for date");
         return;
       }
       count = parseInt(
@@ -94,7 +95,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           .replace(/\s+/, "")
           .match(/全(\d+)件/) || [])[1]
       );
-      console.log(`current count=${count}`);
+      logger.info(`current count=${count}`);
       if (!count && count !== 0) {
         throw new RangeError("cannot get kaijiSum");
       }
@@ -141,8 +142,6 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           time: docTime,
         };
         count--;
-
-        console.log(t, docData);
 
         batch.set(
           firestore.collection(DB_PATH).doc(docTime.toString(10)),

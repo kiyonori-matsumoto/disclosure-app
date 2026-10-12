@@ -4,6 +4,7 @@ import * as xlsx from "xlsx";
 import { URL } from "url";
 import axios from "axios";
 import { chunk } from "./util";
+import logger from "./logger";
 
 export const createSettlementDict = (DB_PATH: string) => async () => {
   const resIndex = await axios.get(
@@ -75,10 +76,11 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
         settlementDate: formatDate(e[keyMapping.settlementDate]),
         quote: e[keyMapping.quote],
       }));
-      console.log(mappedData.at(-1));
       return mappedData;
     } catch (error) {
-      console.error("Error registering objects:", error);
+      logger.error("Error registering objects in createSettlementDict:", error, {
+        url,
+      });
       return [];
     }
   };
@@ -87,7 +89,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
 
   // 500件毎にデータをまとめる(firestoreの書き込み制限)
   const _allData = objs.flat().filter((e) => !!e.code);
-  console.log(`total datas to register: ${_allData.length}`);
+  logger.info(`total datas to register in createSettlementDict: ${_allData.length}`);
 
   const datas = chunk(_allData, 500);
 

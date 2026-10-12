@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions/v1";
 import { notEmpty } from "./lib/util";
+import logger from "./lib/logger";
 
 let companies: any = null;
 
@@ -13,7 +14,11 @@ const sendEdinetToTopic = async (
     return true;
   }
   const { docDescription, map, noSend } = data;
-  console.log(docDescription, map, noSend);
+  logger.info("Processing sendEdinetToTopic trigger", {
+    docDescription,
+    noSend,
+    mapKeys: Object.keys(map || {}),
+  });
 
   if (noSend) {
     return true;
@@ -74,10 +79,12 @@ const sendEdinetToTopic = async (
       succeeded++;
     } else {
       failed++;
-      console.error(`FCM send failed for edinet message index ${i}:`, res.reason);
+      logger.error(`FCM send failed for edinet message index ${i}:`, res.reason);
     }
   });
-  console.log(`FCM sendEdinetToTopic completed: ${succeeded} succeeded, ${failed} failed`);
+  logger.info(
+    `FCM sendEdinetToTopic completed: ${succeeded} succeeded, ${failed} failed`
+  );
   return results;
 };
 

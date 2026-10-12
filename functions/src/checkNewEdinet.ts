@@ -4,6 +4,7 @@ import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { zeroPad, notEmpty, chunk } from "./lib/util";
 import { getEdinetApiKey } from "./lib/config";
+import logger from "./lib/logger";
 
 const DB_PATH = "edinets";
 
@@ -17,7 +18,7 @@ const fetchAndMapEdinet = async (date: string) => {
   });
   const payload = res.data;
   if (!payload || !Array.isArray(payload.results)) {
-    console.warn(
+    logger.warn(
       `EDINET API did not return results. StatusCode: ${payload?.StatusCode}, Message: ${payload?.message}`
     );
     return [];
@@ -77,8 +78,9 @@ const fetchAndMapEdinet = async (date: string) => {
           map,
         };
       } catch (e) {
-        console.error(e);
-        console.log("document is", result);
+        logger.error("Failed to parse EDINET document entry:", e, {
+          document: result,
+        });
         return null;
       }
     })
@@ -94,7 +96,7 @@ const checkNewEdinet = async (
   const start = today.startOf("days").format("YYYY-MM-DD");
   const end = today.startOf("days").add(1, "day").format("YYYY-MM-DD");
 
-  console.log(`viewing: ${today.format("llll")}, start: ${start}, end: ${end}`);
+  logger.info(`viewing: ${today.format("llll")}, start: ${start}, end: ${end}`);
 
   const getLastEdinetDoc = () =>
     admin
@@ -115,7 +117,7 @@ const checkNewEdinet = async (
     ? 0
     : lastEdinetDoc.docs[0].data().seqNumber;
 
-  console.log(
+  logger.info(
     `lastSeqNumber = ${lastSeqNumber}, currentSeqNumber = ${
       data.length > 0 ? data[data.length - 1].seqNumber : "-"
     }`
@@ -126,7 +128,7 @@ const checkNewEdinet = async (
     500
   );
 
-  console.log(`trying to write ${saveData[0]?.length} files`);
+  logger.info(`trying to write ${saveData[0]?.length} files`);
 
   const transaction = saveData.map((d) => {
     const batch = admin.firestore().batch();

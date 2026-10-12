@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions/v1";
+import logger from "./lib/logger";
 
 export const handleContentViewEvent = async (
   event: functions.analytics.AnalyticsEvent,
@@ -10,11 +11,11 @@ export const handleContentViewEvent = async (
   const document = event?.params?.item_id;
 
   if (!document) {
-    console.log("item_id is not provided in event params");
+    logger.info("item_id is not provided in event params");
     return true;
   }
 
-  console.log(`Processing content view event: type=${contentType}, item_id=${document}`);
+  logger.info(`Processing content view event: type=${contentType}, item_id=${document}`);
 
   if (contentType === "edinet_pdf") {
     const DB_PATH = "edinets";
@@ -22,11 +23,11 @@ export const handleContentViewEvent = async (
     const docSnapshot = await docRef.get();
 
     if (!docSnapshot.exists) {
-      console.log(`Document ${document} does not exist in ${DB_PATH}`);
+      logger.info(`Document ${document} does not exist in ${DB_PATH}`);
       return true;
     }
 
-    console.log(`Incrementing view_count for edinet doc ${document}`);
+    logger.info(`Incrementing view_count for edinet doc ${document}`);
     await docRef.update({
       view_count: admin.firestore.FieldValue.increment(1),
     });
@@ -40,13 +41,13 @@ export const handleContentViewEvent = async (
       .get();
 
     if (querySnapshot.empty || querySnapshot.docs.length === 0) {
-      console.log(`Document ${document} does not exist in ${DB_PATH}`);
+      logger.info(`Document ${document} does not exist in ${DB_PATH}`);
       return true;
     }
 
     const docSnapshot = querySnapshot.docs[0];
     const data = docSnapshot.data();
-    console.log(`Incrementing view_count for disclosure ${docSnapshot.id} (${data.title || "no title"})`);
+    logger.info(`Incrementing view_count for disclosure ${docSnapshot.id} (${data.title || "no title"})`);
 
     await docSnapshot.ref.update({
       view_count: admin.firestore.FieldValue.increment(1),

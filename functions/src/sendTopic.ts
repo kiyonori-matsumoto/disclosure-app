@@ -2,6 +2,7 @@ import * as admin from "firebase-admin";
 import { Disclosure } from "./models/disclosure";
 import * as functions from "firebase-functions/v1";
 import base64url from "base64url";
+import logger from "./lib/logger";
 
 const createMessageTags = (topic: string, data: Disclosure, tag: string) => {
   return {
@@ -64,7 +65,12 @@ const sendTopic = (
 ) => {
   const data = snapshot.data() as Disclosure | undefined;
   if (data === undefined) return true;
-  console.log(data.title, data.code, data.noSend, data.company);
+  logger.info("Processing sendTopic trigger", {
+    title: data.title,
+    code: data.code,
+    noSend: data.noSend,
+    company: data.company,
+  });
   if (data.noSend) return true;
   const tagMessages = (data.tags2 || []).map((e) => {
     const b64 = base64url.encode(e);
@@ -73,19 +79,19 @@ const sendTopic = (
 
   const messages = [createMessage(`code_${data.code}`, data), ...tagMessages];
 
-  console.log(JSON.stringify(messages));
+  logger.info(`Sending ${messages.length} FCM messages for code_${data.code}`);
 
   return admin
     .messaging()
     .sendEach(messages)
     .then((response) => {
-      console.log(
+      logger.info(
         `FCM sendEach completed: ${response.successCount} succeeded, ${response.failureCount} failed`
       );
       if (response.failureCount > 0) {
         response.responses.forEach((resp, idx) => {
           if (!resp.success) {
-            console.error(
+            logger.error(
               `FCM error sending message index ${idx} to topic:`,
               resp.error
             );
@@ -95,7 +101,7 @@ const sendTopic = (
       return response;
     })
     .catch((err) => {
-      console.error("Fatal error in FCM sendTopic:", err);
+      logger.error("Fatal error in FCM sendTopic:", err);
       throw err;
     });
 };

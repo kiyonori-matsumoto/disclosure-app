@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import moment from "moment";
+import logger from "./lib/logger";
 
 const settlementToStr = (d: any) =>
   `${d["name"]}の決算(${d["quote"]})は本日の予定です！`;
@@ -27,8 +28,7 @@ const sendSettlementToTopic = async () => {
       },
     };
   });
-  console.log(`sending ${messages.length} messages`);
-  console.log(messages[0]);
+  logger.info(`Sending ${messages.length} settlement notifications for ${dateStr}`);
   const results = await Promise.allSettled(
     messages.map((msg) =>
       admin.messaging().send({
@@ -46,13 +46,13 @@ const sendSettlementToTopic = async () => {
       succeeded++;
     } else {
       failed++;
-      console.error(
+      logger.error(
         `FCM send failed for settlement code ${messages[i]?.data?.code}:`,
         res.reason
       );
     }
   });
-  console.log(
+  logger.info(
     `FCM sendSettlementToTopic completed: ${succeeded} succeeded, ${failed} failed`
   );
   return results;
