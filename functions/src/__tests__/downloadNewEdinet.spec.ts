@@ -126,9 +126,15 @@ describe("getDownloadUrlEdinet", () => {
 
     await getDownloadUrlEdinet(req, res);
 
-    expect(axios.get).toHaveBeenCalledWith(
-      expect.stringContaining("documents/S100TEST?type=2"),
-      expect.objectContaining({ responseType: "stream", timeout: 30000 })
+    const [calledUrl, calledOptions] = (axios.get as jest.Mock).mock.calls[0];
+    expect(calledUrl).not.toContain("Subscription-Key=");
+    expect(calledUrl).toContain("documents/S100TEST?type=2");
+    expect(calledOptions).toEqual(
+      expect.objectContaining({
+        headers: { "Ocp-Apim-Subscription-Key": "test-api-key" },
+        responseType: "stream",
+        timeout: 30000,
+      })
     );
     expect(mockFile.getSignedUrl).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith({

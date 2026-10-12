@@ -23,6 +23,10 @@ const getStorageBucket = () => {
   return admin.storage().bucket();
 };
 
+const getEdinetApiKey = (): string | undefined => {
+  return process.env.EDINET_API_KEY || (functions.config as any)()?.edinet?.apikey;
+};
+
 const getDownloadUrlEdinet = async (
   req: functions.Request,
   res: functions.Response
@@ -51,14 +55,14 @@ const getDownloadUrlEdinet = async (
   try {
     const [exists] = await myBucket.file(documentPath).exists();
     if (!exists) {
-      const config = (functions.config as any)();
-      const apiKey = config?.edinet?.apikey;
+      const apiKey = getEdinetApiKey();
       const url = `https://api.edinet-fsa.go.jp/api/v2/documents/${encodeURIComponent(
         docId
-      )}?type=2${apiKey ? `&Subscription-Key=${apiKey}` : ""}`;
+      )}?type=2`;
 
       // download and save to storage with 30s timeout
       const response = await axios.get(url, {
+        headers: apiKey ? { "Ocp-Apim-Subscription-Key": apiKey } : {},
         responseType: "stream",
         timeout: 30000,
       });

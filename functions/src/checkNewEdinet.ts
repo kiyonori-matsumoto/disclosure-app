@@ -6,12 +6,15 @@ import { zeroPad, notEmpty, chunk } from "./lib/util";
 
 const DB_PATH = "edinets";
 
+const getEdinetApiKey = (): string | undefined => {
+  return process.env.EDINET_API_KEY || (functions.config as any)()?.edinet?.apikey;
+};
+
 const fetchAndMapEdinet = async (date: string) => {
-  const config = (functions.config as any)();
-  const url = `https://api.edinet-fsa.go.jp/api/v2/documents.json?date=${date}&type=2&Subscription-Key=${
-    config.edinet.apikey
-  }`;
+  const apiKey = getEdinetApiKey();
+  const url = `https://api.edinet-fsa.go.jp/api/v2/documents.json?date=${date}&type=2`;
   const res = await axios.get(url, {
+    headers: apiKey ? { "Ocp-Apim-Subscription-Key": apiKey } : {},
     responseType: "json",
   });
   const payload = res.data;

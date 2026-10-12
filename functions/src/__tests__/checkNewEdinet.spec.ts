@@ -123,11 +123,14 @@ describe("checkNewEdinet", () => {
     const context = { timestamp: "2024-05-30T12:00:00.000Z" };
     await checkNewEdinet(undefined, context);
 
-    // Verify axios.get was called with secure options (no rejectUnauthorized: false)
-    expect(axios.get).toHaveBeenCalledWith(
-      expect.stringContaining("https://api.edinet-fsa.go.jp/api/v2/documents.json"),
-      { responseType: "json" }
-    );
+    // Verify axios.get was called with API key in header (not in URL query)
+    const [calledUrl, calledOptions] = (axios.get as jest.Mock).mock.calls[0];
+    expect(calledUrl).not.toContain("Subscription-Key=");
+    expect(calledUrl).toContain("https://api.edinet-fsa.go.jp/api/v2/documents.json");
+    expect(calledOptions).toEqual({
+      headers: { "Ocp-Apim-Subscription-Key": "test-api-key" },
+      responseType: "json",
+    });
 
     // Verify firestore save
     expect(firestoreMock.batch).toHaveBeenCalled();
