@@ -3,7 +3,7 @@
   "description": "Cloud Functions for Firebase",
   "main": "lib/index.js",
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "dependencies": {
     "axios": "^1.13.2",
@@ -23,7 +23,7 @@
   "devDependencies": {
     "@types/cheerio": "^0.22.22",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.2",
+    "@types/node": "^22.0.0",
     "@types/unzipper": "^0.10.9",
     "firebase-functions-test": "^3.4.1",
     "jest": "^29.7.0",
