@@ -5,6 +5,7 @@ import { URL } from "url";
 import axios from "axios";
 import { chunk } from "./util";
 import logger from "./logger";
+import { DEFAULT_USER_AGENT } from "./constants";
 
 export const createSettlementDict = (DB_PATH: string) => async () => {
   const resIndex = await axios.get(
@@ -12,7 +13,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
     {
       timeout: 30000,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; DisclosureAppBot/1.0)",
+        "User-Agent": DEFAULT_USER_AGENT,
       },
     }
   );
@@ -38,7 +39,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
         responseType: "arraybuffer",
         timeout: 30000,
         headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; DisclosureAppBot/1.0)",
+          "User-Agent": DEFAULT_USER_AGENT,
         },
       });
       const wb = xlsx.read(res.data, { cellText: false, cellDates: true });

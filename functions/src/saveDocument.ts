@@ -3,6 +3,7 @@ import * as admin from "firebase-admin";
 import axios from "axios";
 import { pipeline } from "stream/promises";
 import logger from "./lib/logger";
+import { DEFAULT_USER_AGENT } from "./lib/constants";
 
 const DB_PATH = "disclosures";
 const DOC_REGEX = /^[a-zA-Z0-9_-]{1,64}$/;
@@ -49,7 +50,7 @@ export const saveDocument = async (
       responseType: "stream",
       timeout: 30000,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; DisclosureAppBot/1.0)",
+        "User-Agent": DEFAULT_USER_AGENT,
       },
     });
 

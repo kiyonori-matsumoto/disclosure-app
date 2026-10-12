@@ -7,6 +7,7 @@ import * as admin from "firebase-admin";
 import { zeroPad } from "./util";
 import { Disclosure } from "../models/disclosure";
 import logger from "./logger";
+import { DEFAULT_USER_AGENT } from "./constants";
 
 // const TIME_MAX = 9999999999999;
 const TAGS = [
@@ -66,7 +67,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           responseType: "text",
           timeout: 30000,
           headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; DisclosureAppBot/1.0)",
+            "User-Agent": DEFAULT_USER_AGENT,
           },
         }
       );
