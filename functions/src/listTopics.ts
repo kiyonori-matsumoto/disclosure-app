@@ -6,8 +6,16 @@ export const listTopics = async (
   req: functions.Request,
   res: functions.Response
 ) => {
-  const IID_TOKEN = req.body.IID_TOKEN;
+  const IID_TOKEN = req.body?.IID_TOKEN;
   console.log("IID_TOKEN", IID_TOKEN);
+
+  if (
+    typeof IID_TOKEN !== "string" ||
+    !/^[a-zA-Z0-9-_:]{1,256}$/.test(IID_TOKEN)
+  ) {
+    res.status(400).send("Invalid IID_TOKEN");
+    return;
+  }
 
   const url = `https://iid.googleapis.com/iid/info/${IID_TOKEN}?details=true`;
 
