@@ -3,3 +3,8 @@ app/disclosure.apk
 .firebase
 .cache
 support/public
+
+.runtimeconfig.json
+functions/.runtimeconfig.json
+*.local
+.env.local
