@@ -78,7 +78,26 @@ const sendTopic = (
   return admin
     .messaging()
     .sendEach(messages)
-    .then((d) => console.log(JSON.stringify(d)));
+    .then((response) => {
+      console.log(
+        `FCM sendEach completed: ${response.successCount} succeeded, ${response.failureCount} failed`
+      );
+      if (response.failureCount > 0) {
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            console.error(
+              `FCM error sending message index ${idx} to topic:`,
+              resp.error
+            );
+          }
+        });
+      }
+      return response;
+    })
+    .catch((err) => {
+      console.error("Fatal error in FCM sendTopic:", err);
+      throw err;
+    });
 };
 
 export default sendTopic;

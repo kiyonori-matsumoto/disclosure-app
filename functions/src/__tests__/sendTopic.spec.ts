@@ -14,7 +14,11 @@ describe("sendTopic", () => {
     beforeEach(() => {
         jest.clearAllMocks();
         messagingMock = {
-            sendEach: jest.fn().mockResolvedValue({ success: true })
+            sendEach: jest.fn().mockResolvedValue({
+                successCount: 3,
+                failureCount: 0,
+                responses: [{ success: true }, { success: true }, { success: true }],
+            }),
         };
         (admin.messaging as any).mockReturnValue(messagingMock);
     });
