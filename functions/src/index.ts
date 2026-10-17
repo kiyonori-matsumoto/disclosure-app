@@ -1,75 +1,124 @@
 import * as functions from "firebase-functions/v1";
-
+import { onRequest } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
-import { checkNewDisclosure } from "./checkNewDisclosure";
-import sendTopic from "./sendTopic";
+import { checkNewDisclosure as checkNewDisclosureHandler } from "./checkNewDisclosure";
+import sendTopicHandler from "./sendTopic";
+import createSettlementDictHandler from "./createSettlementDict";
+import sendSettlementToTopicHandler from "./sendSettlementToTopic";
+import checkNewEdinetHandler from "./checkNewEdinet";
+import sendEdinetToTopicHandler from "./sendEdinetToTopic";
+import getDownloadUrlEdinetHandler from "./downloadNewEdinet";
+import createCompanyDictHandler from "./createCompanyDict";
+import { listTopics as listTopicsHandler } from "./listTopics";
+import handleContentViewEventHandler from "./handleContentViewEvent";
+import saveDocumentHandler from "./saveDocument";
+import changeTopicHandler from "./changeTopic";
 
-import createSettlementDict from "./createSettlementDict";
-// import devCreateSettlementDict from "./dev/createSettlementDict";
-import sendSettlementToTopic from "./sendSettlementToTopic";
-import checkNewEdinet from "./checkNewEdinet";
-import sendEdinetToTopic from "./sendEdinetToTopic";
-import getDownloadUrlEdinet from "./downloadNewEdinet";
-import createCompanyDict from "./createCompanyDict";
-import { listTopics } from "./listTopics";
-import handleContentViewEvent from "./handleContentViewEvent";
-import saveDocument from "./saveDocument";
-import changeTopic from "./changeTopic";
+// --- Cloud Functions v2: Scheduled Functions (Cloud Scheduler 連携) ---
 
-exports.checkNewDisclosure2 = functions.pubsub
-  .topic("minutely5-tick")
-  .onPublish(checkNewDisclosure);
+// 5分毎のTDnet開示情報チェック
+export const checkNewDisclosure2 = onSchedule(
+  {
+    schedule: "every 5 minutes",
+    timeZone: "Asia/Tokyo",
+    timeoutSeconds: 120,
+  },
+  async () => {
+    await checkNewDisclosureHandler();
+  }
+);
 
-exports.checkNewEdinet = functions.pubsub
-  .topic("minutely5-tick")
-  .onPublish(checkNewEdinet);
+// 5分毎のEDINET開示情報チェック
+export const checkNewEdinet = onSchedule(
+  {
+    schedule: "every 5 minutes",
+    timeZone: "Asia/Tokyo",
+    timeoutSeconds: 120,
+  },
+  async () => {
+    await checkNewEdinetHandler();
+  }
+);
 
-exports.createCompanyDict2 = functions
-  .runWith({ memory: "1GB", timeoutSeconds: 300 })
-  .pubsub.topic("weekly-tick")
-  .onPublish(createCompanyDict);
+// 毎週日曜日 0時の企業コード辞書更新（Playwright使用のためメモリ1GiB・タイムアウト300秒）
+export const createCompanyDict2 = onSchedule(
+  {
+    schedule: "0 0 * * 0",
+    timeZone: "Asia/Tokyo",
+    memory: "1GiB",
+    timeoutSeconds: 300,
+  },
+  async () => {
+    await createCompanyDictHandler();
+  }
+);
 
-exports.createSettlementDict = functions.pubsub
-  .topic("daily-tick")
-  .onPublish(createSettlementDict);
+// 毎日0時の決算発表スケジュール辞書更新
+export const createSettlementDict = onSchedule(
+  {
+    schedule: "0 0 * * *",
+    timeZone: "Asia/Tokyo",
+    timeoutSeconds: 120,
+  },
+  async () => {
+    await createSettlementDictHandler();
+  }
+);
 
-// exports.devCreateSettlementDict = functions.pubsub
-//   .topic("daily-tick")
-//   .onPublish(devCreateSettlementDict);
+// 毎朝8時の当日決算予定通知送信
+export const sendSettlementToTopic = onSchedule(
+  {
+    schedule: "0 8 * * *",
+    timeZone: "Asia/Tokyo",
+    timeoutSeconds: 120,
+  },
+  async () => {
+    await sendSettlementToTopicHandler();
+  }
+);
 
-// 毎朝8時に確認して送信する
-exports.sendSettlementToTopic = functions.pubsub
-  .topic("daily-8am-tick")
-  .onPublish(sendSettlementToTopic);
+// --- Cloud Functions v2: HTTPS Functions (同時実行性 concurrency を活用しコールドスタート抑制) ---
 
-exports.sendTopicFs2 = functions.firestore
+export const listTopics = onRequest(
+  {
+    cors: true,
+    timeoutSeconds: 30,
+    concurrency: 80,
+  },
+  listTopicsHandler
+);
+
+export const getDownloadUrlEdinet = onRequest(
+  {
+    cors: true,
+    timeoutSeconds: 30,
+    concurrency: 80,
+  },
+  getDownloadUrlEdinetHandler
+);
+
+// --- Cloud Functions v1: Background Triggers (Firestore / RTDB / Analytics) ---
+
+export const sendTopicFs2 = functions.firestore
   .document("disclosures/{key}")
-  .onCreate(sendTopic);
-exports.saveDocumentFs = functions.firestore
+  .onCreate(sendTopicHandler);
+
+export const saveDocumentFs = functions.firestore
   .document("disclosures/{key}")
-  .onCreate(saveDocument);
-exports.sendEdinetToTopic = functions.firestore
+  .onCreate(saveDocumentHandler);
+
+export const sendEdinetToTopic = functions.firestore
   .document("edinets/{key}")
-  .onCreate(sendEdinetToTopic);
+  .onCreate(sendEdinetToTopicHandler);
 
-exports.listTopics = functions.https.onRequest(listTopics);
-
-exports.getDownloadUrlEdinet = functions.https.onRequest(getDownloadUrlEdinet);
-
-exports.changeTopic = functions.database
+export const changeTopic = functions.database
   .ref("/user/topics/{userId}")
-  .onWrite(changeTopic);
+  .onWrite(changeTopicHandler);
 
-exports.handleContentViewEvent = functions.analytics
+export const handleContentViewEvent = functions.analytics
   .event("select_content")
-  .onLog(handleContentViewEvent);
-
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
+  .onLog(handleContentViewEventHandler);

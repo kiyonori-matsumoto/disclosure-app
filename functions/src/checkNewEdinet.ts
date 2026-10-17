@@ -92,7 +92,7 @@ const checkNewEdinet = async (
   context?: { timestamp: string }
 ) => {
   const time_msg = message?.json?.timestamp;
-  const today = moment(time_msg ? time_msg : context!.timestamp).utcOffset(9);
+  const today = moment(time_msg ? time_msg : context?.timestamp || Date.now()).utcOffset(9);
   const start = today.startOf("days").format("YYYY-MM-DD");
   const end = today.startOf("days").add(1, "day").format("YYYY-MM-DD");
 
