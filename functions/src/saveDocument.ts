@@ -22,7 +22,7 @@ const getStorageBucket = () => {
   return admin.storage().bucket();
 };
 
-export const saveDocument = async (
+export const createSaveDocument = (dbPath: string = DB_PATH) => async (
   snapshot: functions.firestore.DocumentSnapshot,
   context?: functions.EventContext
 ) => {
@@ -40,7 +40,7 @@ export const saveDocument = async (
   }
 
   const myBucket = getStorageBucket();
-  const filePath = `${DB_PATH}/${document}.pdf`;
+  const filePath = `${dbPath}/${document}.pdf`;
   const url = `https://www.release.tdnet.info/inbs/${document}.pdf`;
 
   logger.info(`Downloading and saving document: ${filePath} from ${url}`);
@@ -74,4 +74,5 @@ export const saveDocument = async (
   }
 };
 
+export const saveDocument = createSaveDocument("disclosures");
 export default saveDocument;

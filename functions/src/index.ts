@@ -17,6 +17,7 @@ import createCompanyDict from "./createCompanyDict";
 import { listTopics } from "./listTopics";
 import handleContentViewEvent from "./handleContentViewEvent";
 import saveDocument from "./saveDocument";
+import changeTopic from "./changeTopic";
 
 exports.checkNewDisclosure2 = functions.pubsub
   .topic("minutely5-tick")
@@ -60,7 +61,7 @@ exports.getDownloadUrlEdinet = functions.https.onRequest(getDownloadUrlEdinet);
 
 exports.changeTopic = functions.database
   .ref("/user/topics/{userId}")
-  .onWrite(require("./changeTopic"));
+  .onWrite(changeTopic);
 
 exports.handleContentViewEvent = functions.analytics
   .event("select_content")
