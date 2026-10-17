@@ -1,0 +1,27 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // 開示PDFファイル: 全ユーザー読み取り可能、直接書き込みは禁止（Cloud Functions / Admin SDKのみ）
+    match /disclosures/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 開発環境用PDFファイル
+    match /dev-disclosures/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 企業コード一覧 JSON: 全ユーザー読み取り可能、直接書き込みは禁止
+    match /companies.json {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // デフォルト: 明示的に許可されていないファイル・パスへのアクセスは全拒否
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

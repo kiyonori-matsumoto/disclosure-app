@@ -2,6 +2,12 @@
   "hosting": {
     "public": "support/public"
   },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
   "functions": {
     "source": "functions",
     "predeploy": [
