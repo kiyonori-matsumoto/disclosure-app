@@ -1,9 +1,15 @@
 import * as functions from "firebase-functions/v1";
+import { setGlobalOptions } from "firebase-functions/v2";
 import { onRequest } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
+
+// Cloud Functions v2 のデフォルトリージョンを日本（東京: asia-northeast1）に設定
+setGlobalOptions({
+  region: "asia-northeast1",
+});
 
 import { checkNewDisclosure as checkNewDisclosureHandler } from "./checkNewDisclosure";
 import sendTopicHandler from "./sendTopic";
@@ -18,7 +24,7 @@ import handleContentViewEventHandler from "./handleContentViewEvent";
 import saveDocumentHandler from "./saveDocument";
 import changeTopicHandler from "./changeTopic";
 
-// --- Cloud Functions v2: Scheduled Functions (Cloud Scheduler 連携) ---
+// --- Cloud Functions v2: Scheduled Functions (東京リージョン asia-northeast1) ---
 
 // 5分毎のTDnet開示情報チェック
 export const checkNewDisclosure2 = onSchedule(
@@ -81,9 +87,14 @@ export const sendSettlementToTopic = onSchedule(
   }
 );
 
-// --- Cloud Functions v2: HTTPS Functions (同時実行性 concurrency を活用しコールドスタート抑制) ---
+// --- 既存アプリ向け互換 HTTPS Functions (v1: us-central1 でそのまま維持) ---
 
-export const listTopics = onRequest(
+export const listTopics = functions.https.onRequest(listTopicsHandler);
+export const getDownloadUrlEdinet = functions.https.onRequest(getDownloadUrlEdinetHandler);
+
+// --- 新アプリ向け HTTPS Functions (v2: 日本・東京リージョン asia-northeast1, concurrency 80) ---
+
+export const listTopicsV2 = onRequest(
   {
     cors: true,
     timeoutSeconds: 30,
@@ -92,7 +103,7 @@ export const listTopics = onRequest(
   listTopicsHandler
 );
 
-export const getDownloadUrlEdinet = onRequest(
+export const getDownloadUrlEdinetV2 = onRequest(
   {
     cors: true,
     timeoutSeconds: 30,
