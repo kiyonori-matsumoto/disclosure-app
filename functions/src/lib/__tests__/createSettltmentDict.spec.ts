@@ -16,7 +16,7 @@ const kessan05 = fs.readFileSync(__dirname + "/res/kessan05_0621.xlsx"); // 451d
 
 describe("lib/createSettlementDict", () => {
   beforeEach(() => {
-    (axios.get as any) = jest.fn().mockImplementation((url, option) => {
+    (axios.get as any) = jest.fn().mockImplementation((url, _option) => {
       if (
         url ===
         "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/index.html"

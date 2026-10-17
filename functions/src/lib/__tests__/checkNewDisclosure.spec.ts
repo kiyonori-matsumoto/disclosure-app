@@ -32,7 +32,7 @@ describe("lib/checkNewDisclosure", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (axios.get as any) = jest.fn().mockImplementation((url, option) => {
+    (axios.get as any) = jest.fn().mockImplementation((url, _option) => {
       if (urlMocks[url] !== undefined) {
         return Promise.resolve({ data: urlMocks[url] });
       } else if (

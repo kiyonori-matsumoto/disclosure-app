@@ -24,7 +24,7 @@ const getStorageBucket = () => {
 
 export const createSaveDocument = (dbPath: string = DB_PATH) => async (
   snapshot: functions.firestore.DocumentSnapshot,
-  context?: functions.EventContext
+  _context?: functions.EventContext
 ) => {
   const data = snapshot.data();
   const document = data?.document;
