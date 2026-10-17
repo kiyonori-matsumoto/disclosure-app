@@ -25,11 +25,11 @@ const firestore = admin.firestore();
 firestore.settings({ timestampsInSnapshots: true });
 
 export const checkNewDisclosure = (DB_PATH: string) => async (
-  snapshot: functions.pubsub.Message,
-  context: functions.EventContext
+  snapshot?: functions.pubsub.Message,
+  context?: functions.EventContext
 ) => {
   const time = moment(
-    snapshot.attributes.timestampForTest || context.timestamp
+    snapshot?.attributes?.timestampForTest || context?.timestamp || Date.now()
   ).utcOffset(9);
   const start = moment(time).utcOffset(9).startOf("date").valueOf();
   const end = moment(start).utcOffset(9).add(1, "days").valueOf();
