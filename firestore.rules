@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 開示情報: 全ユーザー読み取り可能、直接書き込みは禁止（Cloud Functions / Admin SDKのみ）
+    match /disclosures/{disclosureId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // EDINET開示情報: 全ユーザー読み取り可能、直接書き込みは禁止
+    match /edinets/{edinetId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 決算予定情報: 全ユーザー読み取り可能、直接書き込みは禁止
+    match /settlements/{settlementId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 開発環境用開示情報
+    match /dev-disclosures/{disclosureId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 開発環境用決算予定情報
+    match /dev-settlements/{settlementId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // デフォルト: 明示的に許可されていないコレクションへのアクセスは全拒否（最小権限の原則）
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
