@@ -8,7 +8,7 @@ import { checkNewDisclosure } from "./checkNewDisclosure";
 import sendTopic from "./sendTopic";
 
 import createSettlementDict from "./createSettlementDict";
-// import devCreateSettlementDict from "./dev-createSettlementDict";
+// import devCreateSettlementDict from "./dev/createSettlementDict";
 import sendSettlementToTopic from "./sendSettlementToTopic";
 import checkNewEdinet from "./checkNewEdinet";
 import sendEdinetToTopic from "./sendEdinetToTopic";
