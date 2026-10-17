@@ -4,7 +4,7 @@ import logger from "./lib/logger";
 
 export const handleContentViewEvent = async (
   event: functions.analytics.AnalyticsEvent,
-  context?: functions.EventContext
+  _context?: functions.EventContext
 ) => {
   const db = admin.firestore();
   const contentType = event?.params?.content_type;

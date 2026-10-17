@@ -2,7 +2,7 @@ import { chromium } from "playwright";
 import * as os from "os";
 import * as fs from "fs";
 import * as unzipper from "unzipper";
-import path = require("path");
+import * as path from "path";
 import iconv from "iconv-lite";
 import { parse } from "csv-parse/sync";
 import * as admin from "firebase-admin";

@@ -14,7 +14,7 @@ export const TAGS = [
 
 export const addTag = async (
   doc: functions.firestore.DocumentSnapshot,
-  context?: functions.EventContext
+  _context?: functions.EventContext
 ): Promise<FirebaseFirestore.WriteResult | null> => {
   const data = doc.data();
   if (!data || typeof data.title !== "string") {
