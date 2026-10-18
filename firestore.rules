@@ -1,39 +1,33 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 開示情報: 全ユーザー読み取り可能、直接書き込みは禁止（Cloud Functions / Admin SDKのみ）
-    match /disclosures/{disclosureId} {
-      allow read: if true;
-      allow write: if false;
+    match /dev-disclosures/{document=**} {
+      allow read;
     }
-
-    // EDINET開示情報: 全ユーザー読み取り可能、直接書き込みは禁止
-    match /edinets/{edinetId} {
-      allow read: if true;
-      allow write: if false;
+    match /disclosures/{document=**} {
+      // 1. ログイン済みであること
+      // 2. 相手の UID でないこと
+      // 3. 相手の "limit 50" を弾く（正規アプリの limit なし、または limit 20 のみ許可）
+      allow read: if request.auth.uid != null
+                  && request.auth.uid != "zpIzrPUBWHUq7IqEhxiEp5PHxXE3"
+                  && (request.query.limit == null || request.query.limit <= 20);
     }
-
-    // 決算予定情報: 全ユーザー読み取り可能、直接書き込みは禁止
-    match /settlements/{settlementId} {
-      allow read: if true;
-      allow write: if false;
+    match /users/{userId} {
+      allow read: if request.auth.uid == userId;
+      allow write: if request.auth.uid == userId;
+      match /disclosures/{document=**} {
+        allow read: if request.auth.uid == userId;
+        allow write: if request.auth.uid == userId;
+      }
     }
-
-    // 開発環境用開示情報
-    match /dev-disclosures/{disclosureId} {
-      allow read: if true;
-      allow write: if false;
+    match /companies/{document=**} {
+      allow read: if request.auth.uid != null;
     }
-
-    // 開発環境用決算予定情報
-    match /dev-settlements/{settlementId} {
-      allow read: if true;
-      allow write: if false;
+    match /settlements/{document=**} {
+      allow read: if request.auth.uid != null;
     }
-
-    // デフォルト: 明示的に許可されていないコレクションへのアクセスは全拒否（最小権限の原則）
-    match /{document=**} {
-      allow read, write: if false;
+    match /edinets/{document=**} {
+      allow read: if request.auth.uid != null;
     }
   }
 }
