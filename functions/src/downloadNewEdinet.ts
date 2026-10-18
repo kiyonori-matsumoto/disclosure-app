@@ -55,6 +55,11 @@ const getDownloadUrlEdinet = async (
     const [exists] = await myBucket.file(documentPath).exists();
     if (!exists) {
       const apiKey = getEdinetApiKey();
+      if (!apiKey) {
+        logger.warn(
+          "EDINET_API_KEY is not configured in environment or Secret Manager. EDINET API download request may fail."
+        );
+      }
       const url = `https://api.edinet-fsa.go.jp/api/v2/documents/${encodeURIComponent(
         docId
       )}?type=2`;
