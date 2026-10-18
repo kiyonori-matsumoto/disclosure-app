@@ -39,6 +39,7 @@
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "build": "npm run lint && npm run type-check && tsc",
-    "test": "jest ./src --ci"
+    "test": "jest ./src --ci",
+    "audit": "npm audit --audit-level=high"
   }
 }
