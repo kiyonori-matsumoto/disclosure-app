@@ -44,6 +44,7 @@ export const checkNewEdinet = onSchedule(
     schedule: "every 5 minutes",
     timeZone: "Asia/Tokyo",
     timeoutSeconds: 120,
+    secrets: ["EDINET_API_KEY"],
   },
   async () => {
     await checkNewEdinetHandler();
@@ -108,6 +109,7 @@ export const getDownloadUrlEdinetV2 = onRequest(
     cors: true,
     timeoutSeconds: 30,
     concurrency: 80,
+    secrets: ["EDINET_API_KEY"],
   },
   getDownloadUrlEdinetHandler
 );

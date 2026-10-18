@@ -15,6 +15,11 @@ const DB_PATH = "edinets";
 
 const fetchAndMapEdinet = async (date: string) => {
   const apiKey = getEdinetApiKey();
+  if (!apiKey) {
+    logger.warn(
+      "EDINET_API_KEY is not configured in environment or Secret Manager. EDINET API requests will likely fail with 401."
+    );
+  }
   const url = `https://api.edinet-fsa.go.jp/api/v2/documents.json?date=${date}&type=2`;
   const res = await axios.get(url, {
     headers: apiKey ? { "Ocp-Apim-Subscription-Key": apiKey } : {},

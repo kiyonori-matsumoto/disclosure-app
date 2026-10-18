@@ -29,4 +29,16 @@ describe("index exports", () => {
     expect(indexModule.changeTopic).toBeDefined();
     expect(indexModule.handleContentViewEvent).toBeDefined();
   });
+
+  it("should configure EDINET_API_KEY secret for EDINET functions", () => {
+    const checkNewEdinetEndpoint = (indexModule.checkNewEdinet as any).__endpoint;
+    expect(checkNewEdinetEndpoint?.secretEnvironmentVariables).toEqual(
+      expect.arrayContaining([{ key: "EDINET_API_KEY" }])
+    );
+
+    const getDownloadUrlEdinetV2Endpoint = (indexModule.getDownloadUrlEdinetV2 as any).__endpoint;
+    expect(getDownloadUrlEdinetV2Endpoint?.secretEnvironmentVariables).toEqual(
+      expect.arrayContaining([{ key: "EDINET_API_KEY" }])
+    );
+  });
 });
