@@ -1,7 +1,6 @@
 import * as admin from "firebase-admin";
 import { Disclosure } from "./models/disclosure";
 import * as functions from "firebase-functions/v1";
-import base64url from "base64url";
 import logger from "./lib/logger";
 
 const createMessageTags = (topic: string, data: Disclosure, tag: string) => {
@@ -73,7 +72,7 @@ const sendTopic = (
   });
   if (data.noSend) return true;
   const tagMessages = (data.tags2 || []).map((e) => {
-    const b64 = base64url.encode(e);
+    const b64 = Buffer.from(e, "utf-8").toString("base64url");
     return createMessageTags(`tags_${b64}`, data, e);
   });
 

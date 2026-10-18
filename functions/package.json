@@ -7,14 +7,12 @@
   },
   "dependencies": {
     "axios": "^1.20.0",
-    "base64url": "^3.0.1",
     "cheerio": "^1.2.0",
     "csv-parse": "^7.0.3",
-    "encoding": "^0.1.13",
+    "dayjs": "^1.11.23",
     "firebase-admin": "^13.10.0",
     "firebase-functions": "^7.4.0",
     "iconv-lite": "^0.7.3",
-    "moment": "^2.31.0",
     "playwright": "^1.64.1",
     "unzipper": "^0.12.5",
     "xlsx": "^0.18.5"

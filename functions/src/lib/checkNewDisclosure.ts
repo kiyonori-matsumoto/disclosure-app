@@ -1,6 +1,9 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import moment from "moment";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
@@ -28,11 +31,11 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
   snapshot?: functions.pubsub.Message,
   context?: functions.EventContext
 ) => {
-  const time = moment(
+  const time = dayjs(
     snapshot?.attributes?.timestampForTest || context?.timestamp || Date.now()
   ).utcOffset(9);
-  const start = moment(time).utcOffset(9).startOf("date").valueOf();
-  const end = moment(start).utcOffset(9).add(1, "days").valueOf();
+  const start = time.startOf("day").valueOf();
+  const end = time.startOf("day").add(1, "day").valueOf();
   logger.info(`viewing: ${time.format("YYYYMMDD")}, ${start}, ${end}`);
 
   const lastDisclosures = await firestore

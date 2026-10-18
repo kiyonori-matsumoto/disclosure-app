@@ -1,5 +1,10 @@
 import axios from "axios";
-import moment from "moment";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+
+dayjs.extend(utc);
+dayjs.extend(localizedFormat);
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { zeroPad, notEmpty, chunk } from "./lib/util";
@@ -42,7 +47,7 @@ const fetchAndMapEdinet = async (date: string) => {
           pdfFlag,
         } = result;
         const [dateStr] = submitDateTime.split(" ");
-        const time = moment(submitDateTime).unix();
+        const time = dayjs(submitDateTime).unix();
         const subsidiaryEdinetCodes =
           subsidiaryEdinetCode === null
             ? []
@@ -92,9 +97,10 @@ const checkNewEdinet = async (
   context?: { timestamp: string }
 ) => {
   const time_msg = message?.json?.timestamp;
-  const today = moment(time_msg ? time_msg : context?.timestamp || Date.now()).utcOffset(9);
-  const start = today.startOf("days").format("YYYY-MM-DD");
-  const end = today.startOf("days").add(1, "day").format("YYYY-MM-DD");
+  const today = dayjs(time_msg ? time_msg : context?.timestamp || Date.now()).utcOffset(9);
+  const startOfToday = today.startOf("day");
+  const start = startOfToday.format("YYYY-MM-DD");
+  const end = startOfToday.add(1, "day").format("YYYY-MM-DD");
 
   logger.info(`viewing: ${today.format("llll")}, start: ${start}, end: ${end}`);
 

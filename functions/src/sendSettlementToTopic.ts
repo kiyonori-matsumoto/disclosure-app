@@ -1,12 +1,15 @@
 import * as admin from "firebase-admin";
-import moment from "moment";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import logger from "./lib/logger";
+
+dayjs.extend(utc);
 
 const settlementToStr = (d: any) =>
   `${d["name"]}の決算(${d["quote"]})は本日の予定です！`;
 
 const sendSettlementToTopic = async () => {
-  const dateStr = moment().utcOffset(9).format("YYYY-MM-DD");
+  const dateStr = dayjs().utcOffset(9).format("YYYY-MM-DD");
   const settlements = await admin
     .firestore()
     .collection("settlements")
