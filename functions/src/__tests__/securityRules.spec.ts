@@ -31,26 +31,26 @@ describe("Firebase Security Rules", () => {
       expect(rulesContent).toMatch(/rules_version\s*=\s*['"]2['"]/);
     });
 
-    it("should allow public read and deny write on disclosures collection", () => {
-      expect(rulesContent).toContain("match /disclosures/{disclosureId}");
-      expect(rulesContent).toMatch(/match \/disclosures\/\{disclosureId\}[\s\S]*?allow read:\s*if true;/);
-      expect(rulesContent).toMatch(/match \/disclosures\/\{disclosureId\}[\s\S]*?allow write:\s*if false;/);
+    it("should allow read on dev-disclosures", () => {
+      expect(rulesContent).toMatch(/match \/dev-disclosures\/\{document=\*\*\}[\s\S]*?allow read;/);
     });
 
-    it("should allow public read and deny write on edinets collection", () => {
-      expect(rulesContent).toContain("match /edinets/{edinetId}");
-      expect(rulesContent).toMatch(/match \/edinets\/\{edinetId\}[\s\S]*?allow read:\s*if true;/);
-      expect(rulesContent).toMatch(/match \/edinets\/\{edinetId\}[\s\S]*?allow write:\s*if false;/);
+    it("should restrict read on disclosures with authentication, UID block, and query limit", () => {
+      expect(rulesContent).toContain("match /disclosures/{document=**}");
+      expect(rulesContent).toContain("request.auth.uid != null");
+      expect(rulesContent).toContain('request.auth.uid != "zpIzrPUBWHUq7IqEhxiEp5PHxXE3"');
+      expect(rulesContent).toContain("(request.query.limit == null || request.query.limit <= 20)");
     });
 
-    it("should allow public read and deny write on settlements collection", () => {
-      expect(rulesContent).toContain("match /settlements/{settlementId}");
-      expect(rulesContent).toMatch(/match \/settlements\/\{settlementId\}[\s\S]*?allow read:\s*if true;/);
-      expect(rulesContent).toMatch(/match \/settlements\/\{settlementId\}[\s\S]*?allow write:\s*if false;/);
+    it("should restrict user collection and user subcollection to authenticated user", () => {
+      expect(rulesContent).toMatch(/match \/users\/\{userId\}[\s\S]*?allow read:\s*if request\.auth\.uid == userId;/);
+      expect(rulesContent).toMatch(/match \/users\/\{userId\}[\s\S]*?allow write:\s*if request\.auth\.uid == userId;/);
     });
 
-    it("should deny all operations by default for other collections (least privilege)", () => {
-      expect(rulesContent).toMatch(/match\s*\/\{document=\*\*\}[\s\S]*?allow read,\s*write:\s*if false;/);
+    it("should require authentication to read companies, settlements, and edinets", () => {
+      expect(rulesContent).toMatch(/match \/companies\/\{document=\*\*\}[\s\S]*?allow read:\s*if request\.auth\.uid != null;/);
+      expect(rulesContent).toMatch(/match \/settlements\/\{document=\*\*\}[\s\S]*?allow read:\s*if request\.auth\.uid != null;/);
+      expect(rulesContent).toMatch(/match \/edinets\/\{document=\*\*\}[\s\S]*?allow read:\s*if request\.auth\.uid != null;/);
     });
   });
 
