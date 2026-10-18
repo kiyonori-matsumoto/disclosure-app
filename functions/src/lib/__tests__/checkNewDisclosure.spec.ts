@@ -3,7 +3,7 @@ import "jest";
 
 import * as fs from "fs";
 import * as path from "path";
-import moment from "moment";
+import dayjs from "dayjs";
 
 jest.mock("firebase-admin");
 jest.mock("axios");
@@ -82,7 +82,7 @@ describe("lib/checkNewDisclosure", () => {
     await checkNewDisclosure("test-disclosures")(
       { attributes: {} } as any,
       {
-        timestamp: moment("2017-10-05T11:11:22").toISOString()
+        timestamp: dayjs("2017-10-05T11:11:22").toISOString()
       } as any
     );
     expect(firestore.batch().set).toBeCalledTimes(129);
@@ -123,7 +123,7 @@ describe("lib/checkNewDisclosure", () => {
     await checkNewDisclosure("test-disclosures")(
       { attributes: {} } as any,
       {
-        timestamp: moment("2017-10-05T11:11:22").toISOString()
+        timestamp: dayjs("2017-10-05T11:11:22").toISOString()
       } as any
     );
     expect(admin.firestore().batch().set).not.toBeCalled();
@@ -135,7 +135,7 @@ describe("lib/checkNewDisclosure", () => {
     await checkNewDisclosure("test-disclosures")(
       { attributes: {} } as any,
       {
-        timestamp: moment("2017-10-14T11:11:22").toISOString()
+        timestamp: dayjs("2017-10-14T11:11:22").toISOString()
       } as any
     );
     expect(admin.firestore().batch().set).not.toBeCalled();
@@ -149,7 +149,7 @@ describe("lib/checkNewDisclosure", () => {
       checkNewDisclosure("test-disclosures")(
         { attributes: {} } as any,
         {
-          timestamp: moment("2017-10-13T11:11:22").toISOString()
+          timestamp: dayjs("2017-10-13T11:11:22").toISOString()
         } as any
       )
     ).rejects.toHaveProperty("response.status", 500);
@@ -176,7 +176,7 @@ describe("lib/checkNewDisclosure", () => {
     await checkNewDisclosure("test-disclosures")(
       { attributes: {} } as any,
       {
-        timestamp: moment("2018-05-11T12:00:00").toISOString()
+        timestamp: dayjs("2018-05-11T12:00:00").toISOString()
       } as any
     );
 
