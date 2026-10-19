@@ -1,6 +1,5 @@
 import * as admin from "firebase-admin";
 import { Disclosure } from "./models/disclosure";
-import * as functions from "firebase-functions/v1";
 import logger from "./lib/logger";
 
 const createMessageTags = (topic: string, data: Disclosure, tag: string) => {
@@ -59,8 +58,8 @@ const createMessage = (
 };
 
 const sendTopic = (
-  snapshot: functions.firestore.DocumentSnapshot,
-  _: functions.EventContext
+  snapshot: admin.firestore.DocumentSnapshot,
+  _context?: any
 ) => {
   const data = snapshot.data() as Disclosure | undefined;
   if (data === undefined) return true;
