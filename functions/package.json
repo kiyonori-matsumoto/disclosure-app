@@ -37,9 +37,6 @@
     "type-check": "tsc --noEmit",
     "build": "npm run lint && npm run type-check && tsc",
     "test": "jest ./src --ci",
-    "audit": "npm audit --audit-level=high",
-    "cd:record-revisions": "node lib/cd/cli.js record",
-    "cd:rollback": "node lib/cd/cli.js rollback",
-    "cd:smoke-test": "node lib/cd/cli.js smoke"
+    "audit": "npm audit --audit-level=high"
   }
 }

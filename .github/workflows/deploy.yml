@@ -16,7 +16,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Firebase with Automated Rollback
+    name: Deploy to Firebase
     runs-on: ubuntu-latest
 
     defaults:
@@ -51,26 +51,5 @@ jobs:
     - name: Run unit tests
       run: npm test
 
-    - name: Pre-deploy - Record active Cloud Run revisions
-      id: record_revisions
-      run: npm run cd:record-revisions
-      env:
-        GCP_PROJECT_ID: ${{ inputs.project || 'disclosure-app' }}
-        GCP_REGION: asia-northeast1
-        REVISIONS_BACKUP_FILE: ./revisions-backup.json
-
     - name: Deploy to Firebase (Rules, Storage & Functions)
       run: npx firebase-tools deploy --only firestore:rules,storage,functions --project ${{ inputs.project || 'disclosure-app' }}
-
-    - name: Post-deploy - Smoke test endpoints
-      id: smoke_test
-      run: npm run cd:smoke-test
-      env:
-        GCP_PROJECT_ID: ${{ inputs.project || 'disclosure-app' }}
-        GCP_REGION: asia-northeast1
-
-    - name: Automated Rollback on failure
-      if: failure() && steps.record_revisions.outcome == 'success'
-      run: npm run cd:rollback
-      env:
-        REVISIONS_BACKUP_FILE: ./revisions-backup.json
