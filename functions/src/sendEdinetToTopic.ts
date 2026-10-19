@@ -1,13 +1,12 @@
 import * as admin from "firebase-admin";
-import * as functions from "firebase-functions/v1";
 import { notEmpty } from "./lib/util";
 import logger from "./lib/logger";
 
 let companies: any = null;
 
 const sendEdinetToTopic = async (
-  snapshot: functions.firestore.DocumentSnapshot,
-  _: functions.EventContext
+  snapshot: admin.firestore.DocumentSnapshot,
+  _context?: any
 ) => {
   const data = snapshot.data();
   if (data === undefined) {

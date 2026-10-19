@@ -1,4 +1,3 @@
-import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import axios from "axios";
 import { pipeline } from "stream/promises";
@@ -23,8 +22,8 @@ const getStorageBucket = () => {
 };
 
 export const createSaveDocument = (dbPath: string = DB_PATH) => async (
-  snapshot: functions.firestore.DocumentSnapshot,
-  _context?: functions.EventContext
+  snapshot: admin.firestore.DocumentSnapshot,
+  _context?: any
 ) => {
   const data = snapshot.data();
   const document = data?.document;

@@ -2,6 +2,7 @@ import * as functions from "firebase-functions/v1";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { onRequest } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
@@ -113,19 +114,49 @@ export const getDownloadUrlEdinetV2 = onRequest(
   getDownloadUrlEdinetHandler
 );
 
-// --- Cloud Functions v1: Background Triggers (Firestore / RTDB / Analytics) ---
+// --- Cloud Functions v2: Firestore Triggers (Firestore が nam5 のため us-central1 を明示指定) ---
 
-export const sendTopicFs2 = functions.firestore
-  .document("disclosures/{key}")
-  .onCreate(sendTopicHandler);
+export const sendTopicFs2 = onDocumentCreated(
+  {
+    document: "disclosures/{key}",
+    region: "us-central1",
+    timeoutSeconds: 60,
+  },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+    await sendTopicHandler(snap as any, { params: event.params });
+  }
+);
 
-export const saveDocumentFs = functions.firestore
-  .document("disclosures/{key}")
-  .onCreate(saveDocumentHandler);
+export const saveDocumentFs = onDocumentCreated(
+  {
+    document: "disclosures/{key}",
+    region: "us-central1",
+    timeoutSeconds: 120,
+    memory: "512MiB",
+  },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+    await saveDocumentHandler(snap as any, { params: event.params });
+  }
+);
 
-export const sendEdinetToTopic = functions.firestore
-  .document("edinets/{key}")
-  .onCreate(sendEdinetToTopicHandler);
+export const sendEdinetToTopic = onDocumentCreated(
+  {
+    document: "edinets/{key}",
+    region: "us-central1",
+    timeoutSeconds: 60,
+  },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+    await sendEdinetToTopicHandler(snap as any, { params: event.params });
+  }
+);
+
+// --- Cloud Functions v1: Analytics Trigger (v2 に直接の後継トリガーがないため維持) ---
 
 export const handleContentViewEvent = functions.analytics
   .event("select_content")

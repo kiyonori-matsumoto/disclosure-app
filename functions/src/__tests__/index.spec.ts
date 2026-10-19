@@ -22,11 +22,24 @@ describe("index exports", () => {
     expect(indexModule.listTopicsV2).toBeDefined();
     expect(indexModule.getDownloadUrlEdinetV2).toBeDefined();
 
-    // v1 Event Triggers
+    // v2 Firestore Triggers (US: us-central1 for nam5 database location)
     expect(indexModule.sendTopicFs2).toBeDefined();
     expect(indexModule.saveDocumentFs).toBeDefined();
     expect(indexModule.sendEdinetToTopic).toBeDefined();
+
+    // v1 Analytics Trigger
     expect(indexModule.handleContentViewEvent).toBeDefined();
+  });
+
+  it("should configure us-central1 region for Firestore triggers", () => {
+    const sendTopicFs2Endpoint = (indexModule.sendTopicFs2 as any).__endpoint;
+    expect(sendTopicFs2Endpoint?.region).toContain("us-central1");
+
+    const saveDocumentFsEndpoint = (indexModule.saveDocumentFs as any).__endpoint;
+    expect(saveDocumentFsEndpoint?.region).toContain("us-central1");
+
+    const sendEdinetToTopicEndpoint = (indexModule.sendEdinetToTopic as any).__endpoint;
+    expect(sendEdinetToTopicEndpoint?.region).toContain("us-central1");
   });
 
   it("should configure EDINET_API_KEY secret for EDINET functions", () => {
