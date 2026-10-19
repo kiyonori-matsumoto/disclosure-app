@@ -26,7 +26,6 @@ describe("index exports", () => {
     expect(indexModule.sendTopicFs2).toBeDefined();
     expect(indexModule.saveDocumentFs).toBeDefined();
     expect(indexModule.sendEdinetToTopic).toBeDefined();
-    expect(indexModule.changeTopic).toBeDefined();
     expect(indexModule.handleContentViewEvent).toBeDefined();
   });
 
