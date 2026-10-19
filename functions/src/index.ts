@@ -22,7 +22,6 @@ import createCompanyDictHandler from "./createCompanyDict";
 import { listTopics as listTopicsHandler } from "./listTopics";
 import handleContentViewEventHandler from "./handleContentViewEvent";
 import saveDocumentHandler from "./saveDocument";
-import changeTopicHandler from "./changeTopic";
 
 // --- Cloud Functions v2: Scheduled Functions (東京リージョン asia-northeast1) ---
 
@@ -127,10 +126,6 @@ export const saveDocumentFs = functions.firestore
 export const sendEdinetToTopic = functions.firestore
   .document("edinets/{key}")
   .onCreate(sendEdinetToTopicHandler);
-
-export const changeTopic = functions.database
-  .ref("/user/topics/{userId}")
-  .onWrite(changeTopicHandler);
 
 export const handleContentViewEvent = functions.analytics
   .event("select_content")
