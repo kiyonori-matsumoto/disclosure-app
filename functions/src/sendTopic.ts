@@ -2,36 +2,11 @@ import * as admin from "firebase-admin";
 import { Disclosure } from "./models/disclosure";
 import logger from "./lib/logger";
 
-const createMessageTags = (topic: string, data: Disclosure, tag: string) => {
-  return {
-    android: {
-      notification: {
-        body: `${data.title}`,
-        tag: topic,
-        color: "#311B92",
-        title: `新しい開示情報 ${tag} - ${data.company}`,
-      },
-    },
-    data: {
-      title: `${data.title}`,
-      code: `${data.code}`,
-      company: `${data.company}`,
-      click_action: "FLUTTER_NOTIFICATION_CLICK",
-      tag,
-      type: "tag",
-    },
-    notification: {
-      body: `${data.title}`,
-      title: `新しい開示情報 ${tag} - ${data.company}`,
-    },
-    topic: topic,
-  };
-};
-
-const createMessage = (
+const buildMessage = (
   topic: string,
   data: Disclosure,
-  additionals?: { [key: string]: string }
+  title: string,
+  extraData?: { [key: string]: string }
 ) => {
   return {
     android: {
@@ -39,7 +14,7 @@ const createMessage = (
         body: `${data.title}`,
         tag: topic,
         color: "#311B92",
-        title: `新しい開示情報 ${data.company}(${data.code})`,
+        title,
       },
     },
     data: {
@@ -47,14 +22,29 @@ const createMessage = (
       code: `${data.code}`,
       company: `${data.company}`,
       click_action: "FLUTTER_NOTIFICATION_CLICK",
-      ...additionals,
+      ...extraData,
     },
     notification: {
       body: `${data.title}`,
-      title: `新しい開示情報 ${data.company}(${data.code})`,
+      title,
     },
-    topic: topic,
+    topic,
   };
+};
+
+const createMessageTags = (topic: string, data: Disclosure, tag: string) => {
+  const title = `新しい開示情報 ${tag} - ${data.company}`;
+  const extraData = { tag, type: "tag" };
+  return buildMessage(topic, data, title, extraData);
+};
+
+const createMessage = (
+  topic: string,
+  data: Disclosure,
+  additionals?: { [key: string]: string }
+) => {
+  const title = `新しい開示情報 ${data.company}(${data.code})`;
+  return buildMessage(topic, data, title, additionals);
 };
 
 const sendTopic = (
