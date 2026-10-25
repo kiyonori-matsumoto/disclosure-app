@@ -12,7 +12,6 @@ import { Disclosure } from "../models/disclosure";
 import logger from "./logger";
 import { DEFAULT_USER_AGENT } from "./constants";
 
-// const TIME_MAX = 9999999999999;
 const TAGS = [
   "株主優待",
   "決算",
