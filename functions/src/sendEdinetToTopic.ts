@@ -49,9 +49,13 @@ const sendEdinetToTopic = async (
       const d = {
         notification: {
           body: docDescription,
-          tag: `code_${code}`,
-          color: "#006064",
           title: `新しいEdinet ${company.name}(${code})`,
+        },
+        android: {
+          notification: {
+            tag: `code_${code}`,
+            color: "#006064",
+          },
         },
         data: {
           title: docDescription,
@@ -65,6 +69,7 @@ const sendEdinetToTopic = async (
       return admin.messaging().send({
         condition: `'code_${code}' in topics && 'edinet_notification' in topics`,
         notification: d.notification,
+        android: d.android,
         data: d.data,
       });
     })

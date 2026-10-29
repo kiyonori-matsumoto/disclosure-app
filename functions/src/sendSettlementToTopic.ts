@@ -18,11 +18,16 @@ const sendSettlementToTopic = async () => {
   const messages = settlements.docs.map((st) => {
     const data = st.data();
     return {
+      topic: `code_${data.code}`,
       notification: {
         body: settlementToStr(data),
-        tag: `code_${data.code}`,
-        color: "#006064",
         title: `決算予定情報 ${data.name}(${data.code})`,
+      },
+      android: {
+        notification: {
+          tag: `code_${data.code}`,
+          color: "#006064",
+        },
       },
       data: {
         code: `${data.code}`,
@@ -35,8 +40,9 @@ const sendSettlementToTopic = async () => {
   const results = await Promise.allSettled(
     messages.map((msg) =>
       admin.messaging().send({
-        topic: msg.notification.tag,
+        topic: msg.topic,
         notification: msg.notification,
+        android: msg.android,
         data: msg.data,
       })
     )
