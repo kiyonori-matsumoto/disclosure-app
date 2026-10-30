@@ -1,11 +1,57 @@
 import * as admin from "firebase-admin";
 import * as cheerio from "cheerio";
-import * as xlsx from "xlsx";
+import ExcelJS from "exceljs";
 import { URL } from "url";
 import axios from "axios";
 import { chunk } from "./util";
 import logger from "./logger";
 import { DEFAULT_USER_AGENT } from "./constants";
+
+export interface SettlementRecord {
+  code: string;
+  schedule: string;
+  name: string;
+  settlementDate: string;
+  quote: string;
+}
+
+export const formatDate = (date: unknown): string => {
+  if (!date) return "";
+  if (date instanceof Date) {
+    const month = date.getUTCMonth() + 1;
+    const day = date.getUTCDate();
+    return `${month}月${day}日`;
+  }
+  const str = String(date).trim();
+  const parts = str.split("-").map(Number);
+  if (parts.length >= 3 && parts[1] && parts[2]) {
+    return `${parts[1]}月${parts[2]}日`;
+  }
+  return str;
+};
+
+export const formatScheduleDate = (val: unknown): string => {
+  if (!val) return "";
+  if (val instanceof Date) {
+    const y = val.getUTCFullYear();
+    const m = String(val.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(val.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  const str = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return str;
+  }
+  return "";
+};
+
+export const extractText = (val: unknown): string => {
+  if (val == null) return "";
+  if (typeof val === "object" && val !== null && "text" in (val as any)) {
+    return String((val as any).text).trim();
+  }
+  return String(val).trim();
+};
 
 export const createSettlementDict = (DB_PATH: string) => async () => {
   const resIndex = await axios.get(
@@ -23,16 +69,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
     .map((i, elem) => elem.attribs["href"])
     .get();
 
-  const formatDate = (date: string) => {
-    if (!date) return "";
-
-    const [, month, day] = date.split("-").map(Number);
-    if (!month || !day) return date;
-
-    return `${month}月${day}日`;
-  };
-
-  const registerObjects = async (url: string) => {
+  const registerObjects = async (url: string): Promise<SettlementRecord[]> => {
     try {
       const xlsxUrl = new URL(url, "https://www.jpx.co.jp");
       const res = await axios.get(xlsxUrl.toString(), {
@@ -42,42 +79,81 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
           "User-Agent": DEFAULT_USER_AGENT,
         },
       });
-      const wb = xlsx.read(res.data, { cellText: false, cellDates: true });
-      const sheetData = xlsx.utils.sheet_to_json<{ [key: string]: any }>(
-        wb.Sheets[wb.SheetNames[0]],
-        {
-          range: 4,
-          raw: false,
-          dateNF: 'yyyy"-"mm"-"dd',
-        }
-      );
 
-      if (sheetData.length === 0) {
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(res.data);
+      const ws = wb.worksheets[0];
+      if (!ws) {
         return [];
       }
 
-      const keyMapping = {
-        code: Object.keys(sheetData[0]).find((e) => e.match(/コード/))!,
-        schedule: Object.keys(sheetData[0]).find((e) => e.match(/発表予定日/))!,
-        name: Object.keys(sheetData[0]).find((e) => e.match(/会社名/))!,
-        settlementDate: Object.keys(sheetData[0]).find((e) =>
-          e.match(/決算期末/)
-        )!,
-        quote: Object.keys(sheetData[0]).find((e) => e.match(/種別/))!,
-      };
+      let headerRowNumber = 0;
+      const headerColIndices: Partial<Record<keyof SettlementRecord, number>> = {};
 
-      const filteredData = sheetData.filter((e) =>
-        (e[keyMapping.schedule] as string).match(/\d{4}-\d{2}-\d{2}/)
-      );
+      for (let r = 1; r <= Math.min(ws.rowCount, 15); r++) {
+        const row = ws.getRow(r);
+        let foundCode = false;
 
-      const mappedData = filteredData.map((e) => ({
-        code: e[keyMapping.code],
-        schedule: e[keyMapping.schedule],
-        name: e[keyMapping.name],
-        settlementDate: formatDate(e[keyMapping.settlementDate]),
-        quote: e[keyMapping.quote],
-      }));
-      return mappedData;
+        row.eachCell((cell) => {
+          const text = cell.text || extractText(cell.value);
+          if (/コード/.test(text)) {
+            foundCode = true;
+          }
+        });
+
+        if (foundCode) {
+          headerRowNumber = r;
+          row.eachCell((cell, colNumber) => {
+            const text = cell.text || extractText(cell.value);
+            if (/コード/.test(text)) headerColIndices.code = colNumber;
+            if (/発表予定日/.test(text)) headerColIndices.schedule = colNumber;
+            if (/会社名/.test(text)) headerColIndices.name = colNumber;
+            if (/決算期末/.test(text)) headerColIndices.settlementDate = colNumber;
+            if (/種別/.test(text)) headerColIndices.quote = colNumber;
+          });
+          break;
+        }
+      }
+
+      if (
+        !headerRowNumber ||
+        !headerColIndices.code ||
+        !headerColIndices.schedule ||
+        !headerColIndices.name ||
+        !headerColIndices.settlementDate ||
+        !headerColIndices.quote
+      ) {
+        logger.warn("Could not find expected headers in Excel sheet", { url });
+        return [];
+      }
+
+      const records: SettlementRecord[] = [];
+      for (let r = headerRowNumber + 1; r <= ws.rowCount; r++) {
+        const row = ws.getRow(r);
+        const scheduleRaw = row.getCell(headerColIndices.schedule).value;
+        const schedule = formatScheduleDate(scheduleRaw);
+        if (!schedule) continue;
+
+        const codeRaw = row.getCell(headerColIndices.code).value;
+        const code = extractText(codeRaw);
+        if (!code) continue;
+
+        const name = extractText(row.getCell(headerColIndices.name).value);
+        const settlementDate = formatDate(
+          row.getCell(headerColIndices.settlementDate).value
+        );
+        const quote = extractText(row.getCell(headerColIndices.quote).value);
+
+        records.push({
+          code,
+          schedule,
+          name,
+          settlementDate,
+          quote,
+        });
+      }
+
+      return records;
     } catch (error) {
       logger.error("Error registering objects in createSettlementDict:", error, {
         url,
