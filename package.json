@@ -1,0 +1,14 @@
+{
+  "name": "disclosure-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "disclosure-app backend and infrastructure",
+  "scripts": {
+    "prepare": "npm --prefix functions run prepare",
+    "lint": "npm --prefix functions run lint",
+    "type-check": "npm --prefix functions run type-check",
+    "build": "npm --prefix functions run build",
+    "test": "npm --prefix functions test",
+    "audit": "npm --prefix functions run audit"
+  }
+}
