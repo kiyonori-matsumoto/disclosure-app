@@ -21,7 +21,17 @@ const getStorageBucket = () => {
   return admin.storage().bucket();
 };
 
-export const createSaveDocument = (dbPath: string = DB_PATH) => async (
+export interface SaveDocumentOptions {
+  maxRetries?: number;
+  initialDelayMs?: number;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const createSaveDocument = (
+  dbPath: string = DB_PATH,
+  options: SaveDocumentOptions = {}
+) => async (
   snapshot: admin.firestore.DocumentSnapshot,
   _context?: any
 ) => {
@@ -42,35 +52,81 @@ export const createSaveDocument = (dbPath: string = DB_PATH) => async (
   const filePath = `${dbPath}/${document}.pdf`;
   const url = `https://www.release.tdnet.info/inbs/${document}.pdf`;
 
-  logger.info(`Downloading and saving document: ${filePath} from ${url}`);
+  const maxRetries = options.maxRetries ?? 3;
+  const initialDelayMs = options.initialDelayMs ?? 1000;
 
-  try {
-    const response = await axios.get(url, {
-      responseType: "stream",
-      timeout: 30000,
-      headers: {
-        "User-Agent": DEFAULT_USER_AGENT,
-      },
-    });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    let ws: NodeJS.WritableStream | undefined;
+    try {
+      logger.info(
+        `Downloading and saving document: ${filePath} from ${url} (attempt ${attempt}/${maxRetries})`
+      );
 
-    const ws = myBucket.file(filePath).createWriteStream({
-      gzip: true,
-      metadata: {
-        contentType: "application/pdf",
-      },
-    });
+      const response = await axios.get(url, {
+        responseType: "stream",
+        timeout: 30000,
+        headers: {
+          "User-Agent": DEFAULT_USER_AGENT,
+        },
+      });
 
-    await pipeline(response.data, ws);
-    logger.info(`Successfully saved ${filePath}`);
-    return true;
-  } catch (err: any) {
-    if (axios.isAxiosError(err) && err.response?.status === 404) {
-      logger.warn(`TDnet document not found (404): ${url}`);
-      return false;
+      ws = myBucket.file(filePath).createWriteStream({
+        gzip: true,
+        metadata: {
+          contentType: "application/pdf",
+        },
+      });
+
+      await pipeline(response.data, ws);
+      logger.info(`Successfully saved ${filePath}`);
+      return true;
+    } catch (err: any) {
+      if (ws && typeof (ws as any).destroy === "function") {
+        try {
+          (ws as any).destroy();
+        } catch {
+          // ignore
+        }
+      }
+
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        logger.warn(`TDnet document not found (404): ${url}`);
+        return false;
+      }
+
+      if (
+        axios.isAxiosError(err) &&
+        err.response?.status &&
+        err.response.status >= 400 &&
+        err.response.status < 500 &&
+        err.response.status !== 429
+      ) {
+        logger.error(
+          `Non-retryable client error (${err.response.status}) downloading ${filePath}:`,
+          err
+        );
+        return false;
+      }
+
+      const isLastAttempt = attempt === maxRetries;
+      if (isLastAttempt) {
+        logger.error(
+          `Failed to download or save document ${filePath} after ${maxRetries} attempts:`,
+          err
+        );
+        throw err;
+      }
+
+      const jitter = Math.floor(Math.random() * 500);
+      const delay = initialDelayMs * Math.pow(2, attempt - 1) + jitter;
+      logger.warn(
+        `Failed attempt ${attempt}/${maxRetries} to download ${filePath} (${err?.message || err}). Retrying in ${delay}ms...`
+      );
+      await sleep(delay);
     }
-    logger.error(`Failed to download or save document ${filePath}:`, err);
-    throw err;
   }
+
+  return false;
 };
 
 export const saveDocument = createSaveDocument("disclosures");

@@ -37,6 +37,7 @@ describe("index exports", () => {
 
     const saveDocumentFsEndpoint = (indexModule.saveDocumentFs as any).__endpoint;
     expect(saveDocumentFsEndpoint?.region).toContain("us-central1");
+    expect(saveDocumentFsEndpoint?.maxInstances).toBe(10);
 
     const sendEdinetToTopicEndpoint = (indexModule.sendEdinetToTopic as any).__endpoint;
     expect(sendEdinetToTopicEndpoint?.region).toContain("us-central1");

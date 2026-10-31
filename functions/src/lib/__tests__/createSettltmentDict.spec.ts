@@ -214,5 +214,65 @@ describe("lib/createSettlementDict", () => {
 
       expect(admin.firestore().batch().set).not.toHaveBeenCalled();
     });
+
+    it("parses modern JPX HTML table without overtable class and handles merged cells safely", async () => {
+      const modernHtml = `
+        <!DOCTYPE html>
+        <html>
+          <body>
+            <div>
+              <table>
+                <tr>
+                  <td><a href="/listing/event-schedules/financial-announcement/tvdivq0000001ofb-att/modern.xlsx">決算発表予定日</a></td>
+                </tr>
+              </table>
+            </div>
+          </body>
+        </html>
+      `;
+
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet("Sheet1");
+      // Header row
+      ws.addRow(["発表予定日", "コード", "会社名", "決算期末", "種別"]);
+      // Data row
+      ws.addRow(["2024-05-24", "9999", "テスト企業", "3月31日", "本決算"]);
+      // Row with merged cell / empty cells
+      ws.addRow(["2024-05-25", "8888", "マージ企業", "3月31日", "第1四半期"]);
+      const modernBuffer = await wb.xlsx.writeBuffer();
+
+      (axios.get as any) = jest.fn().mockImplementation((url) => {
+        if (
+          url ===
+          "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/index.html"
+        ) {
+          return Promise.resolve({ data: modernHtml });
+        }
+        return Promise.resolve({ data: modernBuffer });
+      });
+
+      await createSettlementDict("test-settlement")();
+
+      expect(admin.firestore().batch().set).toHaveBeenCalledTimes(2);
+      expect(admin.firestore().batch().commit).toHaveBeenCalledTimes(1);
+    });
+
+    it("handles index page without xlsx links without throwing", async () => {
+      const noLinksHtml = "<html><body><p>リンクなし</p></body></html>";
+
+      (axios.get as any) = jest.fn().mockImplementation((url) => {
+        if (
+          url ===
+          "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/index.html"
+        ) {
+          return Promise.resolve({ data: noLinksHtml });
+        }
+        return Promise.reject("not found");
+      });
+
+      const result = await createSettlementDict("test-settlement")();
+      expect(result).toEqual([]);
+      expect(admin.firestore().batch().set).not.toHaveBeenCalled();
+    });
   });
 });

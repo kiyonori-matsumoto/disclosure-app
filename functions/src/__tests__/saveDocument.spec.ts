@@ -105,5 +105,75 @@ describe("saveDocument", () => {
 
     const result = await saveDocument(snapshot);
     expect(result).toBe(false);
+    expect(axios.get).toHaveBeenCalledTimes(1);
+  });
+
+  it("should retry on network error and succeed on subsequent attempt", async () => {
+    const customSaveDoc = (await import("../saveDocument")).createSaveDocument("disclosures", {
+      maxRetries: 3,
+      initialDelayMs: 1,
+    });
+
+    const snapshot = {
+      data: () => ({ document: "140120240530123456" }),
+    } as any;
+
+    const abortError = new Error("aborted");
+    const mockPdfStream = new Readable({
+      read() {
+        this.push(Buffer.from("%PDF-1.4 TDnet test"));
+        this.push(null);
+      },
+    });
+
+    (axios.get as jest.Mock)
+      .mockRejectedValueOnce(abortError)
+      .mockResolvedValueOnce({
+        data: mockPdfStream,
+        status: 200,
+      });
+
+    const result = await customSaveDoc(snapshot);
+    expect(result).toBe(true);
+    expect(axios.get).toHaveBeenCalledTimes(2);
+  });
+
+  it("should throw after exhausting all retries on persistent network error", async () => {
+    const customSaveDoc = (await import("../saveDocument")).createSaveDocument("disclosures", {
+      maxRetries: 3,
+      initialDelayMs: 1,
+    });
+
+    const snapshot = {
+      data: () => ({ document: "140120240530123456" }),
+    } as any;
+
+    const abortError = new Error("aborted");
+    (axios.get as jest.Mock).mockRejectedValue(abortError);
+
+    await expect(customSaveDoc(snapshot)).rejects.toThrow("aborted");
+    expect(axios.get).toHaveBeenCalledTimes(3);
+  });
+
+  it("should not retry non-retryable 4xx client errors (e.g. 403)", async () => {
+    const customSaveDoc = (await import("../saveDocument")).createSaveDocument("disclosures", {
+      maxRetries: 3,
+      initialDelayMs: 1,
+    });
+
+    const snapshot = {
+      data: () => ({ document: "140120240530123456" }),
+    } as any;
+
+    const error403: any = new Error("Request failed with status code 403");
+    error403.isAxiosError = true;
+    error403.response = { status: 403 };
+    (axios.isAxiosError as unknown as jest.Mock) = jest.fn().mockReturnValue(true);
+
+    (axios.get as jest.Mock).mockRejectedValue(error403);
+
+    const result = await customSaveDoc(snapshot);
+    expect(result).toBe(false);
+    expect(axios.get).toHaveBeenCalledTimes(1);
   });
 });
