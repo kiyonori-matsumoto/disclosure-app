@@ -31,8 +31,8 @@ jest.mock("../lib/logger", () => ({
 
 describe("sendEdinetToTopic", () => {
   const companiesData = [
-    { edinetCode: "E00001", code: "12340", name: "テスト株式会社" },
-    { edinetCode: "E00002", code: "56780", name: "サンプル株式会社" },
+    { edinetCode: "E00001", code: "1234", name: "テスト株式会社" },
+    { edinetCode: "E00002", code: "5678", name: "サンプル株式会社" },
   ];
 
   beforeEach(() => {

@@ -66,10 +66,10 @@ describe("createCompanyDict", () => {
         nameEn: "Test Co., Ltd.",
         nameKana: "テストカブシキガイシャ",
         industory: "情報・通信業",
-        code: "12340",
+        code: "1234",
         corporateNumber: "1234567890123",
       });
-      expect(result[1].code).toBe("56780");
+      expect(result[1].code).toBe("5678");
     });
   });
 
