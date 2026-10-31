@@ -3,7 +3,7 @@ import * as cheerio from "cheerio";
 import ExcelJS from "exceljs";
 import { URL } from "url";
 import axios from "axios";
-import { chunk } from "./util";
+import { chunk, notEmpty } from "./util";
 import logger from "./logger";
 import { DEFAULT_USER_AGENT } from "./constants";
 
@@ -65,9 +65,17 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
   );
   const $ = cheerio.load(resIndex.data);
 
-  const urls = $("table.overtable a")
+  const rawUrls = $("a[href*='.xlsx'], a[href*='.xls']")
     .map((i, elem) => elem.attribs["href"])
-    .get();
+    .get()
+    .filter(notEmpty);
+
+  const urls = Array.from(new Set(rawUrls));
+
+  if (urls.length === 0) {
+    logger.warn("No settlement Excel links found on JPX announcement page");
+    return [];
+  }
 
   const registerObjects = async (url: string): Promise<SettlementRecord[]> => {
     try {
@@ -95,7 +103,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
         let foundCode = false;
 
         row.eachCell((cell) => {
-          const text = cell.text || extractText(cell.value);
+          const text = extractText(cell.value);
           if (/コード/.test(text)) {
             foundCode = true;
           }
@@ -104,7 +112,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
         if (foundCode) {
           headerRowNumber = r;
           row.eachCell((cell, colNumber) => {
-            const text = cell.text || extractText(cell.value);
+            const text = extractText(cell.value);
             if (/コード/.test(text)) headerColIndices.code = colNumber;
             if (/発表予定日/.test(text)) headerColIndices.schedule = colNumber;
             if (/会社名/.test(text)) headerColIndices.name = colNumber;
@@ -164,8 +172,14 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
 
   const objs = await Promise.all(urls.map(registerObjects));
 
-  // 500件毎にデータをまとめる(firestoreの書き込み制限)
-  const _allData = objs.flat().filter((e) => !!e.code);
+  // Deduplicate by company code so that a batch does not contain duplicate document writes
+  const codeMap = new Map<string, SettlementRecord>();
+  for (const obj of objs.flat()) {
+    if (obj && obj.code) {
+      codeMap.set(obj.code, obj);
+    }
+  }
+  const _allData = Array.from(codeMap.values());
   logger.info(`total datas to register in createSettlementDict: ${_allData.length}`);
 
   const datas = chunk(_allData, 500);

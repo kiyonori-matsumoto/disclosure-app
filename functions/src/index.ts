@@ -135,6 +135,7 @@ export const saveDocumentFs = onDocumentCreated(
     region: "us-central1",
     timeoutSeconds: 120,
     memory: "512MiB",
+    maxInstances: 10,
   },
   async (event) => {
     const snap = event.data;
