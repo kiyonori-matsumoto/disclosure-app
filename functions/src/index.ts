@@ -69,6 +69,7 @@ export const createSettlementDict = onSchedule(
   {
     schedule: "0 0 * * *",
     timeZone: "Asia/Tokyo",
+    memory: "1GiB",
     timeoutSeconds: 120,
   },
   async () => {
