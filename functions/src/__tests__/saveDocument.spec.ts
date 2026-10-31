@@ -176,4 +176,108 @@ describe("saveDocument", () => {
     expect(result).toBe(false);
     expect(axios.get).toHaveBeenCalledTimes(1);
   });
+
+  it("should retry on 429 Too Many Requests and succeed on subsequent attempt", async () => {
+    const customSaveDoc = (await import("../saveDocument")).createSaveDocument("disclosures", {
+      maxRetries: 3,
+      initialDelayMs: 1,
+    });
+
+    const snapshot = {
+      data: () => ({ document: "140120240530123456" }),
+    } as any;
+
+    const error429: any = new Error("Too Many Requests");
+    error429.isAxiosError = true;
+    error429.response = { status: 429 };
+    (axios.isAxiosError as unknown as jest.Mock) = jest.fn().mockReturnValue(true);
+
+    const mockPdfStream = new Readable({
+      read() {
+        this.push(Buffer.from("%PDF-1.4 TDnet test"));
+        this.push(null);
+      },
+    });
+
+    (axios.get as jest.Mock)
+      .mockRejectedValueOnce(error429)
+      .mockResolvedValueOnce({
+        data: mockPdfStream,
+        status: 200,
+      });
+
+    const result = await customSaveDoc(snapshot);
+    expect(result).toBe(true);
+    expect(axios.get).toHaveBeenCalledTimes(2);
+  });
+
+  it("should destroy writable stream when pipeline stream writing fails", async () => {
+    const customSaveDoc = (await import("../saveDocument")).createSaveDocument("disclosures", {
+      maxRetries: 2,
+      initialDelayMs: 1,
+    });
+
+    const snapshot = {
+      data: () => ({ document: "140120240530123456" }),
+    } as any;
+
+    let destroyed = false;
+    mockFile.createWriteStream.mockImplementation(() => {
+      const failingWriteStream = new Writable({
+        write(chunk, encoding, callback) {
+          callback();
+        },
+      });
+      const originalDestroy = failingWriteStream.destroy.bind(failingWriteStream);
+      failingWriteStream.destroy = jest.fn((error?: Error) => {
+        destroyed = true;
+        return originalDestroy(error);
+      });
+      return failingWriteStream;
+    });
+
+    (axios.get as jest.Mock).mockImplementation(() => {
+      const faultyStream = Readable.from(
+        (async function* () {
+          throw new Error("Stream read error");
+        })()
+      );
+      return Promise.resolve({
+        data: faultyStream,
+        status: 200,
+      });
+    });
+
+    await expect(customSaveDoc(snapshot)).rejects.toThrow("Stream read error");
+    expect(destroyed).toBe(true);
+  });
+
+  it("should use storageBucket configured in FIREBASE_CONFIG when present", async () => {
+    const originalEnv = process.env.FIREBASE_CONFIG;
+    process.env.FIREBASE_CONFIG = JSON.stringify({ storageBucket: "my-custom-bucket" });
+
+    try {
+      const snapshot = {
+        data: () => ({ document: "140120240530123456" }),
+      } as any;
+
+      const mockPdfStream = new Readable({
+        read() {
+          this.push(Buffer.from("%PDF-1.4 TDnet test"));
+          this.push(null);
+        },
+      });
+
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: mockPdfStream,
+        status: 200,
+      });
+
+      const result = await saveDocument(snapshot);
+      expect(result).toBe(true);
+      expect(mockStorage.bucket).toHaveBeenCalledWith("my-custom-bucket");
+    } finally {
+      process.env.FIREBASE_CONFIG = originalEnv;
+    }
+  });
 });
