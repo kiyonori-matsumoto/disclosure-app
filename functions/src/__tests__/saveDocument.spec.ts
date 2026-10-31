@@ -239,6 +239,7 @@ describe("saveDocument", () => {
     (axios.get as jest.Mock).mockImplementation(() => {
       const faultyStream = Readable.from(
         (async function* () {
+          yield "chunk";
           throw new Error("Stream read error");
         })()
       );
