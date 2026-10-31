@@ -51,9 +51,9 @@ describe("lib/createSettlementDict", () => {
 
   it("can execute", async () => {
     await createSettlementDict("test-settlement")();
-    expect(admin.firestore().batch().set).toBeCalledTimes(659);
-    expect(admin.firestore().collection("d").doc).toBeCalledTimes(659);
-    expect(admin.firestore().batch().set).nthCalledWith(
+    expect(admin.firestore().batch().set).toHaveBeenCalledTimes(659);
+    expect(admin.firestore().collection("d").doc).toHaveBeenCalledTimes(659);
+    expect(admin.firestore().batch().set).toHaveBeenNthCalledWith(
       1,
       expect.anything(),
       {
@@ -65,9 +65,9 @@ describe("lib/createSettlementDict", () => {
       },
       { merge: true }
     );
-    expect(admin.firestore().collection("d").doc).nthCalledWith(1, "4707");
-    expect(admin.firestore().collection("d").doc).nthCalledWith(172, "4075");
-    expect(admin.firestore().batch().set).nthCalledWith(
+    expect(admin.firestore().collection("d").doc).toHaveBeenNthCalledWith(1, "4707");
+    expect(admin.firestore().collection("d").doc).toHaveBeenNthCalledWith(172, "4075");
+    expect(admin.firestore().batch().set).toHaveBeenNthCalledWith(
       172,
       expect.anything(),
       {
@@ -79,7 +79,7 @@ describe("lib/createSettlementDict", () => {
       },
       { merge: true }
     );
-    expect(admin.firestore().batch().commit).toBeCalledTimes(2);
+    expect(admin.firestore().batch().commit).toHaveBeenCalledTimes(2);
   });
 
   describe("helper functions", () => {
@@ -169,8 +169,8 @@ describe("lib/createSettlementDict", () => {
       await createSettlementDict("test-settlement")();
 
       // Only kessan05 should be processed without crashing
-      expect(admin.firestore().batch().set).toBeCalled();
-      expect(admin.firestore().batch().commit).toBeCalled();
+      expect(admin.firestore().batch().set).toHaveBeenCalled();
+      expect(admin.firestore().batch().commit).toHaveBeenCalled();
     });
 
     it("handles Excel files without expected headers", async () => {
@@ -193,7 +193,7 @@ describe("lib/createSettlementDict", () => {
       await createSettlementDict("test-settlement")();
 
       // No data should be committed
-      expect(admin.firestore().batch().set).not.toBeCalled();
+      expect(admin.firestore().batch().set).not.toHaveBeenCalled();
     });
 
     it("handles empty Excel workbook without worksheets", async () => {
@@ -212,7 +212,7 @@ describe("lib/createSettlementDict", () => {
 
       await createSettlementDict("test-settlement")();
 
-      expect(admin.firestore().batch().set).not.toBeCalled();
+      expect(admin.firestore().batch().set).not.toHaveBeenCalled();
     });
   });
 });

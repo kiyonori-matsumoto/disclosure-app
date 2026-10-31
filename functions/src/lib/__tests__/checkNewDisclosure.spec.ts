@@ -85,8 +85,8 @@ describe("lib/checkNewDisclosure", () => {
         timestamp: dayjs("2017-10-05T11:11:22").toISOString()
       } as any
     );
-    expect(firestore.batch().set).toBeCalledTimes(129);
-    expect(firestore.batch().set).nthCalledWith(1, expect.anything(), {
+    expect(firestore.batch().set).toHaveBeenCalledTimes(129);
+    expect(firestore.batch().set).toHaveBeenNthCalledWith(1, expect.anything(), {
       code: "6636",
       company: "Ｊ－ソルガムＪＨＤ   ",
       document: "140120171005486134",
@@ -96,7 +96,7 @@ describe("lib/checkNewDisclosure", () => {
       time: 1507204500129, // 最後が129個目のドキュメントなので129になること
       title: "業績予想の修正並びに中期経営計画の取り下げに関するお知らせ"
     });
-    expect(firestore.collection).toBeCalledWith("test-disclosures");
+    expect(firestore.collection).toHaveBeenCalledWith("test-disclosures");
   });
 
   it("saves nothing when latest document is saved", async () => {
@@ -126,7 +126,7 @@ describe("lib/checkNewDisclosure", () => {
         timestamp: dayjs("2017-10-05T11:11:22").toISOString()
       } as any
     );
-    expect(admin.firestore().batch().set).not.toBeCalled();
+    expect(admin.firestore().batch().set).not.toHaveBeenCalled();
   });
 
   it("handles notfound error", async () => {
@@ -138,8 +138,8 @@ describe("lib/checkNewDisclosure", () => {
         timestamp: dayjs("2017-10-14T11:11:22").toISOString()
       } as any
     );
-    expect(admin.firestore().batch().set).not.toBeCalled();
-    expect(admin.firestore().batch().commit).not.toBeCalled();
+    expect(admin.firestore().batch().set).not.toHaveBeenCalled();
+    expect(admin.firestore().batch().commit).not.toHaveBeenCalled();
   });
 
   it("throws error other than notfound error", async () => {
@@ -153,7 +153,7 @@ describe("lib/checkNewDisclosure", () => {
         } as any
       )
     ).rejects.toHaveProperty("response.status", 500);
-    expect(admin.firestore().batch().commit).not.toBeCalled();
+    expect(admin.firestore().batch().commit).not.toHaveBeenCalled();
   });
 
   it("can get over 500 docs", async () => {
@@ -180,7 +180,7 @@ describe("lib/checkNewDisclosure", () => {
       } as any
     );
 
-    expect(admin.firestore().batch().set).toBeCalledTimes(1990);
-    expect(admin.firestore().batch().commit).toBeCalledTimes(20);
+    expect(admin.firestore().batch().set).toHaveBeenCalledTimes(1990);
+    expect(admin.firestore().batch().commit).toHaveBeenCalledTimes(20);
   });
 });
