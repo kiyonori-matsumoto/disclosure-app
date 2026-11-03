@@ -134,6 +134,9 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           a[e] = true; //Todo: そのうち'docTime'に変更する;
           return a;
         }, {});
+        const xbrlHref = $(elem).find(".kjXbrl a").attr("href");
+        const xbrl = xbrlHref && xbrlHref.endsWith(".zip") ? xbrlHref.trim() : undefined;
+
         const docData: Disclosure = {
           code: code,
           company: $(elem).find(".kjName").text(),
@@ -143,6 +146,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           document: doc,
           exchanges: $(elem).find(".kjPlace").text().trim(),
           time: docTime,
+          ...(xbrl ? { xbrl } : {}),
         };
         count--;
 
