@@ -44,7 +44,7 @@ const sendEdinetToTopic = async (
     .map((key) => {
       const company = companies[key];
       if (!company) return null;
-      const code = company.code.substring(0, 4);
+      const code = company.code.substring(0, 4).toUpperCase();
 
       const d = {
         android: {

@@ -183,4 +183,51 @@ describe("lib/checkNewDisclosure", () => {
     expect(admin.firestore().batch().set).toHaveBeenCalledTimes(1990);
     expect(admin.firestore().batch().commit).toHaveBeenCalledTimes(20);
   });
+
+  it("extracts and uppercases alphanumeric stock code correctly from HTML", async () => {
+    const mockHtml = `
+      <html>
+        <body>
+          <div class="kaijiSum">全1件</div>
+          <table id="main-list-table">
+            <tr>
+              <td class="kjTime">15:00</td>
+              <td class="kjCode"> 130a0 </td>
+              <td class="kjName">アルファ新興株式会社</td>
+              <td class="kjTitle"><a href="doc12345.pdf">新株発行に関するお知らせ</a></td>
+              <td class="kjPlace">東</td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+
+    getMock.mockResolvedValue({ docs: [] });
+    (axios.get as any) = jest.fn().mockImplementation((url) => {
+      if (url.includes("I_list_001_")) {
+        return Promise.resolve({ data: mockHtml });
+      }
+      return Promise.reject({
+        isAxiosError: true,
+        response: { status: 404 }
+      });
+    });
+
+    await checkNewDisclosure("test-disclosures")(
+      { attributes: {} } as any,
+      {
+        timestamp: dayjs("2024-05-11T12:00:00").toISOString()
+      } as any
+    );
+
+    expect(admin.firestore().batch().set).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        code: "130A",
+        company: "アルファ新興株式会社",
+        title: "新株発行に関するお知らせ",
+        document: "doc12345",
+      })
+    );
+  });
 });

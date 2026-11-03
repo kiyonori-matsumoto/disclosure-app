@@ -17,21 +17,22 @@ const sendSettlementToTopic = async () => {
     .get();
   const messages = settlements.docs.map((st) => {
     const data = st.data();
+    const code = String(data.code || "").toUpperCase();
     return {
       android: {
         notification: {
           body: settlementToStr(data),
-          tag: `code_${data.code}`,
+          tag: `code_${code}`,
           color: "#006064",
-          title: `決算予定情報 ${data.name}(${data.code})`,
+          title: `決算予定情報 ${data.name}(${code})`,
         },
       },
       notification: {
         body: settlementToStr(data),
-        title: `決算予定情報 ${data.name}(${data.code})`,
+        title: `決算予定情報 ${data.name}(${code})`,
       },
       data: {
-        code: `${data.code}`,
+        code,
         company: `${data.name}`,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
       },
