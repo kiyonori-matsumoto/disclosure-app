@@ -17,6 +17,7 @@ describe("CI/CD Workflow and Scripts Verification", () => {
     expect(content).toMatch(/branches:\s*\[.*main.*master.*\]/);
 
     // Check environment
+    expect(content).toMatch(/concurrency:/);
     expect(content).toMatch(/working-directory:\s*\.\/functions/);
     expect(content).toMatch(/node-version:\s*['"]22['"]/);
 
@@ -51,6 +52,8 @@ describe("CI/CD Workflow and Scripts Verification", () => {
     expect(content).toMatch(/name:\s*Deploy/);
     expect(content).toMatch(/workflow_dispatch:/);
     expect(content).toMatch(/push:\s*branches:\s*\[\s*master\s*\]/);
+    expect(content).toMatch(/concurrency:\s*\n\s*group:\s*deploy-/);
+    expect(content).toMatch(/cancel-in-progress:\s*false/);
     expect(content).toMatch(/npm run build/);
     expect(content).toMatch(/npm test/);
     expect(content).toMatch(/firebase-tools deploy/);
