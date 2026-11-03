@@ -18,7 +18,7 @@ describe("CI/CD Workflow and Scripts Verification", () => {
 
     // Check environment
     expect(content).toMatch(/working-directory:\s*\.\/functions/);
-    expect(content).toMatch(/node-version:\s*['"]24['"]/);
+    expect(content).toMatch(/node-version:\s*['"]22['"]/);
 
     // Check key steps
     expect(content).toMatch(/npm ci/);
