@@ -1,6 +1,7 @@
 import "jest";
 import * as fs from "fs";
 import * as path from "path";
+import AdmZip from "adm-zip";
 import { extractQualitativeSections, extractTdnetQualitativeHtml } from "../extractor";
 import { extractFinancialMetricsFromZip } from "../financial_metrics_extractor";
 import { ForensicAnalyzer } from "../analyzer";
@@ -46,12 +47,11 @@ describe("Real Data Forensic Tests", () => {
     });
 
     it("should extract qualitative text from real TDnet qualitative.htm inside ZIP", () => {
-      const AdmZip = require("adm-zip");
       const zip = new AdmZip(zipBuffer);
       const qualEntry = zip.getEntry("XBRLData/Attachment/qualitative.htm");
 
       expect(qualEntry).toBeDefined();
-      const qualHtml = qualEntry.getData().toString("utf-8");
+      const qualHtml = qualEntry!.getData().toString("utf-8");
 
       const { mdaText } = extractTdnetQualitativeHtml(qualHtml);
       expect(mdaText.length).toBeGreaterThan(100);
