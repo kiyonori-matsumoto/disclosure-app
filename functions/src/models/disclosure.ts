@@ -8,4 +8,6 @@ export interface Disclosure {
   exchanges: string;
   time: number;
   noSend?: boolean;
+  xbrl?: string;
+  forensic?: any;
 }

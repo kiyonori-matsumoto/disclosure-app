@@ -23,6 +23,10 @@ import createCompanyDictHandler from "./createCompanyDict";
 import { listTopics as listTopicsHandler } from "./listTopics";
 import handleContentViewEventHandler from "./handleContentViewEvent";
 import saveDocumentHandler from "./saveDocument";
+import {
+  analyzeEdinetForensic as analyzeEdinetForensicHandler,
+  analyzeTdnetForensic as analyzeTdnetForensicHandler,
+} from "./forensicTrigger";
 
 // --- Cloud Functions v2: Scheduled Functions (東京リージョン asia-northeast1) ---
 
@@ -155,6 +159,36 @@ export const sendEdinetToTopic = onDocumentCreated(
     const snap = event.data;
     if (!snap) return;
     await sendEdinetToTopicHandler(snap as any, { params: event.params });
+  }
+);
+
+export const analyzeEdinetForensicFs = onDocumentCreated(
+  {
+    document: "edinets/{docId}",
+    region: "us-central1",
+    timeoutSeconds: 180,
+    memory: "1GiB",
+    secrets: ["EDINET_API_KEY", "TYPESAFE_API_KEY"],
+  },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+    await analyzeEdinetForensicHandler(snap as any, { params: event.params });
+  }
+);
+
+export const analyzeTdnetForensicFs = onDocumentCreated(
+  {
+    document: "disclosures/{key}",
+    region: "us-central1",
+    timeoutSeconds: 180,
+    memory: "1GiB",
+    secrets: ["TYPESAFE_API_KEY"],
+  },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+    await analyzeTdnetForensicHandler(snap as any, { params: event.params });
   }
 );
 

@@ -94,7 +94,8 @@ describe("lib/checkNewDisclosure", () => {
       tags: { 業績予想: true }, // tagがつくこと
       tags2: ["業績予想"],
       time: 1507204500129, // 最後が129個目のドキュメントなので129になること
-      title: "業績予想の修正並びに中期経営計画の取り下げに関するお知らせ"
+      title: "業績予想の修正並びに中期経営計画の取り下げに関するお知らせ",
+      xbrl: "091220171005486134.zip"
     });
     expect(firestore.collection).toHaveBeenCalledWith("test-disclosures");
   });
