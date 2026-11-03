@@ -71,6 +71,20 @@ describe("createCompanyDict", () => {
       });
       expect(result[1].code).toBe("56780");
     });
+
+    it("should parse and uppercase alphanumeric stock codes", () => {
+      const csvString = [
+        "ダウンロード日時: 2024-05-31",
+        "ＥＤＩＮＥＴコード,提出者種別,上場区分,連結の有無,資本金,決算日,提出者名,提出者名（英字）,提出者名（カナ）,所在地,提出者業種,証券コード,提出者法人番号",
+        "E99999,内国法人・組合,上場,有,1000000,3月31日,アルファ株式会社,\"Alpha Co., Ltd.\",アルファカブシキガイシャ,東京都千代田区,情報・通信業,130a0,1234567890123",
+      ].join("\r\n");
+
+      const buffer = iconv.encode(csvString, "Shift_JIS");
+      const result = parseCompanyDictCsv(buffer);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].code).toBe("130A0");
+    });
   });
 
   describe("downloadFile", () => {

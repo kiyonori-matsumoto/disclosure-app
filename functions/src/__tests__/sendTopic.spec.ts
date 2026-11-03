@@ -72,4 +72,31 @@ describe("sendTopic", () => {
         expect(result).toBe(true);
         expect(admin.messaging().sendEach).not.toHaveBeenCalled();
     });
+
+    it("should normalize alphanumeric stock codes to uppercase in topic and messages", async () => {
+        const mockData = {
+            title: "決算短信",
+            code: "130a",
+            company: "アルファ企業",
+            noSend: false,
+            tags2: ["決算"]
+        };
+        const snapshot = {
+            data: () => mockData
+        } as any;
+        const context = {} as any;
+
+        await sendTopic(snapshot, context);
+
+        expect(admin.messaging().sendEach).toHaveBeenCalled();
+        const calls = (admin.messaging().sendEach as jest.Mock).mock.calls[0][0];
+        // 1 main + 1 tag
+        expect(calls).toHaveLength(2);
+
+        const mainMsg = calls[0];
+        expect(mainMsg.topic).toBe("code_130A");
+        expect(mainMsg.notification.title).toBe("新しい開示情報 アルファ企業(130A)");
+        expect(mainMsg.data.code).toBe("130A");
+        expect(mainMsg.android.notification.tag).toBe("code_130A");
+    });
 });

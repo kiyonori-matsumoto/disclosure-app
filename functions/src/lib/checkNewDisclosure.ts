@@ -117,7 +117,7 @@ export const checkNewDisclosure = (DB_PATH: string) => async (
           .text()
           .split(":")
           .map((e) => parseInt(e, 10));
-        const code = $(elem).find(".kjCode").text().slice(0, 4);
+        const code = $(elem).find(".kjCode").text().trim().toUpperCase().slice(0, 4);
         const docTime =
           time
             .clone()

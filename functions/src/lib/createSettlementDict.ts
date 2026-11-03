@@ -143,7 +143,7 @@ export const createSettlementDict = (DB_PATH: string) => async () => {
         if (!schedule) continue;
 
         const codeRaw = row.getCell(headerColIndices.code).value;
-        const code = extractText(codeRaw);
+        const code = extractText(codeRaw).toUpperCase();
         if (!code) continue;
 
         const name = extractText(row.getCell(headerColIndices.name).value);

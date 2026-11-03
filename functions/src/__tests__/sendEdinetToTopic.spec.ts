@@ -33,6 +33,7 @@ describe("sendEdinetToTopic", () => {
   const companiesData = [
     { edinetCode: "E00001", code: "12340", name: "テスト株式会社" },
     { edinetCode: "E00002", code: "56780", name: "サンプル株式会社" },
+    { edinetCode: "E99999", code: "130a0", name: "アルファ新興株式会社" },
   ];
 
   beforeEach(() => {
@@ -166,5 +167,26 @@ describe("sendEdinetToTopic", () => {
     expect(logger.info).toHaveBeenCalledWith(
       "FCM sendEdinetToTopic completed: 1 succeeded, 1 failed"
     );
+  });
+
+  it("should correctly handle and uppercase alphanumeric stock codes", async () => {
+    const snapshot = {
+      data: () => ({
+        docDescription: "臨時報告書",
+        noSend: false,
+        map: {
+          E99999: true,
+        },
+      }),
+    } as any;
+
+    const results = await sendEdinetToTopic(snapshot);
+
+    expect(results).toHaveLength(1);
+    const callArg = mockMessaging.send.mock.calls[0][0];
+    expect(callArg.condition).toBe("'code_130A' in topics && 'edinet_notification' in topics");
+    expect(callArg.notification.title).toBe("新しいEdinet アルファ新興株式会社(130A)");
+    expect(callArg.android.notification.tag).toBe("code_130A");
+    expect(callArg.data.code).toBe("130A");
   });
 });

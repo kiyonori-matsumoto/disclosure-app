@@ -359,5 +359,43 @@ describe("lib/createSettlementDict", () => {
       expect(axios.get).toHaveBeenCalledTimes(2); // 1 for index.html + 1 for same.xlsx
       expect(admin.firestore().batch().set).toHaveBeenCalledTimes(1);
     });
+
+    it("correctly handles and uppercases alphanumeric stock codes from Excel", async () => {
+      const indexHtml = `
+        <html>
+          <body>
+            <a href="/listing/alpha.xlsx">リンク</a>
+          </body>
+        </html>
+      `;
+
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet("Sheet1");
+      ws.addRow(["発表予定日", "コード", "会社名", "決算期末", "種別"]);
+      ws.addRow(["2024-05-24", "130a", "アルファ企業", "3月31日", "本決算"]);
+      const buf = await wb.xlsx.writeBuffer();
+
+      (axios.get as any) = jest.fn().mockImplementation((url) => {
+        if (url === "https://www.jpx.co.jp/listing/event-schedules/financial-announcement/index.html") {
+          return Promise.resolve({ data: indexHtml });
+        }
+        if (url === "https://www.jpx.co.jp/listing/alpha.xlsx") {
+          return Promise.resolve({ data: buf });
+        }
+        return Promise.reject("not found");
+      });
+
+      await createSettlementDict("test-settlement")();
+
+      expect(admin.firestore().collection("d").doc).toHaveBeenCalledWith("130A");
+      expect(admin.firestore().batch().set).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          code: "130A",
+          name: "アルファ企業",
+        }),
+        { merge: true }
+      );
+    });
   });
 });

@@ -57,7 +57,7 @@ export const parseCompanyDictCsv = (csvBuffer: Buffer): CompanyDictEntry[] => {
         nameEn,
         nameKana,
         industory,
-        code,
+        code: code ? code.trim().toUpperCase() : "",
         corporateNumber,
       };
     })

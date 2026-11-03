@@ -153,4 +153,33 @@ describe("sendSettlementToTopic", () => {
       "FCM sendSettlementToTopic completed: 1 succeeded, 1 failed"
     );
   });
+
+  it("should normalize alphanumeric settlement codes to uppercase in topic and messages", async () => {
+    const mockSettlements = [
+      {
+        data: () => ({
+          code: "130a",
+          name: "アルファ新興",
+          quote: "第1四半期",
+        }),
+      },
+    ];
+
+    mockWhere.mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        docs: mockSettlements,
+      }),
+    });
+
+    const results = await sendSettlementToTopic();
+
+    expect(results).toHaveLength(1);
+    expect(mockMessaging.send).toHaveBeenCalledTimes(1);
+
+    const callArg = mockMessaging.send.mock.calls[0][0];
+    expect(callArg.topic).toBe("code_130A");
+    expect(callArg.notification.title).toBe("決算予定情報 アルファ新興(130A)");
+    expect(callArg.android.notification.tag).toBe("code_130A");
+    expect(callArg.data.code).toBe("130A");
+  });
 });

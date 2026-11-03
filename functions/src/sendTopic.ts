@@ -60,14 +60,16 @@ const sendTopic = (
     company: data.company,
   });
   if (data.noSend) return true;
+  const code = (data.code || "").toUpperCase();
+  const normalizedData = { ...data, code };
   const tagMessages = (data.tags2 || []).map((e) => {
     const b64 = Buffer.from(e, "utf-8").toString("base64url");
-    return createMessageTags(`tags_${b64}`, data, e);
+    return createMessageTags(`tags_${b64}`, normalizedData, e);
   });
 
-  const messages = [createMessage(`code_${data.code}`, data), ...tagMessages];
+  const messages = [createMessage(`code_${code}`, normalizedData), ...tagMessages];
 
-  logger.info(`Sending ${messages.length} FCM messages for code_${data.code}`);
+  logger.info(`Sending ${messages.length} FCM messages for code_${code}`);
 
   return admin
     .messaging()
