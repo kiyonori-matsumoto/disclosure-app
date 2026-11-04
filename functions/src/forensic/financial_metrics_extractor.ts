@@ -105,15 +105,16 @@ export function extractFinancialMetricsFromZip(zipBufferOrPath: Buffer | string)
     "TotalAssets",
   ]);
 
-  return {
-    revenue,
-    operatingIncome,
-    netIncome,
-    operatingCashFlow,
-    payoutRatio,
-    totalAssets,
-    unit: "千円",
-  };
+  const result: KeyFinancialMetrics = { unit: "千円" };
+
+  if (revenue !== undefined) result.revenue = revenue;
+  if (operatingIncome !== undefined) result.operatingIncome = operatingIncome;
+  if (netIncome !== undefined) result.netIncome = netIncome;
+  if (operatingCashFlow !== undefined) result.operatingCashFlow = operatingCashFlow;
+  if (payoutRatio !== undefined) result.payoutRatio = payoutRatio;
+  if (totalAssets !== undefined) result.totalAssets = totalAssets;
+
+  return result;
 }
 
 /**
