@@ -69,7 +69,7 @@ const sendEdinetToTopic = async (
         },
       };
       return admin.messaging().send({
-        condition: `'code_${code}' in topics && 'edinet_notification' in topics`,
+        topic: `code_${code}`,
         notification: d.notification,
         android: d.android,
         data: d.data,

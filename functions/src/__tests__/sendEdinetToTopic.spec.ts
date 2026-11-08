@@ -62,8 +62,8 @@ describe("sendEdinetToTopic", () => {
 
     const callArg = mockMessaging.send.mock.calls[0][0];
 
-    // Verify condition
-    expect(callArg.condition).toBe("'code_1234' in topics && 'edinet_notification' in topics");
+    // Verify topic
+    expect(callArg.topic).toBe("code_1234");
 
     // Top-level notification MUST only have title and body (NO tag, NO color for FCM v1)
     expect(callArg.notification).toEqual({
@@ -184,7 +184,7 @@ describe("sendEdinetToTopic", () => {
 
     expect(results).toHaveLength(1);
     const callArg = mockMessaging.send.mock.calls[0][0];
-    expect(callArg.condition).toBe("'code_130A' in topics && 'edinet_notification' in topics");
+    expect(callArg.topic).toBe("code_130A");
     expect(callArg.notification.title).toBe("新しいEdinet アルファ新興株式会社(130A)");
     expect(callArg.android.notification.tag).toBe("code_130A");
     expect(callArg.data.code).toBe("130A");
