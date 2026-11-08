@@ -19,7 +19,8 @@ export async function detectFinancialAnomaly(
     task: "Scan footnotes and financial excerpts for high-risk red flags.",
     extracted_notes: footnotesText.slice(0, 3500),
     rules: [
-      "If text mentions going concern uncertainty (継続企業の前提に関する疑義・重要事象) or covenant breach, set risk_level = 'critical'.",
+      "If text mentions ongoing going concern uncertainty (継続企業の前提に関する重要な疑義・重要事象) or covenant breach, set risk_level = 'critical'.",
+      "Do NOT flag going concern if the text states '該当事項はありません' (not applicable), if the issue has already been resolved, or if it relates only to an immaterial affiliate.",
       "If financial data or text shows negative operating cash flow, flag negative_operating_cf.",
       "If debt pressure, impairment, or covenant breach is noted, flag respectively.",
     ].join("\n"),
@@ -43,7 +44,9 @@ export async function detectFinancialAnomaly(
         warning: "減損兆候、利払い負担増、営業CFマイナス、在庫急増などの懸念サイン",
         normal: "資金繰りや資産価値に特段の危険サインなし",
       }),
-      flag_going_concern: noul("継続企業の前提に関する注記・疑義（GC注記）の記載がありますか？"),
+      flag_going_concern: noul(
+        "自社グループの事業継続に重要な疑義・不確実性が現在進行形で存在することを示す注記（GC注記）の記載がありますか？（「該当事項はありません」等の非該当や、解消済みのものは除く）"
+      ),
       flag_covenant: noul("財務制限条項（コベナンツ）への抵触、または抵触懸念の記載がありますか？"),
       flag_negative_cf: noul("営業キャッシュ・フローのマイナスや本業での現金流出に関する言及がありますか？"),
       flag_inventory_receivable: noul(

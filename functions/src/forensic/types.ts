@@ -5,7 +5,11 @@ export type RedFlagType =
   | "covenant_breach" // 財務制限条項への抵触
   | "unsustainable_payout" // 利益超過分配・タコ足配当
   | "negative_operating_cf" // 営業CFマイナス・本業での現金流出
-  | "inventory_receivable_surge" // 棚卸資産・売上債権の急増
+  | "inventory_receivable_surge" // 棚卸資産・売上債権の急増 (DSRI / DSI 異常)
+  | "accruals_anomaly" // 総資産アクルーアル比率の異常（ペーパー利益・利益の質の劣化）
+  | "asset_quality_deterioration" // 資産の質指数 (AQI) 悪化・費用の資産化
+  | "liquidity_crunch" // 短期流動性ショック・資金ショート危機
+  | "equity_erosion" // 純資産・利益剰余金毀損・債務超過リスク
   | "impairment_loss" // 減損損失・兆候
   | "interest_debt_pressure" // 利払い負担増・借入急増
   | "subsequent_events"; // 重大な後発事象
@@ -33,7 +37,44 @@ export type BlameAttribution =
   | "internal_acknowledged"
   | "none";
 
+export type AccountingStandard = "J-GAAP" | "IFRS" | "US-GAAP";
+export type FiscalPeriodType = "FY" | "Q1" | "Q2" | "Q3";
+
+/**
+ * 単一時点（当期または前期）の財務数値セット（単位：千円）
+ */
+export interface FinancialSnapshot {
+  revenue?: number; // 売上高
+  operatingIncome?: number; // 営業利益
+  netIncome?: number; // 当期純利益（親会社株主帰属）
+  operatingCashFlow?: number; // 営業活動によるキャッシュフロー
+  payoutRatio?: number; // 配当性向 (%)
+  totalAssets?: number; // 総資産
+  tradeReceivables?: number; // 売上債権（受取手形＋売掛金＋契約資産＋電子記録債権）
+  inventories?: number; // 棚卸資産
+  cashAndDeposits?: number; // 現金及び預金（手元流動性）
+  currentAssets?: number; // 流動資産合計
+  propertyPlantAndEquipment?: number; // 有形固定資産合計
+  currentLiabilities?: number; // 流動負債合計
+  netAssets?: number; // 純資産
+  retainedEarnings?: number; // 利益剰余金
+  investingCashFlow?: number; // 投資活動によるキャッシュフロー
+}
+
+export interface QuantitativeCalculations {
+  accrualsRatio?: number; // 総資産アクルーアル比率
+  dsri?: number; // 売上債権回転期間指数
+  dsiIndex?: number; // 棚卸資産回転期間指数
+  aqi?: number; // 資産の質指数
+  fcf?: number; // フリーキャッシュフロー
+  cashCoverage?: number; // 対流動負債現預金比率
+  cashDropRate?: number; // 現預金前期比増減率
+  equityRatio?: number; // 自己資本比率
+  netAssetsDropRate?: number; // 純資産前期比増減率
+}
+
 export interface KeyFinancialMetrics {
+  // 既存プロパティ（下位互換性維持）
   revenue?: number; // 売上高 (千円)
   operatingIncome?: number; // 営業利益 (千円)
   netIncome?: number; // 当期純利益 (千円)
@@ -41,6 +82,14 @@ export interface KeyFinancialMetrics {
   payoutRatio?: number; // 配当性向 (%)
   totalAssets?: number; // 総資産 (千円)
   unit: "千円";
+
+  // フェーズ1 拡張プロパティ
+  standard?: AccountingStandard;
+  periodType?: FiscalPeriodType;
+  isFinancialIndustry?: boolean;
+  current?: FinancialSnapshot;
+  prior?: FinancialSnapshot;
+  calculations?: QuantitativeCalculations;
 }
 
 export interface ForensicResult {

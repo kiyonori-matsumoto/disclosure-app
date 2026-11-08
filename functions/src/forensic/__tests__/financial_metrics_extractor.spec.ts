@@ -83,5 +83,189 @@ describe("financial_metrics_extractor", () => {
     const assessment = assessQuantitativeRisk(metrics);
     expect(assessment.detectedRedFlags).toContain("unsustainable_payout");
     expect(assessment.warnings.some((w) => w.includes("配当性向が 125.4%"))).toBe(true);
+    expect(assessment.severity).toBe("critical");
+  });
+
+  describe("Quantitative Forensic Risk Assessment (Phase 1 Expansions)", () => {
+    it("should detect accruals anomaly when accruals ratio exceeds threshold", () => {
+      // 純利益 2,000,000千円、営業CF 200,000千円、総資産 10,000,000千円
+      // accrualsRatio = (2,000,000 - 200,000) / 10,000,000 = 0.18 (18% > 15% -> Critical)
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        current: {
+          netIncome: 2000000,
+          operatingCashFlow: 200000,
+          totalAssets: 10000000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toContain("accruals_anomaly");
+      expect(assessment.severity).toBe("critical");
+      expect(assessment.warnings.some((w) => w.includes("総資産アクルーアル比率が18.0%"))).toBe(true);
+      expect(metrics.calculations?.accrualsRatio).toBe(0.18);
+    });
+
+    it("should skip accruals check for financial institutions", () => {
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        isFinancialIndustry: true,
+        current: {
+          netIncome: 2000000,
+          operatingCashFlow: -5000000,
+          totalAssets: 10000000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).not.toContain("accruals_anomaly");
+    });
+
+    it("should detect DSRI spike (receivable surge)", () => {
+      // 前期: 売上 10,000,000, 売上債権 1,000,000 (0.10)
+      // 当期: 売上 10,000,000, 売上債権 1,600,000 (0.16)
+      // DSRI = 0.16 / 0.10 = 1.60 (> 1.465 -> Critical)
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        periodType: "FY",
+        current: {
+          revenue: 10000000,
+          tradeReceivables: 1600000,
+        },
+        prior: {
+          revenue: 10000000,
+          tradeReceivables: 1000000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toContain("inventory_receivable_surge");
+      expect(assessment.severity).toBe("critical");
+      expect(metrics.calculations?.dsri).toBe(1.6);
+      expect(assessment.warnings.some((w) => w.includes("売上債権回転期間指数(DSRI)が前期比1.60倍"))).toBe(true);
+    });
+
+    it("should adjust DSRI threshold for quarterly disclosures with seasonal multiplier", () => {
+      // DSRI = 1.30 (通期なら > 1.20 で Warning、四半期は 1.20 * 1.2 = 1.44 なので Warning にならない)
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        periodType: "Q1",
+        current: {
+          revenue: 10000000,
+          tradeReceivables: 1300000,
+        },
+        prior: {
+          revenue: 10000000,
+          tradeReceivables: 1000000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).not.toContain("inventory_receivable_surge");
+      expect(metrics.calculations?.dsri).toBe(1.3);
+    });
+
+    it("should detect DSI bloat (inventory surge)", () => {
+      // 前期: 売上 10,000,000, 棚卸資産 1,000,000 (0.10)
+      // 当期: 売上 10,000,000, 棚卸資産 1,600,000 (0.16)
+      // DSI = 0.16 / 0.10 = 1.60 (> 1.50 -> Critical)
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        periodType: "FY",
+        current: {
+          revenue: 10000000,
+          inventories: 1600000,
+        },
+        prior: {
+          revenue: 10000000,
+          inventories: 1000000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toContain("inventory_receivable_surge");
+      expect(assessment.severity).toBe("critical");
+      expect(metrics.calculations?.dsiIndex).toBe(1.6);
+    });
+
+    it("should detect asset quality deterioration (AQI)", () => {
+      // 総資産 10,000,000
+      // 前期: 流動資産 6,000,000, 有形固定資産 3,000,000 -> その他資産 1,000,000 (比率 0.10)
+      // 当期: 流動資産 5,000,000, 有形固定資産 2,500,000 -> その他資産 2,500,000 (比率 0.25)
+      // AQI = 0.25 / 0.10 = 2.50 (> 1.254 -> Critical)
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        current: {
+          totalAssets: 10000000,
+          currentAssets: 5000000,
+          propertyPlantAndEquipment: 2500000,
+        },
+        prior: {
+          totalAssets: 10000000,
+          currentAssets: 6000000,
+          propertyPlantAndEquipment: 3000000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toContain("asset_quality_deterioration");
+      expect(assessment.severity).toBe("critical");
+      expect(metrics.calculations?.aqi).toBe(2.5);
+    });
+
+    it("should detect liquidity crunch and funding shock", () => {
+      // 流動負債 5,000,000
+      // 前期現預金 1,000,000 -> 当期現預金 300,000 (比率 0.06 < 0.08、営業CFマイナス -> Critical)
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        current: {
+          cashAndDeposits: 300000,
+          currentLiabilities: 5000000,
+          operatingCashFlow: -50000,
+        },
+        prior: {
+          cashAndDeposits: 1000000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toContain("liquidity_crunch");
+      expect(assessment.severity).toBe("critical");
+      expect(metrics.calculations?.cashCoverage).toBe(0.06);
+    });
+
+    it("should detect equity erosion and deficit dividend", () => {
+      // 利益剰余金 -100,000（赤字・欠損）、配当性向 30%（有配）
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        current: {
+          retainedEarnings: -100000,
+          payoutRatio: 30.0,
+          operatingCashFlow: 50000,
+          investingCashFlow: -20000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toContain("unsustainable_payout");
+      expect(assessment.severity).toBe("critical");
+      expect(assessment.warnings.some((w) => w.includes("利益剰余金マイナス（欠損）状態での配当実施"))).toBe(true);
+    });
+
+    it("should detect excessive leverage / low equity ratio", () => {
+      // 純資産 800,000 / 総資産 10,000,000 = 8% (< 10% -> Warning)
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        current: {
+          totalAssets: 10000000,
+          netAssets: 800000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toContain("equity_erosion");
+      expect(assessment.severity).toBe("warning");
+      expect(metrics.calculations?.equityRatio).toBe(0.08);
+    });
   });
 });
