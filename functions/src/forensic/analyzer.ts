@@ -61,11 +61,17 @@ export class ForensicAnalyzer {
           const tdnetExtracted = extractTdnetQualitativeHtml(content);
           mdaText = tdnetExtracted.mdaText;
           riskText = tdnetExtracted.riskText;
+          if (tdnetExtracted.footnoteText) {
+            footnoteText += "\n" + tdnetExtracted.footnoteText;
+          }
         } else if (name.endsWith(".htm") && name.includes("Attachment")) {
           const content = entry.getData().toString("utf-8");
           const sections = extractQualitativeSections(content);
           if (sections.has("BusinessRisksTextBlock")) {
             riskText += "\n" + sections.get("BusinessRisksTextBlock")!.text;
+          }
+          if (sections.has("GoingConcernAssumptionTextBlock")) {
+            footnoteText += "\n" + sections.get("GoingConcernAssumptionTextBlock")!.text;
           }
           if (sections.has("EventsOrConditionsThatCastSignificantDoubtOnGoingConcernAssumptionTextBlock")) {
             footnoteText += "\n" + sections.get("EventsOrConditionsThatCastSignificantDoubtOnGoingConcernAssumptionTextBlock")!.text;
@@ -85,6 +91,9 @@ export class ForensicAnalyzer {
         if (sections.has("BusinessRisksTextBlock")) {
           riskText += "\n" + sections.get("BusinessRisksTextBlock")!.text;
         }
+        if (sections.has("GoingConcernAssumptionTextBlock")) {
+          footnoteText += "\n" + sections.get("GoingConcernAssumptionTextBlock")!.text;
+        }
         if (sections.has("EventsOrConditionsThatCastSignificantDoubtOnGoingConcernAssumptionTextBlock")) {
           footnoteText += "\n" + sections.get("EventsOrConditionsThatCastSignificantDoubtOnGoingConcernAssumptionTextBlock")!.text;
         }
@@ -100,21 +109,28 @@ export class ForensicAnalyzer {
       detectQualitativeExcuses(this.client, mdaText, riskText, metrics),
     ]);
 
-    // 4. 定量レッドフラグと定性レッドフラグの結合（重複除去）
-    const allRedFlagsSet = new Set<RedFlagType>([
-      ...quantitative.detectedRedFlags,
-      ...financialAnomaly.detectedRedFlags,
-    ]);
-    const redFlags = Array.from(allRedFlagsSet);
+    // 4. 定量レッドフラグ（ルール）と定性レッドフラグ（Jev）の結合（重複除去）
+    const redFlags = Array.from(
+      new Set<RedFlagType>([
+        ...quantitative.detectedRedFlags,
+        ...financialAnomaly.detectedRedFlags,
+      ])
+    );
 
     // 5. タグと深刻度の集約
     const allTags: (RedFlagType | ToneTag)[] = [...redFlags, ...excuses.toneTags];
     const causes: CauseTag[] = excuses.causeTags;
 
     let overallRisk: RiskLevel = "normal";
-    if (financialAnomaly.riskLevel === "critical" || redFlags.includes("going_concern") || redFlags.includes("covenant_breach")) {
+    if (
+      quantitative.severity === "critical" ||
+      financialAnomaly.riskLevel === "critical" ||
+      redFlags.includes("going_concern") ||
+      redFlags.includes("covenant_breach")
+    ) {
       overallRisk = "critical";
     } else if (
+      quantitative.severity === "warning" ||
       financialAnomaly.riskLevel === "warning" ||
       redFlags.length > 0 ||
       excuses.toneTags.length > 0

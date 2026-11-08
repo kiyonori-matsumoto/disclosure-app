@@ -11,6 +11,7 @@ export const TARGET_SECTIONS: Record<string, string> = {
   BusinessRisksTextBlock: "事業等のリスク",
   PolicyEnvironmentIssuesToAddressEtcTextBlock: "対処すべき課題等",
   ManagementAnalysisOfFinancialPositionOperatingResultsAndCashFlowsTextBlock: "経営成績等の状況の分析",
+  GoingConcernAssumptionTextBlock: "継続企業の前提に関する注記",
   EventsOrConditionsThatCastSignificantDoubtOnGoingConcernAssumptionTextBlock: "継続企業の前提に関する重要事象等",
   ChangesInAccountingPoliciesTextBlock: "会計方針の変更",
   SignificantSubsequentEventsTextBlock: "重要な後発事象",
@@ -52,15 +53,21 @@ export function extractQualitativeSections(htmlContent: string): Map<string, Qua
   return results;
 }
 
+export interface TdnetQualitativeResult {
+  mdaText: string;
+  riskText: string;
+  footnoteText: string;
+}
+
 /**
- * TDnet の qualitative.htm (プレーンHTML構造の定性情報) からテキストを抽出・整形
+ * TDnet の qualitative.htm (プレーンHTML構造の定性情報) からテキストを抽出・セクション分割
  */
-export function extractTdnetQualitativeHtml(htmlContent: string): { mdaText: string; riskText: string } {
+export function extractTdnetQualitativeHtml(htmlContent: string): TdnetQualitativeResult {
   const $ = cheerio.load(htmlContent);
 
-  // 改行補正
+  // 改行補正（ブロック要素すべてに改行を付与）
   $("br").replaceWith("\n");
-  $("p, div, tr").each((_, block) => {
+  $("p, div, tr, h1, h2, h3, h4, h5, h6, td, th").each((_, block) => {
     $(block).append("\n");
   });
 
@@ -69,6 +76,7 @@ export function extractTdnetQualitativeHtml(htmlContent: string): { mdaText: str
   // 簡易見出し分割（「１．経営成績等の概況」「２．今後の見通し」等）
   let mdaText = fullText;
   let riskText = "";
+  let footnoteText = "";
 
   const riskKeywords = ["事業等のリスク", "リスク要因", "経営リスク"];
   for (const kw of riskKeywords) {
@@ -80,7 +88,40 @@ export function extractTdnetQualitativeHtml(htmlContent: string): { mdaText: str
     }
   }
 
-  return { mdaText, riskText };
+  // 継続企業の前提に関する注記・重要事象等セクションの切り出し（目次は除外）
+  const lines = fullText.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    // 目次行（ドットや三点リーダーが連続する行）は除外
+    if (/[.．…]{3,}/.test(line)) {
+      continue;
+    }
+
+    if (
+      line.includes("継続企業の前提に関する注記") ||
+      line.includes("継続企業の前提に関する重要事象等") ||
+      line.includes("継続企業の前提")
+    ) {
+      // 見出し以降、次の大セクションまでを注記テキストとして切り出し
+      const bodyLines: string[] = [line];
+      for (let j = i + 1; j < Math.min(lines.length, i + 50); j++) {
+        const l = lines[j].trim();
+        if (/[.．…]{3,}/.test(l)) continue;
+        if (
+          l.includes("セグメント情報") ||
+          l.includes("１株当たり情報") ||
+          l.includes("会計方針の変更") ||
+          l.includes("重要な後発事象")
+        ) {
+          break;
+        }
+        if (l.length > 0) bodyLines.push(l);
+      }
+      footnoteText += "\n" + bodyLines.join("\n");
+    }
+  }
+
+  return { mdaText, riskText, footnoteText: footnoteText.trim() };
 }
 
 /**
