@@ -40,6 +40,7 @@
     "type-check": "tsc --noEmit",
     "build": "npm run lint && npm run type-check && tsc",
     "test": "jest ./src --ci",
+    "purge-forensic": "ts-node scripts/purge_stale_forensic.ts",
     "audit": "npm audit --audit-level=high"
   }
 }
