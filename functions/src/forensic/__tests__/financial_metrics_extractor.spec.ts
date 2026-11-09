@@ -267,5 +267,108 @@ describe("financial_metrics_extractor", () => {
       expect(assessment.severity).toBe("warning");
       expect(metrics.calculations?.equityRatio).toBe(0.08);
     });
+
+    it("should correctly calculate DSRI/DSI when prior revenue is from corresponding prior interim period (Daido Signal model)", () => {
+      // 大同信号の半期報告書（前年同中間期売上を取得した場合）
+      // 当期売上: 12,386,342 (中間期6ヶ月)
+      // 前期売上: 11,319,931 (前年中間期6ヶ月)
+      // 当期債権: 12,663,707、前期末債権: 13,710,290
+      // 当期在庫: 11,822,976、前期末在庫: 11,781,411
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        periodType: "Q2",
+        current: {
+          revenue: 12386342,
+          tradeReceivables: 12663707,
+          inventories: 11822976,
+          netIncome: 1118025,
+          operatingCashFlow: 666000,
+          totalAssets: 48305520,
+          netAssets: 31198364,
+        },
+        prior: {
+          revenue: 11319931,
+          tradeReceivables: 13710290,
+          inventories: 11781411,
+          totalAssets: 50994045,
+          netAssets: 32977146,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toEqual([]);
+      expect(assessment.severity).toBe("normal");
+      expect(metrics.calculations?.dsri).toBe(0.844);
+      expect(metrics.calculations?.dsiIndex).toBe(0.917);
+    });
+
+    it("should normalize quarterly/interim revenue against full-year prior revenue as fallback (Daido Signal fallback model)", () => {
+      // 前年同期売上が取れず、前事業年度通期売上（25,695,648）しか取れなかった場合のフォールバックテスト
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        periodType: "Q2",
+        current: {
+          revenue: 12386342,
+          tradeReceivables: 12663707,
+          inventories: 11822976,
+          netIncome: 1118025,
+          operatingCashFlow: 666000,
+          totalAssets: 48305520,
+          netAssets: 31198364,
+        },
+        prior: {
+          revenue: 25695648,
+          tradeReceivables: 13710290,
+          inventories: 11781411,
+          totalAssets: 50994045,
+          netAssets: 32977146,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toEqual([]);
+      expect(assessment.severity).toBe("normal");
+      expect(metrics.calculations?.dsri).toBe(0.958);
+      expect(metrics.calculations?.dsiIndex).toBe(1.041);
+    });
+
+    it("should mitigate AQI from critical to warning when increase is predominantly driven by M&A goodwill (Shimadzu model)", () => {
+      // 島津製作所の半期報告書実データモデル
+      // 当期売上: 281,984,000 (6ヶ月)、前中間期売上: 256,342,000 (6ヶ月)
+      // 投資CFマイナス1,340億円、のれんが約1,239億円急増（その他資産増加の89%を占める）
+      const metrics: KeyFinancialMetrics = {
+        unit: "千円",
+        periodType: "Q2",
+        current: {
+          revenue: 281984000,
+          tradeReceivables: 149037000,
+          inventories: 169177000,
+          totalAssets: 868074000,
+          currentAssets: 473946000,
+          propertyPlantAndEquipment: 137199000,
+          investingCashFlow: -134012000,
+          goodwill: 131255000,
+        },
+        prior: {
+          revenue: 256342000,
+          tradeReceivables: 156326000,
+          inventories: 152098000,
+          totalAssets: 737978000,
+          currentAssets: 497728000,
+          propertyPlantAndEquipment: 122815000,
+          investingCashFlow: -8245000,
+          goodwill: 7388000,
+        },
+      };
+
+      const assessment = assessQuantitativeRisk(metrics);
+      expect(assessment.detectedRedFlags).toContain("asset_quality_deterioration");
+      // M&Aのれんが主因（寄与率50%以上）のため、Critical ではなく Warning に緩和される
+      expect(assessment.severity).toBe("warning");
+      expect(metrics.calculations?.dsri).toBe(0.867);
+      expect(metrics.calculations?.dsiIndex).toBe(1.011);
+      expect(metrics.calculations?.aqi).toBe(1.86);
+      expect(assessment.warnings.some((w) => w.includes("M&A買収に伴うのれん計上要因：寄与率89%"))).toBe(true);
+    });
   });
 });
