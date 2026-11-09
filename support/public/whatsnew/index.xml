@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Whatsnews on 適時開示(TDNet / EDINet) Notifier サポートサイト</title>
+    <link>https://disclosure-app.firebaseapp.com/whatsnew/</link>
+    <description>Recent content in Whatsnews on 適時開示(TDNet / EDINet) Notifier サポートサイト</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja-jp</language>
+    <lastBuildDate>Thu, 20 Jun 2019 00:12:54 +0900</lastBuildDate>
+    
+	<atom:link href="https://disclosure-app.firebaseapp.com/whatsnew/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>1.1 の新機能</title>
+      <link>https://disclosure-app.firebaseapp.com/whatsnew/1.1/</link>
+      <pubDate>Thu, 20 Jun 2019 00:12:54 +0900</pubDate>
+      
+      <guid>https://disclosure-app.firebaseapp.com/whatsnew/1.1/</guid>
+      <description>お気に入りと通知を共通にしました。 お気に入りに入れると自動的に通知されるようになりました。また、お気に入りから解除すると自動的に通知が解除さ</description>
+    </item>
+    
+  </channel>
+</rss>

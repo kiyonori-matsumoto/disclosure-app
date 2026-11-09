@@ -2,10 +2,10 @@ disclosure-app-firebase-adminsdk-kh901-5d7f4fdb64.json
 app/disclosure.apk
 .firebase
 .cache
-support/public
 
 .runtimeconfig.json
 functions/.runtimeconfig.json
 *.local
 .env.local
 Xbrl_Search_*.zip
+.hugo_build.lock

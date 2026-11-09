@@ -8,6 +8,7 @@
     "lint": "npm --prefix functions run lint",
     "type-check": "npm --prefix functions run type-check",
     "build": "npm --prefix functions run build",
+    "build:support": "cd support && hugo",
     "test": "npm --prefix functions test",
     "audit": "npm --prefix functions run audit"
   }
