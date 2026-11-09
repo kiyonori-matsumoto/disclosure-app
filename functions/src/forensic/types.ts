@@ -59,6 +59,7 @@ export interface FinancialSnapshot {
   netAssets?: number; // 純資産
   retainedEarnings?: number; // 利益剰余金
   investingCashFlow?: number; // 投資活動によるキャッシュフロー
+  goodwill?: number; // のれん（買収資産）
 }
 
 export interface QuantitativeCalculations {

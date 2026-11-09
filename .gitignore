@@ -8,3 +8,4 @@ support/public
 functions/.runtimeconfig.json
 *.local
 .env.local
+Xbrl_Search_*.zip
