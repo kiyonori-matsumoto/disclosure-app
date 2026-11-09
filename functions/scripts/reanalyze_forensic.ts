@@ -3,23 +3,43 @@ import axios from "axios";
 import { DEFAULT_USER_AGENT } from "../src/lib/constants";
 import { getEdinetApiKey } from "../src/lib/config";
 import { ForensicAnalyzer } from "../src/forensic/analyzer";
+import {
+  assessQuantitativeRisk,
+  extractFinancialMetricsFromZip,
+} from "../src/forensic/financial_metrics_extractor";
+import {
+  CauseTag,
+  ForensicResult,
+  RedFlagType,
+  RiskLevel,
+  ToneTag,
+} from "../src/forensic/types";
 
 /**
  * 指定日の TDnet / EDINET 開示ドキュメントを再取得し、
  * 最新のフォレンジックエンジンで再解析して Firestore を更新（データクリーニング）するスクリプト。
  *
+ * 2つの実行モード:
+ *   1. 【デフォルト・推奨】定量のみ再計算モード (Quick Mode)
+ *      - XBRL ZIP から財務数値を再抽出＆新GoFルールエンジンで再評価
+ *      - 既存の Jev (System One) による定性解析（GC注記、経営トーン、言い訳等）はそのまま保持して結合
+ *      - Jev API コスト・呼び出し回数: 0回（超高速・制限なし）
+ *
+ *   2. 完全再実行モード (Full Mode: --full)
+ *      - Jev (System One) による定性解析も含めてゼロから完全再実行
+ *
  * 使い方:
  *   # プレビュー (Dry-run: 実際に更新せずに対象件数とサンプルを表示)
  *   npm run reanalyze-forensic -- --date 2026-11-09
  *
- *   # 実行 (実際にダウンロードして再解析・Firestore上書き)
+ *   # 本番実行 (定量のみ再計算・Jev再利用: 推奨)
  *   npm run reanalyze-forensic -- --date 2026-11-09 --execute
+ *
+ *   # Jevも含めて完全再実行する場合
+ *   npm run reanalyze-forensic -- --date 2026-11-09 --full --execute
  *
  *   # 最初の5件だけでテスト実行
  *   npm run reanalyze-forensic -- --date 2026-11-09 --limit 5 --execute
- *
- *   # TDnet のみ実行
- *   npm run reanalyze-forensic -- --date 2026-11-09 --tdnet-only --execute
  */
 
 if (!admin.apps.length) {
@@ -35,6 +55,7 @@ interface ScriptOptions {
   tdnetOnly: boolean;
   edinetOnly: boolean;
   delayMs: number;
+  fullJev: boolean;
 }
 
 function parseArgs(): ScriptOptions {
@@ -44,7 +65,8 @@ function parseArgs(): ScriptOptions {
   let limit = 0;
   let tdnetOnly = false;
   let edinetOnly = false;
-  let delayMs = 300;
+  let delayMs = 150;
+  let fullJev = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--date" && args[i + 1]) {
@@ -60,21 +82,33 @@ function parseArgs(): ScriptOptions {
     } else if (args[i] === "--edinet-only") {
       edinetOnly = true;
     } else if (args[i] === "--delay" && args[i + 1]) {
-      delayMs = parseInt(args[i + 1], 10) || 300;
+      delayMs = parseInt(args[i + 1], 10) || 150;
       i++;
+    } else if (args[i] === "--full") {
+      fullJev = true;
     }
   }
 
-  return { targetDateStr, execute, limit, tdnetOnly, edinetOnly, delayMs };
+  return { targetDateStr, execute, limit, tdnetOnly, edinetOnly, delayMs, fullJev };
 }
 
 const TARGET_EDINET_DOC_TYPES = ["120", "130", "140", "160"];
+
+// 定量ルールが管轄するレッドフラグ（これらは新定量エンジンで再判定する）
+const QUANTITATIVE_RED_FLAGS: RedFlagType[] = [
+  "inventory_receivable_surge",
+  "accruals_anomaly",
+  "asset_quality_deterioration",
+  "unsustainable_payout",
+  "liquidity_crunch",
+  "equity_erosion",
+];
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function reanalyze() {
   const options = parseArgs();
-  const { targetDateStr, execute, limit, tdnetOnly, edinetOnly, delayMs } = options;
+  const { targetDateStr, execute, limit, tdnetOnly, edinetOnly, delayMs, fullJev } = options;
 
   const startJst = new Date(`${targetDateStr}T00:00:00+09:00`);
   const endJst = new Date(`${targetDateStr}T23:59:59.999+09:00`);
@@ -86,13 +120,14 @@ async function reanalyze() {
 
   console.log("================================================================================");
   console.log(`[Forensic Re-analysis / Cleaner]`);
-  console.log(`モード       : ${execute ? "【本番実行: EXECUTE】" : "【プレビュー: DRY-RUN】"}`);
-  console.log(`対象日 (JST) : ${targetDateStr} (${startJst.toISOString()} 〜 ${endJst.toISOString()})`);
-  console.log(`対象範囲     : ${tdnetOnly ? "TDnet のみ" : edinetOnly ? "EDINET のみ" : "TDnet & EDINET"}`);
+  console.log(`モード        : ${execute ? "【本番実行: EXECUTE】" : "【プレビュー: DRY-RUN】"}`);
+  console.log(`解析方式      : ${fullJev ? "完全再解析 (Jev System One も再実行)" : "定量高速クリーニング (Jev定性結果を保持し、財務数値・指標のみ再計算)"}`);
+  console.log(`対象日 (JST)  : ${targetDateStr} (${startJst.toISOString()} 〜 ${endJst.toISOString()})`);
+  console.log(`対象範囲      : ${tdnetOnly ? "TDnet のみ" : edinetOnly ? "EDINET のみ" : "TDnet & EDINET"}`);
   if (limit > 0) {
-    console.log(`件数制限     : 最大 ${limit} 件`);
+    console.log(`件数制限      : 最大 ${limit} 件`);
   }
-  console.log(`リクエスト間隔: ${delayMs} ms`);
+  console.log(`リクエスト間隔 : ${delayMs} ms`);
   console.log("================================================================================\n");
 
   interface QueueItem {
@@ -102,7 +137,7 @@ async function reanalyze() {
     label: string;
     url: string;
     headers: Record<string, string>;
-    oldRiskLevel?: string;
+    existingForensic?: ForensicResult;
   }
 
   const queue: QueueItem[] = [];
@@ -127,7 +162,7 @@ async function reanalyze() {
           label: `[TDnet] ${data.code || ""} ${data.company || ""} - ${data.title || ""}`,
           url: `https://www.release.tdnet.info/inbs/${encodeURIComponent(xbrlFile)}`,
           headers: { "User-Agent": DEFAULT_USER_AGENT },
-          oldRiskLevel: data.forensic?.riskLevel,
+          existingForensic: data.forensic,
         });
       }
     });
@@ -156,7 +191,7 @@ async function reanalyze() {
           label: `[EDINET] ${data.edinetCode || ""} ${data.filerName || ""} - ${data.docDescription || ""}`,
           url: `https://api.edinet-fsa.go.jp/api/v2/documents/${encodeURIComponent(doc.id)}?type=1`,
           headers: edinetApiKey ? { "Ocp-Apim-Subscription-Key": edinetApiKey } : {},
-          oldRiskLevel: data.forensic?.riskLevel,
+          existingForensic: data.forensic,
         });
       }
     });
@@ -174,7 +209,7 @@ async function reanalyze() {
   if (!execute) {
     console.log("【DRY-RUN プレビュー】先頭10件の対象:");
     totalTargets.slice(0, 10).forEach((item, idx) => {
-      console.log(`  ${idx + 1}. [${item.oldRiskLevel || "未解析"}] ${item.label}`);
+      console.log(`  ${idx + 1}. [${item.existingForensic?.riskLevel || "未解析"}] ${item.label}`);
     });
     if (totalTargets.length > 10) {
       console.log(`  ... 他 ${totalTargets.length - 10} 件`);
@@ -185,7 +220,7 @@ async function reanalyze() {
   }
 
   // 3. 実際の再解析・更新実行
-  const analyzer = new ForensicAnalyzer();
+  const fullAnalyzer = fullJev ? new ForensicAnalyzer() : null;
   let successCount = 0;
   let failCount = 0;
 
@@ -194,10 +229,10 @@ async function reanalyze() {
 
   for (let i = 0; i < totalTargets.length; i++) {
     const item = totalTargets[i];
-    const prevRisk = item.oldRiskLevel || "none";
+    const prevRisk = item.existingForensic?.riskLevel || "none";
     oldStats[prevRisk] = (oldStats[prevRisk] || 0) + 1;
 
-    process.stdout.write(`[${i + 1}/${totalTargets.length}] ${item.source} ${item.id} (${item.label.slice(0, 40)}...) `);
+    process.stdout.write(`[${i + 1}/${totalTargets.length}] ${item.source} ${item.id} (${item.label.slice(0, 38)}...) `);
 
     try {
       const resp = await axios.get(item.url, {
@@ -207,22 +242,78 @@ async function reanalyze() {
       });
 
       const zipBuffer = Buffer.from(resp.data);
-      const isTdnet = item.source === "TDnet";
-      const result = await analyzer.analyzeZip(zipBuffer, isTdnet);
+      let updatedForensic: ForensicResult;
+
+      if (fullJev && fullAnalyzer) {
+        // 完全再実行モード (Jev System One 含む)
+        const isTdnet = item.source === "TDnet";
+        updatedForensic = await fullAnalyzer.analyzeZip(zipBuffer, isTdnet);
+      } else {
+        // 定量高速クリーニングモード (Jev結果保持)
+        const metrics = extractFinancialMetricsFromZip(zipBuffer);
+        const quantitative = assessQuantitativeRisk(metrics);
+
+        const old = item.existingForensic;
+        // 既存の定性Jev結果（注記・GC・言い訳・原因・詳細）を保持
+        const existingTags = old?.tags || [];
+        const jevRedFlags = existingTags.filter(
+          (t): t is RedFlagType => !QUANTITATIVE_RED_FLAGS.includes(t as RedFlagType)
+        );
+        const jevToneTags = existingTags.filter(
+          (t): t is ToneTag => !QUANTITATIVE_RED_FLAGS.includes(t as RedFlagType) && !["going_concern", "covenant_breach", "impairment_loss", "interest_debt_pressure", "subsequent_events"].includes(t)
+        );
+        const existingCauses = old?.causes || [];
+        const existingDetails = old?.details || {
+          blameAttribution: "none" as const,
+          unfoundedOptimism: false,
+          hasNegativeFactors: false,
+        };
+
+        // 新定量レッドフラグと既存Jevレッドフラグを結合
+        const mergedRedFlags = Array.from(
+          new Set<RedFlagType>([...quantitative.detectedRedFlags, ...jevRedFlags])
+        );
+        const mergedAllTags = [...mergedRedFlags, ...jevToneTags];
+
+        // 深刻度の再判定
+        let overallRisk: RiskLevel = "normal";
+        if (
+          quantitative.severity === "critical" ||
+          mergedRedFlags.includes("going_concern") ||
+          mergedRedFlags.includes("covenant_breach")
+        ) {
+          overallRisk = "critical";
+        } else if (
+          quantitative.severity === "warning" ||
+          mergedAllTags.length > 0
+        ) {
+          overallRisk = "warning";
+        }
+
+        updatedForensic = {
+          version: 1,
+          analyzedAt: Math.floor(Date.now() / 1000),
+          riskLevel: overallRisk,
+          tags: mergedAllTags,
+          causes: existingCauses as CauseTag[],
+          metrics: quantitative.metrics,
+          details: existingDetails,
+        };
+      }
 
       // Firestore の更新
       await item.ref.set(
         {
-          forensic: result,
+          forensic: updatedForensic,
         },
         { merge: true }
       );
 
-      newStats[result.riskLevel] = (newStats[result.riskLevel] || 0) + 1;
+      newStats[updatedForensic.riskLevel] = (newStats[updatedForensic.riskLevel] || 0) + 1;
       successCount++;
 
-      const riskArrow = prevRisk !== result.riskLevel ? `[${prevRisk} -> ${result.riskLevel}]` : `[${result.riskLevel}]`;
-      console.log(`OK: ${riskArrow} (tags: ${result.tags.join(",") || "none"})`);
+      const riskArrow = prevRisk !== updatedForensic.riskLevel ? `[${prevRisk} -> ${updatedForensic.riskLevel}]` : `[${updatedForensic.riskLevel}]`;
+      console.log(`OK: ${riskArrow} (tags: ${updatedForensic.tags.join(",") || "none"})`);
     } catch (err: any) {
       failCount++;
       console.log(`FAILED: ${err.message || err}`);
