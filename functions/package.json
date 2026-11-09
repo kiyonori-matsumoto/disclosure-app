@@ -42,6 +42,7 @@
     "test": "jest ./src --ci",
     "purge-forensic": "ts-node scripts/purge_stale_forensic.ts",
     "summarize-forensic": "ts-node scripts/summarize_daily_forensic.ts",
+    "reanalyze-forensic": "ts-node scripts/reanalyze_forensic.ts",
     "audit": "npm audit --audit-level=high"
   }
 }
