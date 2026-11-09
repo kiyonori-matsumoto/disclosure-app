@@ -174,6 +174,10 @@ async function reanalyze() {
     console.log("Scanning EDINET documents...");
     const edinetCountBefore = queue.length;
     const edinetApiKey = getEdinetApiKey();
+    if (!edinetApiKey) {
+      console.warn("  [警告] EDINET_API_KEY が未設定です。EDINET APIからのダウンロードが失敗します。");
+      console.warn("        EDINET_API_KEY=your_key npm run ... または functions/.env.local に設定してください。");
+    }
     const edinetSnap = await db
       .collection("edinets")
       .where("time", ">=", startSec)
@@ -242,6 +246,10 @@ async function reanalyze() {
       });
 
       const zipBuffer = Buffer.from(resp.data);
+      if (zipBuffer.length < 4 || zipBuffer[0] !== 0x50 || zipBuffer[1] !== 0x4b) {
+        const text = zipBuffer.toString("utf-8");
+        throw new Error(`ZIP形式ではありません (EDINET/TDnetレスポンス: ${text.slice(0, 100).replace(/\s+/g, " ")})`);
+      }
       let updatedForensic: ForensicResult;
 
       if (fullJev && fullAnalyzer) {
