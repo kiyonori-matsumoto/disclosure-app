@@ -67,19 +67,19 @@ export class AqiRule implements ForensicRule {
           if (isGoodwillMnaDriven) {
             const gwPct = ((goodwillDelta / otherAssetsDelta) * 100).toFixed(0);
             warnings.push(
-              `[WARNING] 資産の質指数(AQI)が前期比${aqi.toFixed(2)}倍に増加（M&A買収に伴うのれん計上要因：寄与率${gwPct}%）`
+              `[乖離あり] 資産の質指数(AQI)が前期比${aqi.toFixed(2)}倍に増加（M&A買収に伴うのれん計上要因：寄与率${gwPct}%）`
             );
             severity = "warning";
           } else {
             warnings.push(
-              `[CRITICAL] 資産の質指数(AQI)が前期比${aqi.toFixed(2)}倍に急増（無形資産・その他資産への費用繰延の疑い）`
+              `[大幅乖離] 資産の質指数(AQI)が前期比${aqi.toFixed(2)}倍に急増（無形資産・その他資産への費用繰延の疑い）`
             );
             severity = "critical";
           }
         } else if (aqi > 1.15) {
           detectedRedFlags.push("asset_quality_deterioration");
           warnings.push(
-            `[WARNING] 資産の質指数(AQI)が前期比${aqi.toFixed(2)}倍に増加（非流動・非有形資産の比率上昇）`
+            `[乖離あり] 資産の質指数(AQI)が前期比${aqi.toFixed(2)}倍に増加（非流動・非有形資産の比率上昇）`
           );
           severity = "warning";
         }

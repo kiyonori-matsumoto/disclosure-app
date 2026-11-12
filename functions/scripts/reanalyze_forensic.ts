@@ -138,6 +138,7 @@ async function reanalyze() {
     url: string;
     headers: Record<string, string>;
     existingForensic?: ForensicResult;
+    meta?: { companyName?: string; title?: string; code?: string };
   }
 
   const queue: QueueItem[] = [];
@@ -163,6 +164,7 @@ async function reanalyze() {
           url: `https://www.release.tdnet.info/inbs/${encodeURIComponent(xbrlFile)}`,
           headers: { "User-Agent": DEFAULT_USER_AGENT },
           existingForensic: data.forensic,
+          meta: { companyName: data.company, title: data.title, code: data.code },
         });
       }
     });
@@ -192,6 +194,7 @@ async function reanalyze() {
           url: `https://api.edinet-fsa.go.jp/api/v2/documents/${encodeURIComponent(doc.id)}?type=1`,
           headers: edinetApiKey ? { "Ocp-Apim-Subscription-Key": edinetApiKey } : {},
           existingForensic: data.forensic,
+          meta: { companyName: data.filerName, title: data.docDescription, code: data.secCode },
         });
       }
     });
@@ -247,10 +250,10 @@ async function reanalyze() {
       if (fullJev && fullAnalyzer) {
         // 完全再実行モード (Jev System One 含む)
         const isTdnet = item.source === "TDnet";
-        updatedForensic = await fullAnalyzer.analyzeZip(zipBuffer, isTdnet);
+        updatedForensic = await fullAnalyzer.analyzeZip(zipBuffer, isTdnet, item.meta);
       } else {
         // 定量高速クリーニングモード (Jev結果保持)
-        const metrics = extractFinancialMetricsFromZip(zipBuffer);
+        const metrics = extractFinancialMetricsFromZip(zipBuffer, item.meta);
         const quantitative = assessQuantitativeRisk(metrics);
 
         const old = item.existingForensic;

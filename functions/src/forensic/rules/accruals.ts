@@ -38,29 +38,40 @@ export class AccrualsAnomalyRule implements ForensicRule {
         ((cur.netIncome - cur.operatingCashFlow) * annualizeFactor) / cur.totalAssets;
       calculations.accrualsRatio = Number(accrualsRatio.toFixed(4));
 
-      // 不動産開発業等（棚卸資産比率が総資産の35%以上）で自己資本が健全な場合、仕入れ先行による一時的CF乖離を考慮
-      const isInventoryHeavy =
-        cur.inventories !== undefined && cur.inventories / cur.totalAssets >= 0.35;
-      const isEquityHealthy =
-        cur.netAssets !== undefined && cur.netAssets / cur.totalAssets >= 0.25;
+      // 四半期・中間期決算における季節調整マルチプライヤー (中間期の回収サイト偏重を平準化)
+      const seasonalMultiplier = periodType === "FY" ? 1.0 : 1.5;
+      const critThreshold = 0.15 * seasonalMultiplier;
+      const warnThreshold = 0.08 * seasonalMultiplier;
 
-      if (accrualsRatio > 0.15) {
+      // 建設・不動産等の仕入れ・工事支出先行型（運転資本比率が高く、本業黒字・資本健全）の判定
+      const isWorkingCapitalHeavy =
+        (cur.inventories !== undefined && cur.inventories / cur.totalAssets >= 0.30) ||
+        (cur.tradeReceivables !== undefined && cur.tradeReceivables / cur.totalAssets >= 0.30);
+      const isEquityHealthy =
+        cur.netAssets !== undefined && cur.netAssets / cur.totalAssets >= 0.15;
+      const isOperatingProfitable =
+        cur.operatingIncome !== undefined && cur.operatingIncome > 0;
+
+      const isBusinessCycleOutflow =
+        isWorkingCapitalHeavy && isEquityHealthy && isOperatingProfitable;
+
+      if (accrualsRatio > critThreshold) {
         detectedRedFlags.push("accruals_anomaly");
-        if (isInventoryHeavy && isEquityHealthy) {
+        if (isBusinessCycleOutflow) {
           warnings.push(
-            `[WARNING] 総資産アクルーアル比率が高水準（${(accrualsRatio * 100).toFixed(1)}%：不動産・開発等の棚卸仕入れ先行型キャッシュ流出）`
+            `[乖離あり] 総資産アクルーアル比率が高水準（${(accrualsRatio * 100).toFixed(1)}%：建設・開発等の仕入・工事代金回収サイクル先行型キャッシュ流出）`
           );
           severity = "warning";
         } else {
           warnings.push(
-            `[CRITICAL] 総資産アクルーアル比率が${(accrualsRatio * 100).toFixed(1)}%（利益と営業CFが大幅乖離、架空利益・費用繰延の強い兆候）`
+            `[大幅乖離] 総資産アクルーアル比率が${(accrualsRatio * 100).toFixed(1)}%（利益と営業CFが大幅乖離、架空利益・費用繰延の強い兆候）`
           );
           severity = "critical";
         }
-      } else if (accrualsRatio > 0.08) {
+      } else if (accrualsRatio > warnThreshold) {
         detectedRedFlags.push("accruals_anomaly");
         warnings.push(
-          `[WARNING] 総資産アクルーアル比率が高水準（${(accrualsRatio * 100).toFixed(1)}%：利益に対してキャッシュ裏付けが不足）`
+          `[乖離あり] 総資産アクルーアル比率が高水準（${(accrualsRatio * 100).toFixed(1)}%：利益に対してキャッシュ裏付けが不足）`
         );
         severity = "warning";
       }

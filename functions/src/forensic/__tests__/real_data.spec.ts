@@ -484,10 +484,10 @@ describe("Real Data Forensic Tests", () => {
       expect(assessment.detectedRedFlags).toContain("negative_operating_cf");
       expect(assessment.detectedRedFlags).toContain("equity_erosion");
       expect(assessment.warnings).toContain(
-        "[CRITICAL] 債務超過または累積赤字下での純資産77.7%急減"
+        "[大幅乖離] 債務超過または累積赤字下での純資産77.7%急減"
       );
       expect(assessment.warnings).toContain(
-        "[WARNING] 営業活動によるキャッシュ・フローがマイナス（-214,978千円）"
+        "[乖離あり] 営業活動によるキャッシュ・フローがマイナス（-214,978千円）"
       );
 
       // 指標計算値の検証
