@@ -10,6 +10,31 @@ import { QuantitativeAssessment, QuantitativeForensicEngine } from "./rules";
 
 export { QuantitativeAssessment };
 
+export interface ForensicDocumentMetadata {
+  companyName?: string;
+  title?: string;
+  code?: string;
+}
+
+const FINANCIAL_COMPANY_KEYWORDS = [
+  "銀行",
+  "証券",
+  "保険",
+  "フィナンシャル",
+  "信託",
+  "リース",
+  "アセットマネジメント",
+  "インベストメント",
+  "キャピタル",
+];
+
+const FINANCIAL_TITLE_KEYWORDS = [
+  "投資信託",
+  "受益証券",
+  "投資法人",
+  "リート",
+];
+
 interface RawTagEntry {
   name: string;
   contextRef: string;
@@ -164,7 +189,10 @@ function isPriorContext(contextRef: string): boolean {
  * ZIP バッファまたはファイルから主要財務数値を自動抽出（当期・前期ペア対応）
  * EDINET (PublicDoc) および TDnet (XBRLData) の両方に対応
  */
-export function extractFinancialMetricsFromZip(zipBufferOrPath: Buffer | string): KeyFinancialMetrics {
+export function extractFinancialMetricsFromZip(
+  zipBufferOrPath: Buffer | string,
+  meta?: ForensicDocumentMetadata
+): KeyFinancialMetrics {
   const zip = typeof zipBufferOrPath === "string" ? new AdmZip(zipBufferOrPath) : new AdmZip(zipBufferOrPath);
   const entries = zip.getEntries();
 
@@ -175,6 +203,27 @@ export function extractFinancialMetricsFromZip(zipBufferOrPath: Buffer | string)
   let detectedStandard: AccountingStandard = "J-GAAP";
   let detectedPeriod: FiscalPeriodType = "FY";
   let isFinancial = false;
+
+  // メタデータ（会社名・タイトル・証券コード）による金融・リース・投資信託判定
+  if (meta) {
+    if (meta.companyName) {
+      if (FINANCIAL_COMPANY_KEYWORDS.some((kw) => meta.companyName!.includes(kw))) {
+        isFinancial = true;
+      }
+    }
+    if (meta.title) {
+      if (FINANCIAL_TITLE_KEYWORDS.some((kw) => meta.title!.includes(kw))) {
+        isFinancial = true;
+      }
+    }
+    if (meta.code) {
+      const numCode = parseInt(meta.code.slice(0, 4), 10);
+      // 東証33業種の金融関連（8300-8799: 銀行・証券・保険・その他金融）
+      if (!isNaN(numCode) && numCode >= 8300 && numCode <= 8799) {
+        isFinancial = true;
+      }
+    }
+  }
 
   for (const entry of entries) {
     const entryName = entry.entryName;
@@ -212,7 +261,11 @@ export function extractFinancialMetricsFromZip(zipBufferOrPath: Buffer | string)
     if (
       content.includes("OrdinaryIncomeBNK") ||
       content.includes("OperatingRevenuesSEC") ||
-      content.includes("UnderwritingIncomeINS")
+      content.includes("OperatingRevenueSEC") ||
+      content.includes("BrokerageCommission") ||
+      content.includes("UnderwritingIncomeINS") ||
+      content.includes("LeaseInvestmentAssets") ||
+      content.includes("InvestmentAssets")
     ) {
       isFinancial = true;
     }

@@ -42,13 +42,13 @@ export class LiquidityRule implements ForensicRule {
       if (cashCoverage < 0.08 && cur.operatingCashFlow !== undefined && cur.operatingCashFlow < 0) {
         detectedRedFlags.push("liquidity_crunch");
         warnings.push(
-          `[CRITICAL] 流動負債に対する手元現預金比率が${(cashCoverage * 100).toFixed(1)}%かつ営業CF赤字（資金枯渇・黒字倒産危機）`
+          `[大幅乖離] 流動負債に対する手元現預金比率が${(cashCoverage * 100).toFixed(1)}%かつ営業CF赤字（資金ショート・手元流動性急減リスク）`
         );
         severity = "critical";
       } else if (cashCoverage < 0.15 && cashDropRate <= -0.3) {
         detectedRedFlags.push("liquidity_crunch");
         warnings.push(
-          `[WARNING] 手元現預金が前期末比${Math.abs(cashDropRate * 100).toFixed(1)}%急減（対流動負債比率${(cashCoverage * 100).toFixed(1)}%）`
+          `[乖離あり] 手元現預金が前期末比${Math.abs(cashDropRate * 100).toFixed(1)}%急減（対流動負債比率${(cashCoverage * 100).toFixed(1)}%）`
         );
         severity = "warning";
       }

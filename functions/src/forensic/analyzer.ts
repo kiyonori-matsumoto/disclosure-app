@@ -4,6 +4,7 @@ import { extractQualitativeSections, extractTdnetQualitativeHtml } from "./extra
 import {
   assessQuantitativeRisk,
   extractFinancialMetricsFromZip,
+  ForensicDocumentMetadata,
 } from "./financial_metrics_extractor";
 import { detectFinancialAnomaly } from "./schemas/financial_anomaly";
 import { detectQualitativeExcuses } from "./schemas/qualitative_excuses";
@@ -33,13 +34,18 @@ export class ForensicAnalyzer {
    * ZIP バッファを解析し、ForensicResult を生成する
    * @param zipBuffer ZIP ファイルのバイナリ
    * @param isTdnet TDnet の開示 ZIP かどうか（省略時はファイル名や構造から自動判定）
+   * @param meta 開示のメタデータ（会社名・タイトル・証券コード等）
    */
-  async analyzeZip(zipBuffer: Buffer, isTdnet?: boolean): Promise<ForensicResult> {
+  async analyzeZip(
+    zipBuffer: Buffer,
+    isTdnet?: boolean,
+    meta?: ForensicDocumentMetadata
+  ): Promise<ForensicResult> {
     const zip = new AdmZip(zipBuffer);
     const entries = zip.getEntries();
 
     // 1. 主要財務数値の抽出と定量判定
-    const metrics = extractFinancialMetricsFromZip(zipBuffer);
+    const metrics = extractFinancialMetricsFromZip(zipBuffer, meta);
     const quantitative = assessQuantitativeRisk(metrics);
 
     // 2. 定性セクションの抽出

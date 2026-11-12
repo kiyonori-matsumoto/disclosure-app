@@ -41,20 +41,20 @@ export class EquityRule implements ForensicRule {
         detectedRedFlags.push("equity_erosion");
         warnings.push(
           cur.netAssets <= 0
-            ? `[CRITICAL] 債務超過（純資産${cur.netAssets.toLocaleString()}千円）`
-            : `[CRITICAL] 債務超過または累積赤字下での純資産${Math.abs(netAssetsDropRate * 100).toFixed(1)}%急減`
+            ? `[大幅乖離] 債務超過（純資産${cur.netAssets.toLocaleString()}千円）`
+            : `[大幅乖離] 債務超過または累積赤字下での純資産${Math.abs(netAssetsDropRate * 100).toFixed(1)}%急減`
         );
         severity = "critical";
       } else if (!isFinancial && equityRatio < 0.1) {
         detectedRedFlags.push("equity_erosion");
         warnings.push(
-          `[WARNING] 自己資本比率が${(equityRatio * 100).toFixed(1)}%に低下（過大レバレッジ・財務脆弱性）`
+          `[乖離あり] 自己資本比率が${(equityRatio * 100).toFixed(1)}%に低下（過大レバレッジ・財務脆弱性）`
         );
         severity = "warning";
       } else if (netAssetsDropRate <= -0.2) {
         detectedRedFlags.push("equity_erosion");
         warnings.push(
-          `[WARNING] 純資産が前期末比で${Math.abs(netAssetsDropRate * 100).toFixed(1)}%減少`
+          `[乖離あり] 純資産が前期末比で${Math.abs(netAssetsDropRate * 100).toFixed(1)}%減少`
         );
         severity = "warning";
       }

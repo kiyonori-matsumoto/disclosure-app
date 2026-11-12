@@ -53,19 +53,29 @@ export class DsriRule implements ForensicRule {
       const dsri = curTurnover / priTurnover;
       calculations.dsri = Number(dsri.toFixed(3));
 
+      // 売上債権の重要性チェック (Materiality Filter)
+      // 売上債権が極めて小さい業態において比率急変による過大判定を抑制
+      const isReceivablesMaterial =
+        (cur.totalAssets === undefined || cur.tradeReceivables / cur.totalAssets >= 0.02) ||
+        cur.tradeReceivables / curAnnualRevenue >= 0.02;
+
+      if (!isReceivablesMaterial) {
+        return { detectedRedFlags, warnings, severity };
+      }
+
       const critThreshold = Number((1.465 * seasonalMultiplier).toFixed(3));
       const warnThreshold = Number((1.20 * seasonalMultiplier).toFixed(3));
 
       if (dsri > critThreshold) {
         detectedRedFlags.push("inventory_receivable_surge");
         warnings.push(
-          `[CRITICAL] 売上債権回転期間指数(DSRI)が前期比${dsri.toFixed(2)}倍に急増（押し込み販売・架空売上・回収滞留リスク）`
+          `[大幅乖離] 売上債権回転期間指数(DSRI)が前期比${dsri.toFixed(2)}倍に急増（押し込み販売・架空売上・回収滞留リスク）`
         );
         severity = "critical";
       } else if (dsri > warnThreshold) {
         detectedRedFlags.push("inventory_receivable_surge");
         warnings.push(
-          `[WARNING] 売上債権回転期間指数(DSRI)が前期比${dsri.toFixed(2)}倍に悪化（回収サイト長期化）`
+          `[乖離あり] 売上債権回転期間指数(DSRI)が前期比${dsri.toFixed(2)}倍に悪化（回収サイト長期化）`
         );
         severity = "warning";
       }

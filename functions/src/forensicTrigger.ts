@@ -46,7 +46,11 @@ export async function analyzeEdinetForensic(
 
     const zipBuffer = Buffer.from(response.data);
     const analyzer = new ForensicAnalyzer();
-    const result = await analyzer.analyzeZip(zipBuffer, false);
+    const result = await analyzer.analyzeZip(zipBuffer, false, {
+      companyName: data.filerName,
+      title: data.docDescription,
+      code: data.secCode,
+    });
 
     await snapshot.ref.set(
       {
@@ -103,7 +107,11 @@ export async function analyzeTdnetForensic(
 
     const zipBuffer = Buffer.from(response.data);
     const analyzer = new ForensicAnalyzer();
-    const result = await analyzer.analyzeZip(zipBuffer, true);
+    const result = await analyzer.analyzeZip(zipBuffer, true, {
+      companyName: data.company,
+      title: data.title,
+      code: data.code,
+    });
 
     await snapshot.ref.set(
       {

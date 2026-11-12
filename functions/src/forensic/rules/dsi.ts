@@ -51,19 +51,30 @@ export class DsiRule implements ForensicRule {
       const dsiIndex = curInvRatio / priInvRatio;
       calculations.dsiIndex = Number(dsiIndex.toFixed(3));
 
+      // 棚卸資産の重要性チェック (Materiality Filter)
+      // IT・受託開発・SaaS・サービス業等で棚卸資産（仕掛品等）が極小の場合、比率の急変による誤検知を抑制
+      const isInventoryMaterial =
+        (cur.totalAssets === undefined || cur.inventories / cur.totalAssets >= 0.01) ||
+        cur.inventories / curAnnualRevenue >= 0.01;
+
+      if (!isInventoryMaterial) {
+        // 重要性が極めて乏しい棚卸資産のため、計算値のみ記録してフラグ・深刻度判定はスキップ
+        return { detectedRedFlags, warnings, severity };
+      }
+
       const critThreshold = Number((1.50 * seasonalMultiplier).toFixed(3));
       const warnThreshold = Number((1.25 * seasonalMultiplier).toFixed(3));
 
       if (dsiIndex > critThreshold) {
         detectedRedFlags.push("inventory_receivable_surge");
         warnings.push(
-          `[CRITICAL] 棚卸資産回転期間指数(DSI)が前期比${dsiIndex.toFixed(2)}倍に異常膨張（架空在庫・原価付け替え・不良在庫滞留リスク）`
+          `[大幅乖離] 棚卸資産回転期間指数(DSI)が前期比${dsiIndex.toFixed(2)}倍に異常膨張（架空在庫・原価付け替え・不良在庫滞留リスク）`
         );
         severity = "critical";
       } else if (dsiIndex > warnThreshold) {
         detectedRedFlags.push("inventory_receivable_surge");
         warnings.push(
-          `[WARNING] 棚卸資産回転期間指数(DSI)が前期比${dsiIndex.toFixed(2)}倍に長期化`
+          `[乖離あり] 棚卸資産回転期間指数(DSI)が前期比${dsiIndex.toFixed(2)}倍に長期化`
         );
         severity = "warning";
       }
