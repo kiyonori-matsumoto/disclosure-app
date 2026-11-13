@@ -6,10 +6,19 @@
     <description>Recent content on 適時開示(TDNet / EDINet) Notifier サポートサイト</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja-jp</language>
-    <lastBuildDate>Thu, 20 Jun 2019 00:12:54 +0900</lastBuildDate>
+    <lastBuildDate>Tue, 10 Nov 2026 01:00:00 +0900</lastBuildDate>
     
 	<atom:link href="https://disclosure-app.firebaseapp.com/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>フォレンジック（財務不正・リスク検知）機能の解説</title>
+      <link>https://disclosure-app.firebaseapp.com/howto/forensic/</link>
+      <pubDate>Tue, 10 Nov 2026 01:00:00 +0900</pubDate>
+      
+      <guid>https://disclosure-app.firebaseapp.com/howto/forensic/</guid>
+      <description>フォレンジック（財務不正・リスク検知）機能の解説 本アプリでは、適時開示情報（TDnet）や有価証券報告書等（EDINET）が開示された瞬間に</description>
+    </item>
     
     <item>
       <title>1.1 の新機能</title>
